@@ -1,6 +1,7 @@
 package network
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -37,42 +38,22 @@ func init() {
 // ---------------------------------------------------------------------------
 
 func runCmd(args []string) {
-	ctx, cancel := exec.CommandContext(timeoutCtx(2*time.Second), args[0], args[1:]...).Output, nil
-	_ = ctx
-	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Stdout = nil
-	cmd.Stderr = nil
-	done := make(chan error, 1)
-	if err := cmd.Start(); err != nil {
-		return
-	}
-	go func() { done <- cmd.Wait() }()
-	select {
-	case <-time.After(2 * time.Second):
-		cmd.Process.Kill()
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	if err := cmd.Run(); err != nil && ctx.Err() != nil {
 		logger.SystemLog(fmt.Sprintf("[Firewall Timeout] %s", strings.Join(args, " ")))
-	case <-done:
 	}
-	cancel = func() {}
-	_ = cancel
 }
 
 func runTcCmd(args []string) {
-	cmd := exec.Command(args[0], args[1:]...)
-	done := make(chan error, 1)
-	if err := cmd.Start(); err != nil {
-		return
-	}
-	go func() { done <- cmd.Wait() }()
-	select {
-	case <-time.After(5 * time.Second):
-		cmd.Process.Kill()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	if err := cmd.Run(); err != nil && ctx.Err() != nil {
 		logger.SystemLog(fmt.Sprintf("[TC Timeout] %s", strings.Join(args, " ")))
-	case <-done:
 	}
 }
-
-func timeoutCtx(d time.Duration) interface{} { return d } // unused, kept for clarity
 
 func runSysctl(param, value string) {
 	cmd := exec.Command("sysctl", "-w", fmt.Sprintf("%s=%s", param, value))
