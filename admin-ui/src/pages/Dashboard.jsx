@@ -49,7 +49,7 @@ export default function Dashboard() {
           </div>
           <div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Total Sales</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>₱{stats.total_sales.toFixed(2)}</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>₱{stats.total ? stats.total.toFixed(2) : "0.00"}</div>
           </div>
         </div>
       </div>
