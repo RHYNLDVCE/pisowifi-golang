@@ -18,7 +18,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	fiberrecover "github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/gofiber/template/html/v2"
+	"github.com/gofiber/template/django/v3"
 	"github.com/joho/godotenv"
 )
 
@@ -79,7 +79,7 @@ func main() {
 
 	// 10. Build Fiber app with HTML template engine
 	// Go's html/template uses {{ .Variable }} — maps with string keys work naturally.
-	engine := html.New("./templates", ".html")
+	engine := django.New("./templates", ".html")
 	engine.Delims("{{", "}}")  // default, same as Jinja2
 
 	app := fiber.New(fiber.Config{

@@ -496,8 +496,8 @@
                     </div>
                 </div>
                 <div>
-                    <span class="status-badge status-{{ user.status | default('expired') }}">
-                        {{ user.status | default('expired') }}
+                    <span class="status-badge status-{{ user.status | default:'expired' }}">
+                        {{ user.status | default:'expired' }}
                     </span>
                 </div>
             </div>
@@ -539,7 +539,7 @@
                             <i data-lucide="award" style="width: 13px; height: 13px;"></i> Points Balance
                         </div>
                         <div class="info-value" style="color: #d97706;">
-                            {{ user.points | default(0) | round(1) }}
+                            {{ user.points | default:0 }}
                             <span style="font-size: 0.75rem; font-weight: 700; color: #b45309; vertical-align: middle;">PTS</span>
                         </div>
                     </div>

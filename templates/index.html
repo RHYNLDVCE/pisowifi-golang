@@ -624,7 +624,7 @@
             {% if free_duration >= 60 %}
             {% set f_hours = (free_duration // 60) %}
             {% set f_mins = (free_duration % 60) %}
-            🎁 Claim Free {{ "%d:%02d"|format(f_hours, f_mins) }} Hours
+            🎁 Claim Free {{ free_time_formatted }} Hours
             {% else %}
             🎁 Claim Free {{ free_duration }} Mins
             {% endif %}
@@ -753,8 +753,8 @@
 
     var mac = "{{ mac }}";
     var ratesStr = "{{ coin_rates }}";
-    var pointMap = JSON.parse('{{ coin_point_map | tojson | safe }}');
-    var pointsEnabled = JSON.parse('{{ points_enabled | tojson | safe }}');
+    var pointMap = JSON.parse('{{ coin_point_map_json | safe }}');
+    var pointsEnabled = {{ points_enabled_json }};
 
     // --- UI SETUP ---
     var badChar = String.fromCharCode(123);

@@ -3,8 +3,8 @@
 {% block title %}Rewards - REYES Starlink{% endblock %}
 
 {% block styles %}
-<link href="{{ url_for('static', path='css/fonts.css') }}" rel="stylesheet">
-<script src="{{ url_for('static', path='js/lucide.min.js') }}"></script>
+<link href="/static/css/fonts.css" rel="stylesheet">
+<script src="/static/js/lucide.min.js"></script>
 
 <style>
     :root {
@@ -380,14 +380,14 @@
                     <div class="promo-name">{{ p.name }}</div>
                     <div class="promo-cost">
                         <i data-lucide="arrow-right-circle" style="width: 14px; height: 14px;"></i>
-                        {{ p.cost | int }} Points
+                        {{ p.cost }} Points
                     </div>
                 </div>
                 
                 <button class="btn-redeem" 
                     data-id="{{ p.id }}" 
                     data-name="{{ p.name }}" 
-                    data-cost="{{ p.cost | int }}"
+                    data-cost="{{ p.cost }}"
                     onclick="openConfirmModal(this)"
                     {% if points < p.cost %}disabled{% endif %}>
                     {% if points < p.cost %}
@@ -424,7 +424,7 @@
     }
 
     // --- TIMER LOGIC ---
-    var mac = "{{ mac | default('Unknown', true) }}"; 
+    var mac = "{{ mac | default:'Unknown' }}"; 
     let localTime = 0;
 
     // 1. Instantly load cached time for a seamless UI experience

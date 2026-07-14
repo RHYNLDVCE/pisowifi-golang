@@ -89,21 +89,36 @@ func portalHome(c *fiber.Ctx) error {
 		s_coin = "coin-recieved.mp3"
 	}
 
+	coinPointMapJSON, _ := json.Marshal(cfg.CoinPointMap)
+	pointsEnabledJSON := "false"
+	if cfg.PointsEnabled {
+		pointsEnabledJSON = "true"
+	}
+	fHours := cfg.FreeTimeDuration / 60
+	fMins := cfg.FreeTimeDuration % 60
+	freeTimeFormatted := fmt.Sprintf("%d:%02d", fHours, fMins)
+
 	return c.Render("index", fiber.Map{
-		"mac":              clientMAC,
-		"ip":               clientIP,
-		"banners":          banners,
-		"banner_text":      cfg.BannerText,
-		"banner_link":      cfg.BannerLink,
-		"coin_rates":       cfg.CoinRates,
-		"free_time_enabled": cfg.FreeTimeEnabled,
-		"free_claimed":     user.FreeClaimed == 1,
-		"free_duration":    cfg.FreeTimeDuration,
-		"sound_insert_url": fmt.Sprintf("/static/sounds/%s", s_insert),
-		"sound_coin_url":   fmt.Sprintf("/static/sounds/%s", s_coin),
-		"points":           user.Points,
-		"points_enabled":   cfg.PointsEnabled,
-		"coin_point_map":   cfg.CoinPointMap,
+		"mac":                   clientMAC,
+		"ip":                    clientIP,
+		"time":                  user.Time,
+		"status":                user.Status,
+		"balance":               user.Balance,
+		"points":                user.Points,
+		"banners":               banners,
+		"banner_text":           cfg.BannerText,
+		"banner_link":           cfg.BannerLink,
+		"coin_rates":            cfg.CoinRates,
+		"points_enabled":        cfg.PointsEnabled,
+		"points_enabled_json":   pointsEnabledJSON,
+		"coin_point_map":        cfg.CoinPointMap,
+		"coin_point_map_json":   string(coinPointMapJSON),
+		"free_time_enabled":     cfg.FreeTimeEnabled,
+		"free_claimed":          user.FreeClaimed == 1,
+		"free_duration":         cfg.FreeTimeDuration,
+		"free_time_formatted":   freeTimeFormatted,
+		"sound_insert_url":      fmt.Sprintf("/static/sounds/%s", s_insert),
+		"sound_coin_url":        fmt.Sprintf("/static/sounds/%s", s_coin),
 	})
 }
 
