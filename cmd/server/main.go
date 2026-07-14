@@ -103,6 +103,7 @@ func main() {
 
 	// Static files
 	app.Static("/static", "./static")
+	app.Static("/admin/assets", "./admin-ui/dist/assets")
 
 	// Register all routes
 	api.RegisterAdminRoutes(app)

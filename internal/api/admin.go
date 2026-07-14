@@ -33,7 +33,7 @@ func RegisterAdminRoutes(app *fiber.App) {
 
 	// Protected admin group
 	admin := app.Group("/admin", security.AdminMiddleware)
-	admin.Get("", adminDashboard)
+	admin.Get("/api/dashboard_data", getDashboardData)
 	admin.Get("/system_stats", getSystemStats)
 	admin.Get("/get_infrastructure_devices", getInfrastructureDevices)
 	admin.Get("/api/logs", getLogsJSON)
@@ -48,7 +48,7 @@ func RegisterAdminRoutes(app *fiber.App) {
 	admin.Post("/save_banner_order", saveBannerOrder)
 	admin.Post("/delete_banner", deleteBanner)
 	admin.Post("/upload_sound", uploadSound)
-	admin.Get("/user/:mac", manageSingleUser)
+	admin.Get("/api/user/:mac", getSingleUser)
 	admin.Post("/manage_time", adminManageTime)
 	admin.Post("/manage_points", adminManagePoints)
 	admin.Post("/block", adminBlock)
@@ -59,6 +59,11 @@ func RegisterAdminRoutes(app *fiber.App) {
 	// WebSockets (not under the group middleware — Fiber WS upgrade is separate)
 	app.Get("/admin/ws/system_stats", websocket.New(wsSystemStats))
 	app.Get("/admin/ws/logs", websocket.New(wsLogs))
+
+	// Catch-all to serve the React SPA index.html for any remaining /admin sub-route
+	admin.Get("/*", func(c *fiber.Ctx) error {
+		return c.SendFile("./admin-ui/dist/index.html")
+	})
 }
 
 // ---------------------------------------------------------------------------
@@ -115,7 +120,7 @@ func logoutAction(c *fiber.Ctx) error {
 
 const itemsPerPage = 10
 
-func adminDashboard(c *fiber.Ctx) error {
+func getDashboardData(c *fiber.Ctx) error {
 	search := c.Query("search", "")
 	page := c.QueryInt("page", 1)
 
@@ -216,7 +221,7 @@ func adminDashboard(c *fiber.Ctx) error {
 		}
 	})
 
-	return c.Render("admin", fiber.Map{
+	return c.JSON(fiber.Map{
 		"users": usersMap, "devices": devices,
 		"current_page": page, "total_pages": totalPages,
 		"search_query": search, "active_users": activeCount,
@@ -378,21 +383,26 @@ func updateSettings(c *fiber.Ctx) error {
 	clientIP := c.IP()
 	clientMAC := infrastructure.GetMACFromIP(clientIP)
 
-	timeout := c.FormValue("timeout", "30")
-	inactiveTimeout := c.FormValue("inactive_timeout", "900")
-	autoPause := c.FormValue("auto_pause", "")
-	speedLimitVal := c.FormValue("speed_limit_val", "5")
-	speedLimitToggle := c.FormValue("speed_limit_toggle", "")
-	gamingMode := c.FormValue("gaming_mode", "")
-	coinRates := c.FormValue("coin_rates", "1:10,5:60,10:180,20:300")
-	bannerText := c.FormValue("banner_text", "")
-	bannerLink := c.FormValue("banner_link", "")
-	freeTimeToggle := c.FormValue("free_time_toggle", "")
-	freeTimeDuration := c.FormValue("free_time_duration", "5")
-	soundInsert := c.FormValue("sound_insert", "insert_coin_sound.mp3")
-	soundCoin := c.FormValue("sound_coin", "coin-recieved.mp3")
+	var body struct {
+		Timeout          string `json:"timeout"`
+		InactiveTimeout  string `json:"inactive_timeout"`
+		AutoPause        string `json:"auto_pause"`
+		SpeedLimitVal    string `json:"speed_limit_val"`
+		SpeedLimitToggle string `json:"speed_limit_toggle"`
+		GamingMode       string `json:"gaming_mode"`
+		CoinRates        string `json:"coin_rates"`
+		BannerText       string `json:"banner_text"`
+		BannerLink       string `json:"banner_link"`
+		FreeTimeToggle   string `json:"free_time_toggle"`
+		FreeTimeDuration string `json:"free_time_duration"`
+		SoundInsert      string `json:"sound_insert"`
+		SoundCoin        string `json:"sound_coin"`
+	}
+	if err := c.BodyParser(&body); err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
+	}
 
-	newFreeEnabled := freeTimeToggle == "on"
+	newFreeEnabled := body.FreeTimeToggle == "on"
 	oldFreeEnabled := config.Get().FreeTimeEnabled
 	if newFreeEnabled && !oldFreeEnabled {
 		db.ResetAllFreeClaimed()
@@ -409,24 +419,24 @@ func updateSettings(c *fiber.Ctx) error {
 			}
 			return v
 		}
-		cfg.SlotTimeout = parseInt(timeout, 30)
-		cfg.InactiveTimeout = parseInt(inactiveTimeout, 900)
-		cfg.AutoPauseEnabled = autoPause == "on"
-		cfg.GlobalSpeedLimit = parseInt(speedLimitVal, 5)
-		cfg.SpeedLimitEnabled = speedLimitToggle == "on"
-		cfg.GamingModeEnabled = gamingMode == "on"
-		cfg.CoinRates = coinRates
-		cfg.BannerText = bannerText
-		cfg.BannerLink = bannerLink
+		cfg.SlotTimeout = parseInt(body.Timeout, 30)
+		cfg.InactiveTimeout = parseInt(body.InactiveTimeout, 900)
+		cfg.AutoPauseEnabled = body.AutoPause == "on"
+		cfg.GlobalSpeedLimit = parseInt(body.SpeedLimitVal, 5)
+		cfg.SpeedLimitEnabled = body.SpeedLimitToggle == "on"
+		cfg.GamingModeEnabled = body.GamingMode == "on"
+		cfg.CoinRates = body.CoinRates
+		cfg.BannerText = body.BannerText
+		cfg.BannerLink = body.BannerLink
 		cfg.FreeTimeEnabled = newFreeEnabled
-		cfg.FreeTimeDuration = parseInt(freeTimeDuration, 5)
-		cfg.SoundInsert = soundInsert
-		cfg.SoundCoin = soundCoin
+		cfg.FreeTimeDuration = parseInt(body.FreeTimeDuration, 5)
+		cfg.SoundInsert = body.SoundInsert
+		cfg.SoundCoin = body.SoundCoin
 	})
 	config.Save()
 	network.RefreshAllLimits()
 	logger.AuditLog("CONFIG_UPDATE", clientIP, clientMAC, "Updated core system settings")
-	return c.Redirect("/admin", fiber.StatusSeeOther)
+	return c.JSON(fiber.Map{"status": "success"})
 }
 
 func rebootDevice(c *fiber.Ctx) error {
@@ -451,7 +461,7 @@ func clearBanners(c *fiber.Ctx) error {
 	config.Update(func(cfg *config.AppConfig) { cfg.BannerOrder = []string{} })
 	config.Save()
 	logger.AuditLog("CONFIG_UPDATE", clientIP, infrastructure.GetMACFromIP(clientIP), "Cleared all promotional banners")
-	return c.Redirect("/admin", fiber.StatusSeeOther)
+	return c.JSON(fiber.Map{"status": "success"})
 }
 
 func uploadBanners(c *fiber.Ctx) error {
@@ -459,7 +469,7 @@ func uploadBanners(c *fiber.Ctx) error {
 	os.MkdirAll("static/banners/set", 0755)
 	form, err := c.MultipartForm()
 	if err != nil {
-		return c.Status(400).SendString("Bad form")
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "Bad form"})
 	}
 	files := form.File["files"]
 	for _, f := range files {
@@ -469,7 +479,7 @@ func uploadBanners(c *fiber.Ctx) error {
 	}
 	logger.AuditLog("CONFIG_UPDATE", clientIP, infrastructure.GetMACFromIP(clientIP),
 		fmt.Sprintf("Uploaded %d new promotional banners", len(files)))
-	return c.Redirect("/admin", fiber.StatusSeeOther)
+	return c.JSON(fiber.Map{"status": "success"})
 }
 
 func saveBannerOrder(c *fiber.Ctx) error {
@@ -510,25 +520,25 @@ func uploadSound(c *fiber.Ctx) error {
 	os.MkdirAll("static/sounds", 0755)
 	f, err := c.FormFile("file")
 	if err != nil {
-		return c.Status(400).SendString("No file")
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "No file"})
 	}
 	if err := c.SaveFile(f, filepath.Join("static/sounds", f.Filename)); err != nil {
-		return c.Status(500).SendString("Save error")
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Save error"})
 	}
 	logger.AuditLog("CONFIG_UPDATE", clientIP, infrastructure.GetMACFromIP(clientIP),
 		fmt.Sprintf("Uploaded new sound file: %s", f.Filename))
-	return c.Redirect("/admin", fiber.StatusSeeOther)
+	return c.JSON(fiber.Map{"status": "success"})
 }
 
 // ---------------------------------------------------------------------------
 // User management
 // ---------------------------------------------------------------------------
 
-func manageSingleUser(c *fiber.Ctx) error {
+func getSingleUser(c *fiber.Ctx) error {
 	mac := c.Params("mac")
 	user, ok := state.Users.Get(mac)
 	if !ok {
-		return c.Redirect("/admin", fiber.StatusSeeOther)
+		return c.Status(404).JSON(fiber.Map{"error": "User not found"})
 	}
 	leases := infrastructure.GetDhcpLeases()
 	displayName, _ := infrastructure.GetVendorInfo(mac, user.IP, leases)
@@ -536,7 +546,7 @@ func manageSingleUser(c *fiber.Ctx) error {
 	for i, s := range salesHistory {
 		salesHistory[i].DateStr = time.Unix(s.Timestamp, 0).Format("Jan 02, 2006 03:04 PM")
 	}
-	return c.Render("components/manage_user", fiber.Map{
+	return c.JSON(fiber.Map{
 		"mac":            mac,
 		"user":           user,
 		"time_formatted": services.FormatHumanTime(user.Time),
@@ -546,31 +556,45 @@ func manageSingleUser(c *fiber.Ctx) error {
 }
 
 func adminManageTime(c *fiber.Ctx) error {
-	mac := c.FormValue("mac")
-	amount := 0
-	fmt.Sscan(c.FormValue("amount", "0"), &amount)
-	unit := c.FormValue("unit", "minutes")
-	action := c.FormValue("action", "add")
+	var body struct {
+		MAC    string `json:"mac"`
+		Amount string `json:"amount"`
+		Unit   string `json:"unit"`
+		Action string `json:"action"`
+	}
+	if err := c.BodyParser(&body); err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
+	}
 	clientIP := c.IP()
 
-	services.ManageUserTime(mac, amount, unit, action)
+	amount := 0
+	fmt.Sscan(body.Amount, &amount)
+
+	services.ManageUserTime(body.MAC, amount, body.Unit, body.Action)
 	logger.AuditLog("TIME_UPDATE", clientIP, infrastructure.GetMACFromIP(clientIP),
-		fmt.Sprintf("%s %d %s applied to target user %s", strings.ToUpper(action), amount, unit, mac))
-	return c.Redirect(fmt.Sprintf("/admin/user/%s", mac), fiber.StatusSeeOther)
+		fmt.Sprintf("%s %d %s applied to target user %s", strings.ToUpper(body.Action), amount, body.Unit, body.MAC))
+	return c.JSON(fiber.Map{"status": "success"})
 }
 
 func adminManagePoints(c *fiber.Ctx) error {
-	mac := c.FormValue("mac")
-	amount := 0.0
-	fmt.Sscan(c.FormValue("amount", "0"), &amount)
-	action := c.FormValue("action", "add")
+	var body struct {
+		MAC    string `json:"mac"`
+		Amount string `json:"amount"`
+		Action string `json:"action"`
+	}
+	if err := c.BodyParser(&body); err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
+	}
 	clientIP := c.IP()
+
+	amount := 0.0
+	fmt.Sscan(body.Amount, &amount)
 	if amount < 0 {
 		amount = -amount
 	}
 
-	state.Users.UpdateField(mac, func(u *state.UserRecord) {
-		if action == "subtract" {
+	state.Users.UpdateField(body.MAC, func(u *state.UserRecord) {
+		if body.Action == "subtract" {
 			u.Points -= amount
 		} else {
 			u.Points += amount
@@ -579,39 +603,42 @@ func adminManagePoints(c *fiber.Ctx) error {
 			u.Points = 0
 		}
 	})
-	if u, ok := state.Users.Get(mac); ok {
+	if u, ok := state.Users.Get(body.MAC); ok {
 		db.SyncUser(db.UserRecord{
-			MAC: mac, IP: u.IP, Time: u.Time, Status: u.Status,
+			MAC: body.MAC, IP: u.IP, Time: u.Time, Status: u.Status,
 			Balance: u.Balance, FreeClaimed: u.FreeClaimed, Points: u.Points,
 		})
 	}
 	logger.AuditLog("POINTS_UPDATE", clientIP, infrastructure.GetMACFromIP(clientIP),
-		fmt.Sprintf("%s %.1f points applied to target user %s", strings.ToUpper(action), amount, mac))
-	return c.Redirect(fmt.Sprintf("/admin/user/%s", mac), fiber.StatusSeeOther)
+		fmt.Sprintf("%s %.1f points applied to target user %s", strings.ToUpper(body.Action), amount, body.MAC))
+	return c.JSON(fiber.Map{"status": "success"})
 }
 
 func adminBlock(c *fiber.Ctx) error {
-	mac := c.FormValue("mac")
+	var body struct{ MAC string `json:"mac"` }
+	if err := c.BodyParser(&body); err != nil { return c.JSON(fiber.Map{"status":"error"}) }
 	clientIP := c.IP()
-	services.UpdateUserStatus(mac, "blocked")
-	logger.AuditLog("USER_BLOCKED", clientIP, infrastructure.GetMACFromIP(clientIP), fmt.Sprintf("Blocked access for target user %s", mac))
-	return c.Redirect(fmt.Sprintf("/admin/user/%s", mac), fiber.StatusSeeOther)
+	services.UpdateUserStatus(body.MAC, "blocked")
+	logger.AuditLog("USER_BLOCKED", clientIP, infrastructure.GetMACFromIP(clientIP), fmt.Sprintf("Blocked access for target user %s", body.MAC))
+	return c.JSON(fiber.Map{"status": "success"})
 }
 
 func adminUnblock(c *fiber.Ctx) error {
-	mac := c.FormValue("mac")
+	var body struct{ MAC string `json:"mac"` }
+	if err := c.BodyParser(&body); err != nil { return c.JSON(fiber.Map{"status":"error"}) }
 	clientIP := c.IP()
-	services.UpdateUserStatus(mac, "new")
-	logger.AuditLog("USER_UNBLOCKED", clientIP, infrastructure.GetMACFromIP(clientIP), fmt.Sprintf("Restored access for target user %s", mac))
-	return c.Redirect(fmt.Sprintf("/admin/user/%s", mac), fiber.StatusSeeOther)
+	services.UpdateUserStatus(body.MAC, "new")
+	logger.AuditLog("USER_UNBLOCKED", clientIP, infrastructure.GetMACFromIP(clientIP), fmt.Sprintf("Restored access for target user %s", body.MAC))
+	return c.JSON(fiber.Map{"status": "success"})
 }
 
 func adminDeleteUser(c *fiber.Ctx) error {
-	mac := c.FormValue("mac")
+	var body struct{ MAC string `json:"mac"` }
+	if err := c.BodyParser(&body); err != nil { return c.JSON(fiber.Map{"status":"error"}) }
 	clientIP := c.IP()
-	services.DeleteUser(mac)
-	logger.AuditLog("USER_DELETED", clientIP, infrastructure.GetMACFromIP(clientIP), fmt.Sprintf("Deleted target user %s from system", mac))
-	return c.Redirect("/admin", fiber.StatusSeeOther)
+	services.DeleteUser(body.MAC)
+	logger.AuditLog("USER_DELETED", clientIP, infrastructure.GetMACFromIP(clientIP), fmt.Sprintf("Deleted target user %s from system", body.MAC))
+	return c.JSON(fiber.Map{"status": "success"})
 }
 
 func renameDevice(c *fiber.Ctx) error {
