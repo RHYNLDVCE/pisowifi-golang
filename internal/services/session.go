@@ -1,6 +1,8 @@
 package services
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"pisowifi/internal/config"
@@ -148,4 +150,39 @@ func RoundFloat(val float64, precision int) float64 {
 		p *= 10
 	}
 	return float64(int(val*p+0.5)) / p
+}
+
+func FormatHumanTime(seconds int) string {
+	if seconds <= 0 {
+		return "0s"
+	}
+	y := seconds / 31536000
+	mo := (seconds % 31536000) / 2592000
+	d := (seconds % 2592000) / 86400
+	h := (seconds % 86400) / 3600
+	m := (seconds % 3600) / 60
+	s := seconds % 60
+
+	var parts []string
+	if y > 0 {
+		parts = append(parts, fmt.Sprintf("%dy", y))
+	}
+	if mo > 0 {
+		parts = append(parts, fmt.Sprintf("%dmo", mo))
+	}
+	if d > 0 {
+		parts = append(parts, fmt.Sprintf("%dd", d))
+	}
+	if y == 0 && mo == 0 && d == 0 {
+		if h > 0 {
+			parts = append(parts, fmt.Sprintf("%dh", h))
+		}
+		if m > 0 {
+			parts = append(parts, fmt.Sprintf("%dm", m))
+		}
+		parts = append(parts, fmt.Sprintf("%ds", s))
+	} else {
+		parts = append(parts, fmt.Sprintf("%dh %dm", h, m))
+	}
+	return strings.Join(parts, " ")
 }

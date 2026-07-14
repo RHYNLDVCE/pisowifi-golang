@@ -193,6 +193,7 @@ func adminDashboard(c *fiber.Ctx) error {
 			"ip": u.Data.IP, "time": u.Data.Time, "status": u.Data.Status,
 			"balance": u.Data.Balance, "points": u.Data.Points,
 			"free_claimed": u.Data.FreeClaimed, "device_name": u.Name,
+			"time_formatted": services.FormatHumanTime(u.Data.Time),
 		}
 	}
 
@@ -531,10 +532,11 @@ func manageSingleUser(c *fiber.Ctx) error {
 		salesHistory[i].DateStr = time.Unix(s.Timestamp, 0).Format("Jan 02, 2006 03:04 PM")
 	}
 	return c.Render("components/manage_user", fiber.Map{
-		"mac":     mac,
-		"user":    user,
-		"history": salesHistory,
-		"device_name": displayName,
+		"mac":            mac,
+		"user":           user,
+		"time_formatted": services.FormatHumanTime(user.Time),
+		"history":        salesHistory,
+		"device_name":    displayName,
 	})
 }
 

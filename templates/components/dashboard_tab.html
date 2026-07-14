@@ -426,24 +426,8 @@
                             <div class="time-points-container" style="display: flex; align-items: center; gap: 8px;">
                                 <div>
                                     {% if user.time > 0 %}
-                                        {% set t = user.time %}
-                                        {% set y = (t // 31536000) | int %}
-                                        {% set mo = ((t % 31536000) // 2592000) | int %}
-                                        {% set d = ((t % 2592000) // 86400) | int %}
-                                        {% set h = ((t % 86400) // 3600) | int %}
-                                        {% set m = ((t % 3600) // 60) | int %}
-                                        {% set s = (t % 60) | int %}
                                         <span style="font-weight: 700; color: #059669; font-size: 0.82rem;">
-                                            {% if y > 0 %}{{ y }}y {% endif %}
-                                            {% if mo > 0 %}{{ mo }}mo {% endif %}
-                                            {% if d > 0 %}{{ d }}d {% endif %}
-                                            {% if y == 0 and mo == 0 and d == 0 %}
-                                                {% if h > 0 %}{{ h }}h {% endif %}
-                                                {% if m > 0 %}{{ m }}m {% endif %}
-                                                {{ s }}s
-                                            {% else %}
-                                                {{ h }}h {{ m }}m
-                                            {% endif %}
+                                            {{ user.time_formatted }}
                                         </span>
                                     {% else %}
                                         <span style="color: #94a3b8; font-size: 0.82rem;">0s</span>
