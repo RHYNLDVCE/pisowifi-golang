@@ -1,0 +1,631 @@
+{% extends "base.html" %}
+
+{% block title %}Rewards - REYES Starlink{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', path='css/fonts.css') }}" rel="stylesheet">
+<script src="{{ url_for('static', path='js/lucide.min.js') }}"></script>
+
+<style>
+    :root {
+        --primary: #0f172a;
+        --primary-light: #1e293b;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --success: #059669;
+        --danger: #dc2626;
+        --surface: #ffffff;
+        --bg-body: #f8fafc;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+    }
+
+    body { 
+        background-color: var(--bg-body); 
+        color: var(--text-main); 
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif; 
+        margin: 0;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .main-wrapper { 
+        max-width: 480px; 
+        margin: 0 auto; 
+        min-height: 100vh; 
+        display: flex; 
+        flex-direction: column; 
+        background: var(--bg-body);
+        border-left: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+        box-shadow: 0 0 20px rgba(0,0,0,0.03);
+    }
+    
+    /* HEADER DESIGN UPDATE */
+    .header-card {
+        background-color: var(--primary);
+        color: #ffffff; 
+        padding: 2.5rem 1.5rem; 
+        position: relative;
+    }
+
+    .brand-title {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .stats-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--primary-light);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stat-box {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .stat-box:first-child {
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        margin-right: 1.5rem;
+    }
+
+    .points-label, .time-label { 
+        font-size: 0.75rem; 
+        font-weight: 500; 
+        color: #cbd5e1;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .points-val, .time-val { 
+        font-size: 2rem; 
+        font-weight: 700; 
+        line-height: 1;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .unit-small {
+        font-size: 0.5em;
+        margin-left: 1px;
+        margin-right: 2px;
+        color: #94a3b8;
+        vertical-align: baseline;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+    
+    /* CONTENT AREA */
+    .content-area { 
+        padding: 0 1.5rem 2.5rem; 
+        flex-grow: 1; 
+        background: var(--bg-body);
+    }
+    
+    .section-title { 
+        font-size: 1.125rem; 
+        font-weight: 600; 
+        color: var(--text-main); 
+        margin: 2rem 0 1.25rem; 
+        display: flex; 
+        align-items: center; 
+        gap: 0.5rem;
+    }
+    
+    /* PROMO CARD DESIGN */
+    .promo-card {
+        background: var(--surface); 
+        border-radius: 12px; 
+        padding: 1.25rem; 
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        transition: border-color 0.2s ease;
+    }
+
+    .promo-card:hover {
+        border-color: #cbd5e1;
+    }
+    
+    .promo-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+
+    .promo-name { 
+        margin: 0; 
+        font-size: 1rem; 
+        font-weight: 600; 
+        color: var(--text-main); 
+    }
+    
+    .promo-cost { 
+        margin: 0;
+        color: var(--text-muted); 
+        font-size: 0.875rem; 
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    
+    /* BUTTONS */
+    .btn-redeem {
+        background: var(--surface); 
+        color: var(--accent); 
+        border: 1px solid var(--accent); 
+        padding: 0.6rem 1.25rem;
+        border-radius: 6px; 
+        font-weight: 600; 
+        font-size: 0.875rem; 
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 90px;
+        font-family: inherit;
+    }
+    
+    .btn-redeem:hover:not(:disabled) { 
+        background: var(--accent); 
+        color: #ffffff;
+    }
+    
+    .btn-redeem:disabled { 
+        background: #f1f5f9; 
+        color: #94a3b8; 
+        border-color: #e2e8f0;
+        cursor: not-allowed; 
+    }
+    
+    .btn-back-wrapper { 
+        margin-top: 2.5rem; 
+        text-align: center; 
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: transparent; 
+        border: 1px solid var(--border-color); 
+        border-radius: 8px;
+        color: var(--text-muted); 
+        text-decoration: none; 
+        font-weight: 500; 
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-back:hover { 
+        background: var(--surface);
+        color: var(--text-main);
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: var(--text-muted);
+        background: var(--surface);
+        border-radius: 12px;
+        border: 1px dashed var(--border-color);
+        margin-top: 1rem;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+        color: var(--text-main);
+    }
+
+    /* MODAL STYLES */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(2px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .modal-card {
+        background: var(--surface);
+        width: 90%;
+        max-width: 360px;
+        padding: 2rem 1.5rem;
+        border-radius: 16px;
+        text-align: center;
+        transform: translateY(10px);
+        transition: transform 0.2s ease;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-overlay.active .modal-card {
+        transform: translateY(0);
+    }
+
+    .modal-icon-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .modal-title {
+        margin: 0 0 0.75rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .modal-text {
+        margin: 0 0 1.5rem;
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+    }
+
+    .btn-modal {
+        flex: 1;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-family: inherit;
+    }
+
+    .btn-cancel { 
+        background: var(--bg-body); 
+        color: var(--text-main); 
+        border: 1px solid var(--border-color);
+    }
+    .btn-cancel:hover { background: #e2e8f0; }
+    
+    .btn-confirm { 
+        background: var(--accent); 
+        color: white; 
+    }
+    .btn-confirm:hover { background: var(--accent-hover); }
+
+    .btn-full { width: 100%; }
+
+    .lucide-spin { animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-wrapper">
+    <div class="header-card">
+        <div class="brand-title">REYES Starlink</div>
+        
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="points-label">Balance</div>
+                <div class="points-val">
+                    <i data-lucide="credit-card" style="width: 24px; height: 24px; color: #94a3b8;"></i>
+                    {{ points }}
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="time-label">Time Remaining</div>
+                <div class="time-val" id="timeDisplay">
+                    --:--
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        {% if not enabled %}
+            <div class="empty-state">
+                <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+                    <i data-lucide="power-off" style="width: 32px; height: 32px; color: #94a3b8;"></i>
+                </div>
+                <h3>System Offline</h3>
+                <p style="margin:0; font-size: 0.875rem;">The rewards system is currently unavailable.</p>
+            </div>
+        {% else %}
+            <div class="section-title">
+                <i data-lucide="list" style="width: 20px; height: 20px; color: var(--text-muted);"></i>
+                Reward Catalog
+            </div>
+            
+            {% if promos|length == 0 %}
+                <div class="empty-state">
+                    <p style="margin: 0;">No active promotions at this time.</p>
+                </div>
+            {% endif %}
+
+            {% for p in promos %}
+            <div class="promo-card">
+                <div class="promo-info">
+                    <div class="promo-name">{{ p.name }}</div>
+                    <div class="promo-cost">
+                        <i data-lucide="arrow-right-circle" style="width: 14px; height: 14px;"></i>
+                        {{ p.cost | int }} Points
+                    </div>
+                </div>
+                
+                <button class="btn-redeem" 
+                    data-id="{{ p.id }}" 
+                    data-name="{{ p.name }}" 
+                    data-cost="{{ p.cost | int }}"
+                    onclick="openConfirmModal(this)"
+                    {% if points < p.cost %}disabled{% endif %}>
+                    {% if points < p.cost %}
+                        Locked
+                    {% else %}
+                        Redeem
+                    {% endif %}
+                </button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="btn-back-wrapper">
+            <a href="/" class="btn-back">
+                <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+                Return to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<div id="rewardModal" class="modal-overlay">
+    <div class="modal-card">
+        <div id="modalContent"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize icons on load
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+
+    // --- TIMER LOGIC ---
+    var mac = "{{ mac | default('Unknown', true) }}"; 
+    let localTime = 0;
+
+    // 1. Instantly load cached time for a seamless UI experience
+    const cachedTime = localStorage.getItem("piso_time_" + mac);
+    if (cachedTime && !isNaN(parseInt(cachedTime))) {
+        localTime = parseInt(cachedTime);
+        updateTimerDisplay(localTime);
+    }
+
+    // 2. Fetch the true, authoritative time from the server
+    async function syncTimeWithServer() {
+        if (mac === "Unknown" || !mac) return;
+        
+        try {
+            let res = await fetch(`/status?mac=${mac}`);
+            let data = await res.json();
+            
+            if (data && data.time_remaining !== undefined) {
+                localTime = parseInt(data.time_remaining);
+                updateTimerDisplay(localTime);
+                localStorage.setItem("piso_time_" + mac, localTime);
+                console.info('[Rewards] Timer synchronized with server:', localTime);
+            }
+        } catch(e) {
+            console.warn('[Rewards] Failed to sync time with server, falling back to local cache.');
+        }
+    }
+
+    // Execute sync immediately on page load
+    syncTimeWithServer();
+
+    // 3. Tick down the time locally while the user browses the rewards
+    setInterval(() => {
+        if (localTime > 0) {
+            localTime--;
+            updateTimerDisplay(localTime);
+            // Sync it back to local storage periodically
+            if (localTime % 5 === 0) {
+                localStorage.setItem("piso_time_" + mac, localTime);
+            }
+        } else {
+            updateTimerDisplay(0);
+        }
+    }, 1000);
+
+    function updateTimerDisplay(seconds) {
+        const display = document.getElementById("timeDisplay");
+        if (!display) return;
+        
+        const { htmlText } = formatHumanTime(seconds);
+        display.innerHTML = htmlText;
+    }
+
+    function formatHumanTime(seconds, hideZeroSeconds = false) {
+        if (!Number.isFinite(seconds) || seconds <= 0) {
+            return { plainText: "--", htmlText: "--", length: 2 };
+        }
+
+        const YEAR = 31104000;
+        const MONTH = 2592000;
+        const DAY = 86400;
+        const HOUR = 3600;
+        const MIN = 60;
+
+        const y = Math.floor(seconds / YEAR);
+        const mo = Math.floor((seconds % YEAR) / MONTH);
+        const d = Math.floor((seconds % MONTH) / DAY);
+        const h = Math.floor((seconds % DAY) / HOUR);
+        const m = Math.floor((seconds % HOUR) / MIN);
+        const s = seconds % MIN;
+
+        const partsText = []; const partsHtml = [];
+        const unit = (label) => `<span class="unit-small">${label}</span>`;
+
+        if (y > 0) { partsText.push(`${y}YR.`); partsHtml.push(`${y}${unit("YR.")}`); }
+        if (mo > 0) { partsText.push(`${mo}MO.`); partsHtml.push(`${mo}${unit("MO.")}`); }
+        if (d > 0) { partsText.push(`${d}D.`); partsHtml.push(`${d}${unit("D.")}`); }
+        if (h > 0) { partsText.push(`${h}HR.`); partsHtml.push(`${h}${unit("HR.")}`); }
+
+        if (m > 0 || y > 0 || mo > 0 || d > 0 || h > 0) {
+            partsText.push(`${m}MIN.`); partsHtml.push(`${m}${unit("MIN.")}`);
+        }
+
+        if (!hideZeroSeconds || s > 0) {
+            partsText.push(`${s}SEC.`);
+            partsHtml.push(`<span style="color: #cbd5e1;">${s}</span><span class="unit-small" style="color: #cbd5e1;">SEC.</span>`);
+        }
+
+        const plainText = partsText.join(" ");
+        const htmlText = `<span style="display:inline-block; font-size: clamp(1rem, 4vw, 1.5rem);">${partsHtml.join("")}</span>`;
+
+        return { plainText, htmlText, length: plainText.length };
+    }
+
+    // --- MODAL & REDEMPTION LOGIC ---
+    const modal = document.getElementById('rewardModal');
+    const modalContent = document.getElementById('modalContent');
+    let currentPromoId = null;
+
+    // Show confirmation dialog
+    function openConfirmModal(btn) {
+        const id = btn.getAttribute('data-id');
+        const name = btn.getAttribute('data-name');
+        const cost = btn.getAttribute('data-cost');
+        currentPromoId = parseInt(id);
+
+        modalContent.innerHTML = `
+            <div class="modal-icon-wrapper">
+                <i data-lucide="help-circle" style="width: 48px; height: 48px; color: var(--accent);"></i>
+            </div>
+            <h3 class="modal-title">Confirm Redemption</h3>
+            <p class="modal-text">
+                Confirm deduction of <b>${cost} points</b> in exchange for <b>"${name}"</b>.
+            </p>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-modal btn-confirm" onclick="processRedemption()">Confirm</button>
+            </div>
+        `;
+        
+        lucide.createIcons();
+        modal.classList.add('active');
+    }
+
+    // Process redemption request
+    async function processRedemption() {
+        console.info('[Rewards] Initializing redemption process for promo ID:', currentPromoId);
+
+        modalContent.innerHTML = `
+            <div class="modal-icon-wrapper">
+                <i data-lucide="loader-2" class="lucide-spin" style="width: 48px; height: 48px; color: var(--text-muted);"></i>
+            </div>
+            <h3 class="modal-title">Processing</h3>
+            <p class="modal-text">Please wait while the transaction is finalized.</p>
+        `;
+        lucide.createIcons();
+
+        try {
+            let res = await fetch('/redeem_points', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ promo_id: currentPromoId })
+            });
+            let data = await res.json();
+            
+            if(data.status === "success") {
+                console.info('[Rewards] Redemption successful.');
+                showSuccess(data.message);
+            } else {
+                console.warn('[Rewards] Redemption rejected by server:', data.message);
+                showError(data.message);
+            }
+        } catch(e) {
+            console.error('[Rewards] Network exception during redemption:', e);
+            showError("Network connection failed. Please check connectivity.");
+        }
+    }
+
+    // Display success view
+    function showSuccess(msg) {
+        modalContent.innerHTML = `
+            <div class="modal-icon-wrapper">
+                <i data-lucide="check-circle-2" style="width: 48px; height: 48px; color: var(--success);"></i>
+            </div>
+            <h3 class="modal-title">Success</h3>
+            <p class="modal-text">${msg}</p>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel btn-full" onclick="finishRedemption()">Close</button>
+            </div>
+        `;
+        lucide.createIcons();
+    }
+
+    // Display error view
+    function showError(msg) {
+        modalContent.innerHTML = `
+            <div class="modal-icon-wrapper">
+                <i data-lucide="alert-circle" style="width: 48px; height: 48px; color: var(--danger);"></i>
+            </div>
+            <h3 class="modal-title">Transaction Failed</h3>
+            <p class="modal-text">${msg}</p>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel btn-full" onclick="closeModal()">Dismiss</button>
+            </div>
+        `;
+        lucide.createIcons();
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+
+    function finishRedemption() {
+        closeModal();
+        // The reload will now automatically trigger the syncTimeWithServer() function on boot
+        setTimeout(() => window.location.reload(), 200);
+    }
+
+    // Close modal on outside click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+</script>
+{% endblock %}

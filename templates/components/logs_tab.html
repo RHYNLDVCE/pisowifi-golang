@@ -1,0 +1,794 @@
+<style>
+    /* =====================================================
+       LOGS TAB — DARK-ADAPTIVE + SEARCH/FILTER
+       Uses CSS variables so dark mode works automatically
+    ===================================================== */
+
+    .logs-container {
+        border: 1px solid var(--card-border, #e2e8f0);
+        border-radius: 12px;
+        background: var(--card-bg, #ffffff);
+        overflow: hidden;
+    }
+
+    .logs-scroll-area {
+        max-height: 560px;
+        overflow-y: auto;
+    }
+
+    .logs-scroll-area::-webkit-scrollbar { width: 6px; }
+    .logs-scroll-area::-webkit-scrollbar-track { background: transparent; }
+    .logs-scroll-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+    [data-theme="dark"] .logs-scroll-area::-webkit-scrollbar-thumb { background: #334155; }
+    .logs-scroll-area::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    .log-item {
+        display: flex;
+        align-items: flex-start;
+        border-bottom: 1px solid var(--card-border, #f1f5f9);
+        transition: background-color 0.12s ease;
+        position: relative;
+    }
+
+    .log-item:last-child { border-bottom: none; }
+    .log-item:hover { background-color: var(--bg, #f8fafc); }
+
+    .log-item-bar {
+        width: 3px;
+        align-self: stretch;
+        flex-shrink: 0;
+        background: #e2e8f0;
+    }
+
+    .log-item-content {
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+        padding: 12px 18px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .log-time {
+        min-width: 148px;
+        font-size: 0.72rem;
+        color: var(--text-light, #94a3b8);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    /* ★ Critical fix: use CSS variable so dark mode works */
+    .log-message {
+        font-size: 0.875rem;
+        color: var(--text-dark, #0f172a);
+        font-weight: 500;
+        line-height: 1.5;
+        flex: 1;
+        min-width: 0;
+        word-break: break-word;
+    }
+
+    /* Log search bar */
+    .log-search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .log-search-input {
+        width: 220px;
+        padding: 8px 32px 8px 34px;
+        border: 1px solid var(--card-border, #d1d5db);
+        border-radius: 9px;
+        font-family: inherit;
+        font-size: 0.83rem;
+        color: var(--text-dark, #0f172a);
+        background: var(--bg, #f9fafb);
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s, width 0.2s;
+    }
+
+    .log-search-input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        width: 260px;
+        background: var(--card-bg, #ffffff);
+    }
+
+    .log-search-icon {
+        position: absolute;
+        left: 10px;
+        pointer-events: none;
+        color: var(--text-light, #94a3b8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .log-search-clear {
+        position: absolute;
+        right: 8px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-light, #94a3b8);
+        display: flex;
+        align-items: center;
+        padding: 2px;
+        border-radius: 4px;
+        transition: color 0.15s;
+    }
+
+    .log-search-clear:hover { color: #ef4444; }
+
+    /* Filter pill buttons */
+    .log-filter-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 5px 11px;
+        border-radius: 99px;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        background: var(--bg, #f8fafc);
+        color: var(--text-muted, #64748b);
+        transition: all 0.15s ease;
+        letter-spacing: 0.03em;
+        font-family: inherit;
+    }
+
+    .log-filter-pill:hover {
+        border-color: currentColor;
+        opacity: 0.85;
+    }
+
+    .log-filter-pill.active {
+        border-color: currentColor !important;
+        filter: brightness(1.1);
+    }
+
+    .log-filter-pill.active.all {
+        background: #6366f1;
+        color: #ffffff;
+        border-color: #6366f1 !important;
+        box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+    }
+
+    /* Count badge */
+    .log-count-badge {
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 1px 6px;
+        border-radius: 99px;
+        background: rgba(0,0,0,0.08);
+    }
+
+    [data-theme="dark"] .log-count-badge { background: rgba(255,255,255,0.12); }
+
+    /* Empty state */
+    .log-empty-state {
+        padding: 52px 20px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: var(--text-light, #94a3b8);
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 640px) {
+        .log-header-top {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 12px !important;
+        }
+        .log-search-group {
+            width: 100%;
+            justify-content: space-between !important;
+            flex-wrap: nowrap !important;
+        }
+        .log-search-wrapper {
+            flex: 1;
+        }
+        .log-search-input, .log-search-input:focus {
+            width: 100% !important;
+        }
+        #log-status {
+            padding: 6px 10px !important;
+        }
+        #log-status span:last-child {
+            /* Hide "Connecting..."/"Live Stream" text, keep only pulsing dot */
+            display: none !important;
+        }
+        .log-filter-row {
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            padding-bottom: 12px !important;
+            -webkit-overflow-scrolling: touch;
+        }
+        .log-filter-row::-webkit-scrollbar {
+            display: none;
+        }
+        .log-results-container {
+            margin-left: 0 !important;
+            width: 100%;
+            justify-content: space-between !important;
+            margin-top: 4px;
+        }
+    }
+
+    .log-empty-state p {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-muted, #64748b);
+    }
+
+    .log-empty-state span {
+        font-size: 0.8rem;
+        color: var(--text-light, #94a3b8);
+    }
+
+    /* Highlighted search matches */
+    mark.log-highlight {
+        background: rgba(250, 204, 21, 0.35);
+        color: inherit;
+        border-radius: 2px;
+        padding: 0 1px;
+    }
+
+    [data-theme="dark"] mark.log-highlight {
+        background: rgba(250, 204, 21, 0.25);
+    }
+
+    @media (max-width: 768px) {
+        .log-item-content {
+            flex-direction: column;
+            gap: 3px;
+            padding: 10px 14px;
+        }
+        .log-time { min-width: auto; font-size: 0.68rem; }
+        .log-search-input { width: 160px; font-size: 0.8rem; }
+        .log-search-input:focus { width: 180px; }
+    }
+</style>
+
+<div id="logs" class="section">
+    <!-- Page Header -->
+    <div style="margin-bottom: 20px;">
+        <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-dark, #0f172a);">System Logs</h2>
+        <p style="margin: 4px 0 0; color: var(--text-muted, #64748b); font-size: 0.875rem;">Real-time events, administrator actions, and system security audits.</p>
+    </div>
+
+    <div class="card">
+        <!-- Card Header Row -->
+        <div class="log-header-top" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(99,102,241,0.1); display: flex; align-items: center; justify-content: center; color: #6366f1;">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-dark, #0f172a); letter-spacing: -0.02em;">Activity Feed</h3>
+                </div>
+            </div>
+            
+            <div class="log-search-group" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <!-- Search Input -->
+                <div class="log-search-wrapper">
+                    <span class="log-search-icon">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35"/></svg>
+                    </span>
+                    <input type="text" class="log-search-input" id="logSearch" placeholder="Search logs..." oninput="applyLogsFilter()">
+                    <button class="log-search-clear" id="logSearchClear" title="Clear" onclick="clearLogSearch()" style="display: none;">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Live Status -->
+                <div id="log-status" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted, #64748b); display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--bg, #f8fafc); border: 1px solid var(--card-border, #e2e8f0); border-radius: 99px; white-space: nowrap;">
+                    <span style="width: 6px; height: 6px; background: #cbd5e1; border-radius: 50%; display: inline-block;"></span>
+                    <span>Connecting...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Row -->
+        <div class="log-filter-row" style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--card-border, #f1f5f9);">
+            <span style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted, #64748b); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px;">Filter:</span>
+
+            <button class="log-filter-pill active all" data-filter="ALL" onclick="setLogFilter('ALL', this)">
+                <span>All</span>
+                <span class="log-count-badge" id="count-ALL">0</span>
+            </button>
+            <button class="log-filter-pill" data-filter="COIN" onclick="setLogFilter('COIN', this)" style="color: #10b981; background: rgba(16,185,129,0.08);">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; flex-shrink: 0; display: inline-block;"></span>
+                Coin
+                <span class="log-count-badge" id="count-COIN">0</span>
+            </button>
+            <button class="log-filter-pill" data-filter="PORTAL" onclick="setLogFilter('PORTAL', this)" style="color: #3b82f6; background: rgba(59,130,246,0.08);">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #3b82f6; flex-shrink: 0; display: inline-block;"></span>
+                Portal
+                <span class="log-count-badge" id="count-PORTAL">0</span>
+            </button>
+            <button class="log-filter-pill" data-filter="ADMIN" onclick="setLogFilter('ADMIN', this)" style="color: #f59e0b; background: rgba(245,158,11,0.08);">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; display: inline-block;"></span>
+                Admin
+                <span class="log-count-badge" id="count-ADMIN">0</span>
+            </button>
+            <button class="log-filter-pill" data-filter="SECURITY" onclick="setLogFilter('SECURITY', this)" style="color: #ef4444; background: rgba(239,68,68,0.08);">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444; flex-shrink: 0; display: inline-block;"></span>
+                Security
+                <span class="log-count-badge" id="count-SECURITY">0</span>
+            </button>
+            <button class="log-filter-pill" data-filter="SYSTEM" onclick="setLogFilter('SYSTEM', this)" style="color: #94a3b8; background: rgba(148,163,184,0.08);">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; display: inline-block;"></span>
+                System
+                <span class="log-count-badge" id="count-SYSTEM">0</span>
+            </button>
+
+            <!-- Results info and reset -->
+            <div class="log-results-container" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+                <button id="resetLogsBtn" onclick="resetLogFeed()" style="display: none; background: none; border: none; color: #ef4444; font-size: 0.72rem; font-weight: 700; cursor: pointer; padding: 0; align-items: center; gap: 4px; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Clear History
+                </button>
+                <span id="log-results-info" style="font-size: 0.72rem; color: var(--text-light, #94a3b8); font-weight: 600; white-space: nowrap;"></span>
+            </div>
+        </div>
+
+        <div class="logs-container">
+            <div id="log-feed" class="logs-scroll-area">
+                <div class="log-empty-state">
+                    <i data-lucide="loader-2" style="width: 28px; height: 28px; animation: spin 1s linear infinite; color: #6366f1;"></i>
+                    <p>Connecting to live stream...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load More History Button -->
+        <button id="loadMoreBtn" onclick="loadMoreLogs()"
+                style="display: none; width: 100%; margin-top: 12px; padding: 11px 18px; border: 1.5px dashed var(--card-border, #e2e8f0); border-radius: 10px; background: var(--bg, #f8fafc); color: var(--text-muted, #64748b); font-family: inherit; font-size: 0.875rem; font-weight: 700; cursor: pointer; align-items: center; justify-content: center; gap: 8px; transition: all 0.18s ease;"
+                onmouseover="this.style.borderColor='#6366f1'; this.style.color='#6366f1'; this.style.background='rgba(99,102,241,0.04)'"
+                onmouseout="this.style.borderColor=''; this.style.color=''; this.style.background=''">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+            <span class="load-more-label">Load More History</span>
+        </button>
+    </div>
+</div>
+
+<script>
+(function() {
+    const PAGE_SIZE      = 100;   // logs per REST page
+    const MAX_BUFFER     = 2000;  // max entries kept in memory
+
+    // In-memory log buffer (newest first)
+    const logBuffer = [];
+
+    let activeFilter = 'ALL';
+    let searchQuery  = '';
+    let historyOffset = 0;   // current pagination offset for REST history
+    let historyTotal  = 0;   // total matching logs in file (from REST response)
+    let isLoadingMore = false;
+
+    // Per-category counts
+    const counts = { ALL: 0, COIN: 0, PORTAL: 0, ADMIN: 0, SECURITY: 0, SYSTEM: 0 };
+
+    /* =====================================================
+       CHRONOLOGICAL SORTING
+    ===================================================== */
+    function parseLogDate(ts) {
+        if (!ts || ts === '--') return 0;
+        const parts = ts.split(' ');
+        if (parts.length < 3) return new Date(ts).getTime() || 0;
+        const datePart = parts[0];
+        const timePart = parts[1];
+        const ampm = parts[2].toUpperCase();
+        
+        const timeSplits = timePart.split(':');
+        let h = parseInt(timeSplits[0], 10);
+        const m = parseInt(timeSplits[1], 10);
+        const s = parseInt(timeSplits[2], 10);
+        
+        if (ampm === 'PM' && h < 12) h += 12;
+        if (ampm === 'AM' && h === 12) h = 0;
+        
+        return new Date(`${datePart}T${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`).getTime();
+    }
+
+    function sortLogBuffer() {
+        logBuffer.sort((a, b) => parseLogDate(b.timestamp) - parseLogDate(a.timestamp));
+    }
+
+    /* =====================================================
+       CATEGORY / COLOR HELPERS
+    ===================================================== */
+    function getLogCategory(type) {
+        if (!type) return 'SYSTEM';
+        if (type === 'COIN_INSERT' || type === 'COIN_SUCCESS') return 'COIN';
+        if (type === 'PORTAL_EVENT') return 'PORTAL';
+        if (type === 'ADMIN_AUDIT') return 'ADMIN';
+        if (type === 'SECURITY_ALERT' || type === 'CRITICAL') return 'SECURITY';
+        return 'SYSTEM';
+    }
+
+    function getLogBarColor(type) {
+        const cat = getLogCategory(type);
+        if (cat === 'COIN')     return '#10b981';
+        if (cat === 'PORTAL')   return '#3b82f6';
+        if (cat === 'ADMIN')    return '#f59e0b';
+        if (cat === 'SECURITY') return '#ef4444';
+        if (type === 'WARNING') return '#eab308';
+        return '#94a3b8';
+    }
+
+    function getLogTypeColor(type) { return getLogBarColor(type); }
+
+    /* =====================================================
+       HIGHLIGHT SEARCH TERM IN TEXT
+    ===================================================== */
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function highlight(text, query) {
+        if (!query) return escapeHtml(text);
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return escapeHtml(text).replace(
+            new RegExp(escaped, 'gi'),
+            m => `<mark class="log-highlight">${m}</mark>`
+        );
+    }
+
+    /* =====================================================
+       BUILD A LOG ELEMENT
+    ===================================================== */
+    function buildLogElement(log) {
+        const barColor  = getLogBarColor(log.type);
+        const typeColor = getLogTypeColor(log.type);
+        const msgHtml   = highlight(log.message || '', searchQuery);
+        const tsHtml    = highlight(log.timestamp || '', searchQuery);
+        const typeStr   = log.type ? `[${log.type}]` : '';
+        const typeHtml  = highlight(typeStr, searchQuery);
+
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        div.dataset.category = getLogCategory(log.type);
+        div.innerHTML = `
+            <div class="log-item-bar" style="background: ${barColor};"></div>
+            <div class="log-item-content">
+                <div class="log-time">
+                    <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:0.6; flex-shrink:0;">
+                        <circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
+                    </svg>
+                    ${tsHtml}
+                </div>
+                <div class="log-message">
+                    <span style="font-size: 0.68rem; font-weight: 800; color: ${typeColor}; margin-right: 8px; letter-spacing: 0.04em; font-family: ui-monospace, monospace;">${typeHtml}</span>${msgHtml}
+                </div>
+            </div>`;
+        return div;
+    }
+
+    /* =====================================================
+       FILTER BUFFER CLIENT-SIDE (for search)
+    ===================================================== */
+    function getFilteredBuffer() {
+        const query = searchQuery.toLowerCase().trim();
+        return logBuffer.filter(log => {
+            const catMatch = activeFilter === 'ALL' || getLogCategory(log.type) === activeFilter;
+            if (!catMatch) return false;
+            if (!query) return true;
+            return (
+                (log.message || '').toLowerCase().includes(query) ||
+                (log.timestamp || '').toLowerCase().includes(query) ||
+                (log.type || '').toLowerCase().includes(query)
+            );
+        });
+    }
+
+    /* =====================================================
+       RENDER FEED FROM BUFFER
+    ===================================================== */
+    function renderFeed() {
+        const feed = document.getElementById('log-feed');
+        if (!feed) return;
+
+        const visible = getFilteredBuffer();
+        const infoEl  = document.getElementById('log-results-info');
+        const hasActiveFilter = activeFilter !== 'ALL' || searchQuery.trim() !== '';
+
+        if (infoEl) {
+            if (hasActiveFilter) {
+                infoEl.textContent = `${visible.length} match${visible.length !== 1 ? 'es' : ''} in buffer`;
+            } else {
+                infoEl.textContent = `${logBuffer.length} event${logBuffer.length !== 1 ? 's' : ''} loaded`;
+            }
+        }
+        
+        const resetBtn = document.getElementById('resetLogsBtn');
+        if (resetBtn) {
+            // Show clear button if buffer is larger than base page size
+            resetBtn.style.display = logBuffer.length > PAGE_SIZE ? 'flex' : 'none';
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        if (visible.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'log-empty-state';
+            if (hasActiveFilter) {
+                empty.innerHTML = `
+                    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:0.4; color: #94a3b8;">
+                        <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <p>No logs match your filter.</p>
+                    <span>Try a different search term or category.</span>`;
+            } else {
+                empty.innerHTML = `
+                    <svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:0.4; color: #cbd5e1;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0H4"/>
+                    </svg>
+                    <p>No events recorded yet.</p>
+                    <span>Events will appear automatically.</span>`;
+            }
+            fragment.appendChild(empty);
+        } else {
+            visible.forEach(log => fragment.appendChild(buildLogElement(log)));
+        }
+
+        feed.innerHTML = '';
+        feed.appendChild(fragment);
+        updateLoadMoreBtn();
+    }
+
+    /* =====================================================
+       UPDATE COUNTS
+    ===================================================== */
+    function rebuildCounts() {
+        const keys = ['ALL', 'COIN', 'PORTAL', 'ADMIN', 'SECURITY', 'SYSTEM'];
+        keys.forEach(k => counts[k] = 0);
+        
+        const query = searchQuery.toLowerCase().trim();
+        
+        logBuffer.forEach(log => {
+            if (query) {
+                const matches = (log.message || '').toLowerCase().includes(query) ||
+                                (log.timestamp || '').toLowerCase().includes(query) ||
+                                (log.type || '').toLowerCase().includes(query);
+                if (!matches) return;
+            }
+            counts.ALL++;
+            const cat = getLogCategory(log.type);
+            counts[cat] = (counts[cat] || 0) + 1;
+        });
+        
+        keys.forEach(k => {
+            const el = document.getElementById('count-' + k);
+            if (el) el.textContent = counts[k];
+        });
+    }
+
+    /* =====================================================
+       LOAD MORE (REST API pagination)
+    ===================================================== */
+    function updateLoadMoreBtn() {
+        const btn = document.getElementById('loadMoreBtn');
+        if (!btn) return;
+
+        // How many are still in the file beyond what's in buffer
+        const remaining = historyTotal - logBuffer.length;
+
+        if (remaining > 0 && activeFilter === 'ALL' && !searchQuery.trim()) {
+            btn.style.display = 'flex';
+            btn.querySelector('.load-more-label').textContent =
+                `Load More History (${Math.min(PAGE_SIZE, remaining)} of ${remaining} remaining)`;
+        } else if (remaining > 0 && (activeFilter !== 'ALL' || searchQuery.trim())) {
+            btn.style.display = 'flex';
+            btn.querySelector('.load-more-label').textContent =
+                `Load More History`;
+        } else {
+            btn.style.display = 'none';
+        }
+    }
+
+    async function loadHistoryPage(offset, filter, query) {
+        const params = new URLSearchParams({ limit: PAGE_SIZE, offset });
+        if (filter && filter !== 'ALL') params.set('log_type', filter);
+        // Note: search is purely client-side (REST doesn't support text search)
+
+        const res = await fetch(`/admin/api/logs?${params}`);
+        if (!res.ok) throw new Error('Failed to fetch logs');
+        return await res.json(); // { logs, total, offset, limit }
+    }
+
+    window.loadMoreLogs = async function() {
+        if (isLoadingMore) return;
+        isLoadingMore = true;
+
+        const btn = document.getElementById('loadMoreBtn');
+        const label = btn && btn.querySelector('.load-more-label');
+        if (label) label.textContent = 'Loading...';
+
+        try {
+            const data = await loadHistoryPage(historyOffset, activeFilter, searchQuery);
+            const newLogs = data.logs || [];
+            historyTotal  = data.total || 0;
+            historyOffset += newLogs.length;
+
+            // Append (older entries) to end of buffer
+            newLogs.forEach(log => {
+                if (!logBuffer.find(e => e.timestamp === log.timestamp && e.message === log.message)) {
+                    logBuffer.push(log);
+                }
+            });
+
+            sortLogBuffer();
+            if (logBuffer.length > MAX_BUFFER) logBuffer.length = MAX_BUFFER;
+
+            rebuildCounts();
+            renderFeed();
+        } catch (e) {
+            console.error('Load more failed:', e);
+        } finally {
+            isLoadingMore = false;
+        }
+    };
+
+    /* =====================================================
+       INITIAL HISTORY LOAD (REST API)
+    ===================================================== */
+    async function loadInitialHistory() {
+        try {
+            const data = await loadHistoryPage(0, 'ALL', '');
+            const logs = data.logs || [];
+            historyTotal  = data.total || 0;
+            historyOffset = logs.length;
+
+            logBuffer.length = 0;
+            logs.forEach(log => logBuffer.push(log));
+            
+            sortLogBuffer();
+            rebuildCounts();
+            renderFeed();
+        } catch (e) {
+            console.error('Initial history load failed:', e);
+        }
+    }
+
+    window.resetLogFeed = function() {
+        logBuffer.length = 0;
+        historyOffset = 0;
+        historyTotal = 0;
+        const resetBtn = document.getElementById('resetLogsBtn');
+        if (resetBtn) resetBtn.style.display = 'none';
+
+        const feed = document.getElementById('log-feed');
+        if (feed) {
+            feed.innerHTML = `
+                <div class="log-empty-state">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:0.4; color: #6366f1; animation: spin 1s linear infinite;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+                    </svg>
+                    <p>Reloading recent events...</p>
+                </div>
+            `;
+        }
+        
+        loadInitialHistory();
+    };
+
+    /* =====================================================
+       FILTER / SEARCH CONTROLS
+    ===================================================== */
+    window.setLogFilter = function(filter, btn) {
+        activeFilter  = filter;
+        historyOffset = 0; // reset pagination context
+
+        document.querySelectorAll('.log-filter-pill').forEach(b => {
+            b.classList.remove('active');
+            if (b.dataset.filter === 'ALL') b.classList.remove('all');
+        });
+        if (btn) {
+            btn.classList.add('active');
+            if (filter === 'ALL') btn.classList.add('all');
+        }
+
+        renderFeed();
+    };
+
+    window.applyLogsFilter = function() {
+        const inp = document.getElementById('logSearch');
+        searchQuery = inp ? inp.value : '';
+        const clearBtn = document.getElementById('logSearchClear');
+        if (clearBtn) clearBtn.style.display = searchQuery ? 'flex' : 'none';
+        rebuildCounts();
+        renderFeed();
+    };
+
+    window.clearLogSearch = function() {
+        const inp = document.getElementById('logSearch');
+        if (inp) { inp.value = ''; inp.focus(); }
+        searchQuery = '';
+        const clearBtn = document.getElementById('logSearchClear');
+        if (clearBtn) clearBtn.style.display = 'none';
+        rebuildCounts();
+        renderFeed();
+    };
+
+    /* =====================================================
+       LIVE WEBSOCKET
+    ===================================================== */
+    function connectLogStream() {
+        const statusText = document.getElementById('log-status');
+        const protocol   = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws         = new WebSocket(`${protocol}//${window.location.host}/admin/ws/logs`);
+
+        ws.onopen = () => {
+            if (statusText) {
+                statusText.innerHTML = `<span style="width:6px;height:6px;background:#10b981;border-radius:50%;display:inline-block;animation:pulse-dot 2s ease-in-out infinite;box-shadow:0 0 0 3px rgba(16,185,129,0.2);"></span> <span>Live Stream</span>`;
+                statusText.style.color = '#10b981';
+                statusText.style.borderColor = 'rgba(16,185,129,0.25)';
+                statusText.style.background = 'rgba(16,185,129,0.07)';
+            }
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const log = JSON.parse(event.data);
+                const cat = getLogCategory(log.type);
+
+                // Skip if already in buffer (WS initial load overlaps with REST history)
+                const isDupe = logBuffer.some(
+                    e => e.timestamp === log.timestamp && e.type === log.type && e.message === log.message
+                );
+                if (isDupe) return;
+
+                // Add and enforce limit
+                logBuffer.push(log);
+                sortLogBuffer();
+                if (logBuffer.length > MAX_BUFFER) logBuffer.length = MAX_BUFFER;
+
+                // Re-evaluate counts with active search and re-render
+                rebuildCounts();
+
+                renderFeed();
+            } catch (e) {
+                console.error('Log parse error:', e);
+            }
+        };
+
+        ws.onclose = () => {
+            if (statusText) {
+                statusText.innerHTML = `<span style="width:6px;height:6px;background:#ef4444;border-radius:50%;display:inline-block;"></span> <span>Reconnecting...</span>`;
+                statusText.style.color = '#ef4444';
+                statusText.style.borderColor = 'rgba(239,68,68,0.2)';
+                statusText.style.background = 'rgba(239,68,68,0.06)';
+            }
+            setTimeout(connectLogStream, 3000);
+        };
+
+        ws.onerror = () => ws.close();
+    }
+
+    /* =====================================================
+       BOOT
+    ===================================================== */
+    loadInitialHistory().then(() => {
+        connectLogStream();
+    });
+
+})();
+</script>

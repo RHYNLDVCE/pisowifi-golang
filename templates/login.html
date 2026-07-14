@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - PisoWifi{% endblock %}
+
+{% block styles %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+    :root {
+        --bg-body: #f8fafc;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --border-color: #cbd5e1;
+        --border-focus: #3b82f6;
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --error-bg: #fef2f2;
+        --error-text: #ef4444;
+        --error-border: #fca5a5;
+    }
+
+    * { 
+        box-sizing: border-box; 
+    }
+
+    body { 
+        background-color: var(--bg-body); 
+        margin: 0;
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        color: var(--text-main);
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+    }
+
+    /* Layout Structure */
+    .split-layout {
+        display: flex;
+        /* Reverse the mobile stack order: Form on top, Branding below */
+        flex-direction: column-reverse; 
+        min-height: 100vh;
+        padding: 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        gap: 2.5rem;
+        justify-content: center;
+    }
+
+    @media (min-width: 992px) {
+        .split-layout {
+            /* Restore left-to-right layout for desktop */
+            flex-direction: row; 
+            align-items: center;
+            justify-content: space-between;
+            gap: 6rem;
+            padding: 2rem;
+        }
+    }
+
+    /* Left Side - Branding & Stickers */
+    .hero-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        /* Center content on mobile */
+        text-align: center; 
+        align-items: center; 
+    }
+
+    .brand-title {
+        color: var(--primary);
+        font-size: 3rem;
+        font-weight: 700;
+        margin: 0 0 1rem 0;
+        letter-spacing: -0.02em;
+    }
+
+    .brand-tagline {
+        font-size: 1.25rem;
+        color: var(--text-main);
+        margin: 0 0 2rem 0;
+        line-height: 1.4;
+        max-width: 500px;
+    }
+
+    .stickers-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        /* Center stickers on mobile */
+        justify-content: center; 
+    }
+
+    .sticker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background-color: #ffffff;
+        border-radius: 9999px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        color: var(--primary);
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    @media (min-width: 992px) {
+        /* Restore left-alignment for desktop */
+        .hero-section {
+            text-align: left;
+            align-items: flex-start;
+        }
+        
+        .stickers-container {
+            justify-content: flex-start;
+        }
+        
+        .brand-title {
+            font-size: 3.5rem;
+        }
+        
+        .brand-tagline {
+            font-size: 1.5rem;
+            margin: 0 0 2.5rem 0;
+        }
+    }
+
+    /* Right Side - Form */
+    .auth-section {
+        width: 100%;
+        max-width: 420px;
+        /* Ensure the form container is centered within its column on mobile */
+        margin: 0 auto; 
+    }
+
+    .login-container {
+        width: 100%;
+    }
+
+    .header {
+        margin-bottom: 2rem;
+    }
+
+    .title {
+        margin: 0 0 0.5rem;
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .subtitle {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--text-muted);
+    }
+
+    .flash-message {
+        background-color: var(--error-bg);
+        color: var(--error-text);
+        border: 1px solid var(--error-border);
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+    }
+
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    input { 
+        width: 100%; 
+        padding: 0.875rem 1rem; 
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: inherit;
+        color: var(--text-main);
+        background-color: #ffffff;
+        transition: all 0.2s ease;
+    }
+    
+    input:focus {
+        outline: none;
+        border-color: var(--border-focus);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 0.75rem;
+        background: none;
+        border: none;
+        padding: 0.25rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s ease;
+    }
+
+    .password-toggle:hover {
+        color: var(--text-main);
+    }
+
+    .password-toggle:focus {
+        outline: none;
+        color: var(--primary);
+    }
+
+    .btn-submit { 
+        width: 100%; 
+        padding: 1rem;
+        background-color: var(--primary); 
+        color: #ffffff; 
+        border: none; 
+        border-radius: 8px;
+        cursor: pointer; 
+        font-weight: 600;
+        font-size: 1.1rem;
+        font-family: inherit;
+        transition: background-color 0.2s ease;
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-submit:hover { 
+        background-color: var(--primary-hover); 
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .lucide-spin {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { 
+        100% { transform: rotate(360deg); } 
+    }
+
+    /* --- DARK MODE OVERRIDES --- */
+    [data-theme="dark"] {
+        --bg-body: #0f172a;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: #334155;
+        --border-focus: #818cf8;
+        --primary: #818cf8;
+        --primary-hover: #6366f1;
+        --error-bg: rgba(239, 68, 68, 0.2);
+        --error-text: #f87171;
+        --error-border: rgba(239, 68, 68, 0.3);
+    }
+    
+    [data-theme="dark"] .sticker { background-color: #1e293b; border-color: #334155; color: #818cf8; }
+    [data-theme="dark"] input { background-color: #1e293b; color: #f8fafc; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="split-layout">
+    <!-- Left Side Content -->
+    <div class="hero-section">
+        <h1 class="brand-title">PisoWifi</h1>
+        <p class="brand-tagline">Manage the network, monitor connections, and scale seamlessly.</p>
+        
+        <div class="stickers-container">
+            <div class="sticker">
+                <i data-lucide="wifi" style="width: 18px; height: 18px;"></i>
+                Fast Network
+            </div>
+            <div class="sticker">
+                <i data-lucide="shield-check" style="width: 18px; height: 18px;"></i>
+                Secure Access
+            </div>
+            <div class="sticker">
+                <i data-lucide="bar-chart-2" style="width: 18px; height: 18px;"></i>
+                Live Analytics
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side Form -->
+    <div class="auth-section">
+        <div class="login-container">
+            <div class="header">
+                <h2 class="title">Administrator Portal</h2>
+                <p class="subtitle">Sign in to access the dashboard</p>
+            </div>
+            
+            {% if request.query_params.get('error') %}
+                <div class="flash-message">
+                    <i data-lucide="alert-circle" style="width: 18px; height: 18px;"></i>
+                    {{ request.query_params.get('error') }}
+                </div>
+            {% endif %}
+
+            <form action="/auth" method="post" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="username" name="username" required autofocus autocomplete="username">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                        <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                            <i data-lucide="eye" style="width: 20px; height: 20px;"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize icons on load
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+
+    // Password visibility toggle logic
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', function() {
+            const currentType = passwordInput.getAttribute('type');
+            const isPassword = currentType === 'password';
+            
+            // Toggle input type
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            
+            // Update icon
+            const newIcon = isPassword ? 'eye-off' : 'eye';
+            this.innerHTML = `<i data-lucide="${newIcon}" style="width: 20px; height: 20px;"></i>`;
+            
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            console.info(`[Auth UI] Password visibility toggled to: ${isPassword ? 'visible' : 'hidden'}`);
+        });
+    }
+
+    // Form submission state handling
+    document.getElementById('loginForm').addEventListener('submit', function() {
+        console.info('[Auth] Initiating authentication sequence...');
+        
+        const btn = document.getElementById('submitBtn');
+        btn.innerHTML = `<i data-lucide="loader-2" class="lucide-spin" style="width: 20px; height: 20px;"></i> Authenticating...`;
+        btn.disabled = true;
+        
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+</script>
+{% endblock %}

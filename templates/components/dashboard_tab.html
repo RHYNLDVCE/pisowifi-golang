@@ -1,0 +1,525 @@
+<style>
+    /* =====================================================
+       DASHBOARD TAB — ENTERPRISE KPI + TABLE
+    ===================================================== */
+
+    /* --- KPI STAT CARDS --- */
+    .stats-grid {
+        display: grid;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+
+    /* Colored top accent bar per card — enterprise KPI style */
+    .stat-card:nth-child(1)::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #10b981, #059669); }
+    .stat-card:nth-child(2)::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    .stat-card:nth-child(3)::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #f59e0b, #f97316); }
+    .stat-card:nth-child(4)::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #3b82f6, #6366f1); }
+    .stat-card:nth-child(5)::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #ec4899, #8b5cf6); }
+    .stat-card:nth-child(6)::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #14b8a6, #3b82f6); }
+
+    .stat-title {
+        font-size: 0.72rem;
+        color: #64748b;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin-bottom: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stat-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.03em;
+        line-height: 1;
+    }
+
+    /* --- SEARCH BAR --- */
+    .search-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 340px;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-icon-left {
+        position: absolute;
+        left: 11px;
+        color: #94a3b8;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 9px 36px 9px 36px;
+        border: 1px solid #d1d5db;
+        border-radius: 9px;
+        font-size: 0.875rem;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        background: #f9fafb;
+        font-family: inherit;
+        color: #0f172a;
+    }
+
+    .search-input:focus {
+        background: #ffffff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+
+    .search-clear-btn {
+        position: absolute;
+        right: 8px;
+        color: #94a3b8;
+        background: none;
+        border: none;
+        padding: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: color 0.2s, background-color 0.2s;
+        text-decoration: none;
+    }
+
+    .search-clear-btn:hover { color: #ef4444; background-color: #fee2e2; }
+
+    .search-submit-btn {
+        background: #6366f1;
+        color: white;
+        border: none;
+        border-radius: 9px;
+        padding: 9px 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        font-family: inherit;
+        white-space: nowrap;
+    }
+
+    .search-submit-btn:hover { background: #4f46e5; }
+
+    /* --- TABLE --- */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+
+    th, td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+        white-space: nowrap;
+    }
+
+    th {
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        background: #f8fafc;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .row-active { background-color: rgba(16, 185, 129, 0.05); }
+
+    .clickable-row {
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    .clickable-row:hover { background-color: #f8fafc; }
+    .clickable-row.row-active:hover { background-color: rgba(16, 185, 129, 0.1); }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 9px;
+        border-radius: 99px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+    }
+
+    .status-pill::before {
+        content: '';
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .st-short { display: none; }
+    .st-full { display: inline; }
+
+    /* --- FILL HEIGHT CARD (Table Container) --- */
+    @media (min-width: 769px) {
+        #home.section.active {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 120px);
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            flex-shrink: 0;
+        }
+
+        .fill-height-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+            margin-bottom: 0 !important;
+            border-radius: 14px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .table-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .table-scroll-area::-webkit-scrollbar { width: 6px; height: 6px; }
+        .table-scroll-area::-webkit-scrollbar-track { background: #f8fafc; }
+        .table-scroll-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+
+        thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f8fafc;
+            z-index: 10;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+    }
+
+    /* --- MOBILE --- */
+    @media (max-width: 768px) {
+        #home.section.active {
+            display: block;
+            height: auto !important;
+            padding-bottom: 20px;
+        }
+
+        .search-form { max-width: 100%; }
+
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .stat-card {
+            padding: 10px 8px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-title { font-size: 0.6rem; margin-bottom: 5px; }
+        .stat-value { font-size: 1rem; }
+
+        .fill-height-card {
+            display: block;
+            height: auto;
+            overflow: visible;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .table-scroll-area { overflow-x: hidden !important; }
+        .table-scroll-area table { width: 100% !important; table-layout: fixed !important; }
+
+        .table-scroll-area th,
+        .table-scroll-area td {
+            padding: 9px 4px !important;
+            font-size: 0.68rem !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
+        .table-scroll-area th { font-size: 0.62rem !important; text-overflow: clip !important; overflow: visible !important; letter-spacing: -0.1px !important; }
+
+        .table-scroll-area th:nth-child(1),
+        .table-scroll-area td:nth-child(1) { display: table-cell !important; width: 6% !important; padding-left: 2px !important; padding-right: 2px !important; text-align: center !important; }
+
+        .table-scroll-area th:nth-child(2) { width: 36% !important; }
+        .table-scroll-area th:nth-child(3) { width: 24% !important; }
+        .table-scroll-area th:nth-child(4) { width: 21% !important; text-align: left !important; padding-left: 2px !important; }
+        .table-scroll-area th:nth-child(5) { width: 13% !important; text-align: center !important; }
+
+        .table-scroll-area td:nth-child(4) { text-align: left !important; padding-left: 2px !important; }
+        .table-scroll-area td:nth-child(5) { text-align: center !important; padding-right: 0 !important; overflow: visible !important; text-overflow: clip !important; }
+
+        .table-scroll-area td div { font-size: 0.62rem !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+
+        .table-scroll-area td:nth-child(2) div:first-child { text-overflow: clip !important; overflow: visible !important; font-size: 0.6rem !important; letter-spacing: -0.4px !important; }
+
+        .table-scroll-area td span { font-size: 0.52rem !important; padding: 2px 4px !important; }
+
+        .st-full { display: none !important; }
+        .st-short { display: inline !important; font-size: 0.7rem; font-weight: 800; }
+        .status-pill { padding: 3px 5px !important; border-radius: 6px !important; display: inline-block !important; }
+        .status-pill::before { display: none; }
+
+        .time-points-container { flex-direction: column !important; align-items: flex-start !important; gap: 3px !important; }
+    }
+
+    @media (max-width: 380px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
+<div id="home" class="section active">
+    <!-- Page Header -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+        <div>
+            <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Dashboard</h2>
+            <p style="margin: 4px 0 0; color: #64748b; font-size: 0.875rem;">Revenue overview and active connections.</p>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-title">All Time</div>
+            <div class="stat-value" style="color: #10b981;">₱{{ stats.total }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Yesterday</div>
+            <div class="stat-value">₱{{ stats.yesterday }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Today</div>
+            <div class="stat-value">₱{{ stats.daily }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">This Week</div>
+            <div class="stat-value">₱{{ stats.weekly }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">This Month</div>
+            <div class="stat-value">₱{{ stats.monthly }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">This Year</div>
+            <div class="stat-value">₱{{ stats.yearly }}</div>
+        </div>
+    </div>
+
+    <!-- Connections Table Card -->
+    <div class="fill-height-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-shrink: 0; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #0f172a;">Connections</h3>
+                <div style="display: inline-flex; align-items: center; gap: 5px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 99px; padding: 3px 10px;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #059669;">{{ active_users }} Active</span>
+                </div>
+                <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">/ {{ total_users }} Total</span>
+            </div>
+            <form action="/admin" method="get" class="search-form">
+                <div class="search-input-wrapper">
+                    <span class="search-icon-left">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35"/></svg>
+                    </span>
+                    <input type="text" name="search" value="{{ search_query }}" class="search-input" placeholder="Search MAC address...">
+                    <input type="hidden" name="page" value="1">
+                    {% if search_query %}
+                    <a href="/admin" class="search-clear-btn" title="Clear Search">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </a>
+                    {% endif %}
+                </div>
+                <button type="submit" class="search-submit-btn">Search</button>
+            </form>
+        </div>
+
+        <div class="table-scroll-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 48px;">#</th>
+                        <th>MAC Address</th>
+                        <th>Device</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mac, user in users.items() %}
+                    <tr class="clickable-row {% if user.status == 'connected' %}row-active{% endif %}"
+                        onclick="sessionStorage.setItem('dashboardReturnUrl', window.location.href); saveScrollPosition(); window.location.href='/admin/user/{{ mac }}'">
+                        <td>
+                            <div style="font-weight: 700; color: #64748b; font-size: 0.8rem; text-align: center;">{{ (current_page - 1) * 10 + loop.index }}</div>
+                        </td>
+                        <td style="font-family: ui-monospace, SFMono-Regular, monospace; text-transform: uppercase;">
+                            <div style="color: #0f172a; font-weight: 700; font-size: 0.82rem;">
+                                {% if search_query %}
+                                    <span style="background-color: #fef08a; border-radius: 3px; padding: 1px 2px;">{{ mac }}</span>
+                                {% else %}
+                                    {{ mac }}
+                                {% endif %}
+                            </div>
+                            {% if user.ip %}
+                                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px; font-family: inherit;">{{ user.ip }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="font-size: 0.82rem; font-weight: 600; color: #374151;">
+                                {{ user.device_name | default('Unknown Device', true) }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="time-points-container" style="display: flex; align-items: center; gap: 8px;">
+                                <div>
+                                    {% if user.time > 0 %}
+                                        {% set t = user.time %}
+                                        {% set y = (t // 31536000) | int %}
+                                        {% set mo = ((t % 31536000) // 2592000) | int %}
+                                        {% set d = ((t % 2592000) // 86400) | int %}
+                                        {% set h = ((t % 86400) // 3600) | int %}
+                                        {% set m = ((t % 3600) // 60) | int %}
+                                        {% set s = (t % 60) | int %}
+                                        <span style="font-weight: 700; color: #059669; font-size: 0.82rem;">
+                                            {% if y > 0 %}{{ y }}y {% endif %}
+                                            {% if mo > 0 %}{{ mo }}mo {% endif %}
+                                            {% if d > 0 %}{{ d }}d {% endif %}
+                                            {% if y == 0 and mo == 0 and d == 0 %}
+                                                {% if h > 0 %}{{ h }}h {% endif %}
+                                                {% if m > 0 %}{{ m }}m {% endif %}
+                                                {{ s }}s
+                                            {% else %}
+                                                {{ h }}h {{ m }}m
+                                            {% endif %}
+                                        </span>
+                                    {% else %}
+                                        <span style="color: #94a3b8; font-size: 0.82rem;">0s</span>
+                                    {% endif %}
+                                </div>
+                                <span style="background: #fffbeb; color: #d97706; padding: 2px 7px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; border: 1px solid #fde68a;">
+                                    ★ {{ user.points | default(0) }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if user.status == 'connected' %}
+                                <span class="status-pill" style="background:#d1fae5; color:#065f46;"><span class="st-full">ACTIVE</span><span class="st-short">A</span></span>
+                            {% elif user.status == 'paused' %}
+                                <span class="status-pill" style="background:#fef3c7; color:#92400e;"><span class="st-full">PAUSED</span><span class="st-short">P</span></span>
+                            {% elif user.status == 'blocked' %}
+                                <span class="status-pill" style="background:#fee2e2; color:#991b1b;"><span class="st-full">BLOCKED</span><span class="st-short">B</span></span>
+                            {% elif user.status == 'expired' %}
+                                <span class="status-pill" style="background:#f3f4f6; color:#6b7280;"><span class="st-full">EXPIRED</span><span class="st-short">E</span></span>
+                            {% else %}
+                                <span class="status-pill" style="background:#e5e7eb; color:#374151;"><span class="st-full">{{ user.status|upper }}</span><span class="st-short">{{ user.status[0]|upper }}</span></span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #cbd5e1;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                <span style="font-size: 0.9rem;">No users found matching your search.</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_pages > 1 %}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; flex-shrink: 0;">
+            <div style="font-size: 0.82rem; color: #64748b;">Page <b style="color: #0f172a;">{{ current_page }}</b> of <b style="color: #0f172a;">{{ total_pages }}</b></div>
+            <div style="display: flex; gap: 6px;">
+                {% if current_page > 1 %}
+                    <a href="/admin?page={{ current_page - 1 }}&search={{ search_query }}" class="btn btn-sm btn-outline" style="text-decoration: none;">← Prev</a>
+                {% else %}
+                    <button class="btn btn-sm btn-disabled" disabled>← Prev</button>
+                {% endif %}
+                {% if current_page < total_pages %}
+                    <a href="/admin?page={{ current_page + 1 }}&search={{ search_query }}" class="btn btn-sm btn-outline" style="text-decoration: none;">Next →</a>
+                {% else %}
+                    <button class="btn btn-sm btn-disabled" disabled>Next →</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function saveScrollPosition() {
+        sessionStorage.setItem('scrollPos_Window', window.scrollY);
+        const tableArea = document.querySelector('.table-scroll-area');
+        if (tableArea) sessionStorage.setItem('scrollPos_Table', tableArea.scrollTop);
+    }
+
+    function restoreScrollPosition() {
+        const winScroll = sessionStorage.getItem('scrollPos_Window');
+        if (winScroll) { window.scrollTo(0, parseInt(winScroll)); sessionStorage.removeItem('scrollPos_Window'); }
+        const tableScroll = sessionStorage.getItem('scrollPos_Table');
+        const tableArea = document.querySelector('.table-scroll-area');
+        if (tableScroll && tableArea) { tableArea.scrollTop = parseInt(tableScroll); sessionStorage.removeItem('scrollPos_Table'); }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        restoreScrollPosition();
+        document.querySelectorAll('form').forEach(form => form.addEventListener('submit', saveScrollPosition));
+        document.querySelectorAll('a[href^="/admin"]').forEach(link => link.addEventListener('click', saveScrollPosition));
+    });
+</script>
