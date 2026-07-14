@@ -403,7 +403,7 @@
                     <tr class="clickable-row {% if user.status == 'connected' %}row-active{% endif %}"
                         onclick="sessionStorage.setItem('dashboardReturnUrl', window.location.href); saveScrollPosition(); window.location.href='/admin/user/{{ mac }}'">
                         <td>
-                            <div style="font-weight: 700; color: #64748b; font-size: 0.8rem; text-align: center;">{{ (current_page - 1) * 10 + loop.index }}</div>
+                            <div style="font-weight: 700; color: #64748b; font-size: 0.8rem; text-align: center;">{{ (current_page - 1) * 10 + forloop.Counter }}</div>
                         </td>
                         <td style="font-family: ui-monospace, SFMono-Regular, monospace; text-transform: uppercase;">
                             <div style="color: #0f172a; font-weight: 700; font-size: 0.82rem;">

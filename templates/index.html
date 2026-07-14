@@ -622,8 +622,7 @@
         <button id="btnFree" class="btn" style="background: #8b5cf6; color: white; margin-top: 5px;"
             onclick="claimFreeTime()">
             {% if free_duration >= 60 %}
-            {% set f_hours = (free_duration // 60) %}
-            {% set f_mins = (free_duration % 60) %}
+
             🎁 Claim Free {{ free_time_formatted }} Hours
             {% else %}
             🎁 Claim Free {{ free_duration }} Mins
