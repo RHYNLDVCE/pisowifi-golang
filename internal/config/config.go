@@ -11,10 +11,16 @@ import (
 // Hardware constants — adjust these to match your Orange Pi board wiring
 // ---------------------------------------------------------------------------
 
-const (
+// LANInterface and WANInterface are the Linux interface names for the LAN
+// (the side clients connect to) and WAN (the internet uplink). These are set
+// from the .env file at startup via ReloadSecrets(). Defaults match a typical
+// Orange Pi bridge setup but MUST be changed to match your hardware.
+var (
 	LANInterface = "br0"
-	WANInterface = "eth0"
+	WANInterface  = "eth0"
+)
 
+const (
 	// sysfs GPIO numbers for your Orange Pi board.
 	// Physical pin 3 on the 40-pin header = GPIO 12 on most Orange Pi boards.
 	// Physical pin 5 on the 40-pin header = GPIO 11 on most Orange Pi boards.
@@ -48,6 +54,8 @@ func ReloadSecrets() {
 	SecretKey = getEnv("SECRET_KEY", "unsafe_default_change_me")
 	AdminUsername = getEnv("ADMIN_USERNAME", "admin")
 	AdminPassword = getEnv("ADMIN_PASSWORD", "admin123")
+	LANInterface = getEnv("LAN_INTERFACE", "br0")
+	WANInterface = getEnv("WAN_INTERFACE", "eth0")
 }
 
 // ---------------------------------------------------------------------------
