@@ -194,6 +194,7 @@ func adminDashboard(c *fiber.Ctx) error {
 			"balance": u.Data.Balance, "points": u.Data.Points,
 			"free_claimed": u.Data.FreeClaimed, "device_name": u.Name,
 			"time_formatted": services.FormatHumanTime(u.Data.Time),
+			"status_short":   func() string { if len(u.Data.Status)>0 {return string(u.Data.Status[0])} return "" }(),
 		}
 	}
 

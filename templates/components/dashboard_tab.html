@@ -399,7 +399,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for mac, user in users.items() %}
+                    {% for mac, user in users %}
                     <tr class="clickable-row {% if user.status == 'connected' %}row-active{% endif %}"
                         onclick="sessionStorage.setItem('dashboardReturnUrl', window.location.href); saveScrollPosition(); window.location.href='/admin/user/{{ mac }}'">
                         <td>
@@ -448,11 +448,11 @@
                             {% elif user.status == 'expired' %}
                                 <span class="status-pill" style="background:#f3f4f6; color:#6b7280;"><span class="st-full">EXPIRED</span><span class="st-short">E</span></span>
                             {% else %}
-                                <span class="status-pill" style="background:#e5e7eb; color:#374151;"><span class="st-full">{{ user.status|upper }}</span><span class="st-short">{{ user.status[0]|upper }}</span></span>
+                                <span class="status-pill" style="background:#e5e7eb; color:#374151;"><span class="st-full">{{ user.status|upper }}</span><span class="st-short">{{ user.status_short|upper }}</span></span>
                             {% endif %}
                         </td>
                     </tr>
-                    {% else %}
+                    {% empty %}
                     <tr>
                         <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
                             <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
