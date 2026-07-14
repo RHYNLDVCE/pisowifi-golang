@@ -17,7 +17,7 @@ import (
 	"pisowifi/internal/state"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/recover"
+	fiberrecover "github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/template/html/v2"
 	"github.com/joho/godotenv"
 )
@@ -90,8 +90,7 @@ func main() {
 		ServerHeader:  "PisoWifi",
 	})
 
-	// Global panic recovery (keeps server alive on handler panics)
-	app.Use(recover.New())
+	app.Use(fiberrecover.New())
 
 	// Static files
 	app.Static("/static", "./static")
