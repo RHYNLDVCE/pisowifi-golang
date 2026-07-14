@@ -157,7 +157,11 @@ func InitFirewall() {
 		fmt.Sprintf("iptables -t nat -A PREROUTING -m set --match-set %s src -p tcp --dport 53 -j DNAT --to-destination 1.0.0.1:53", ipsetName),
 		fmt.Sprintf("iptables -t nat -A PREROUTING -i %s -m set ! --match-set %s src -p udp --dport 53 -j DNAT --to-destination 10.0.0.1:53", lan, ipsetName),
 		fmt.Sprintf("iptables -t nat -A PREROUTING -i %s -m set ! --match-set %s src -p tcp --dport 53 -j DNAT --to-destination 10.0.0.1:53", lan, ipsetName),
+		// Redirect unauthorized TCP port 80 traffic to captive portal
 		fmt.Sprintf("iptables -t nat -A PREROUTING -i %s -m set ! --match-set %s src -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80", lan, ipsetName),
+		// Redirect unauthorized TCP port 443 (HTTPS) to captive portal HTTP — triggers captive portal notification on iOS/Android
+		fmt.Sprintf("iptables -t nat -A PREROUTING -i %s -m set ! --match-set %s src -p tcp --dport 443 -j DNAT --to-destination 10.0.0.1:80", lan, ipsetName),
+		// Drop 443 for authorized users (they use real HTTPS via WAN)
 		fmt.Sprintf("iptables -A FORWARD -i %s -m set ! --match-set %s src -p tcp --dport 443 -j DROP", lan, ipsetName),
 		"iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1300",
 		fmt.Sprintf("iptables -t mangle -A POSTROUTING -o %s -j TTL --ttl-set 1", lan),

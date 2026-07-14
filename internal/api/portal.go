@@ -39,12 +39,34 @@ func RegisterPortalRoutes(app *fiber.App) {
 	// --- WebSocket ---
 	app.Get("/ws/:mac", websocket.New(portalWS))
 
-	// --- Captive portal triggers ---
-	for _, path := range []string{"/generate_204", "/ncsi.txt", "/connecttest.txt", "/redirect"} {
-		app.Get(path, func(c *fiber.Ctx) error {
-			return c.Redirect("/", fiber.StatusFound)
-		})
-	}
+	// --- Captive portal detection endpoints ---
+	// Android: expects HTTP 204 from /generate_204
+	app.Get("/generate_204", func(c *fiber.Ctx) error {
+		return c.Redirect("/", fiber.StatusFound)
+	})
+	// Android/Chrome: connectivitycheck.gstatic.com proxy
+	app.Get("/gen_204", func(c *fiber.Ctx) error {
+		return c.Redirect("/", fiber.StatusFound)
+	})
+	// Windows: /ncsi.txt (expects "Microsoft NCSI")
+	app.Get("/ncsi.txt", func(c *fiber.Ctx) error {
+		return c.Redirect("/", fiber.StatusFound)
+	})
+	// Windows: /connecttest.txt
+	app.Get("/connecttest.txt", func(c *fiber.Ctx) error {
+		return c.Redirect("/", fiber.StatusFound)
+	})
+	// macOS/iOS: /hotspot-detect.html
+	app.Get("/hotspot-detect.html", func(c *fiber.Ctx) error {
+		return c.Redirect("/", fiber.StatusFound)
+	})
+	app.Get("/library/test/success.html", func(c *fiber.Ctx) error {
+		return c.Redirect("/", fiber.StatusFound)
+	})
+	// Generic redirect
+	app.Get("/redirect", func(c *fiber.Ctx) error {
+		return c.Redirect("/", fiber.StatusFound)
+	})
 
 	// Catch-all — must be last
 	app.Get("/*", func(c *fiber.Ctx) error {
