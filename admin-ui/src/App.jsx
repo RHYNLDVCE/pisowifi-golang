@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award, Server, LogOut } from 'lucide-react';
+import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award, Server, LogOut, X } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Connections from './pages/Connections';
 import ManageUser from './pages/ManageUser';
@@ -61,16 +61,52 @@ function Layout({ children }) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 text-gray-900 dark:bg-black dark:text-zinc-300 transition-colors duration-200">
-      {/* Mobile Overlay */}
+      {/* Mobile Full-Screen Menu Overlay */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-20 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 z-50 bg-gray-50 dark:bg-black md:hidden flex flex-col">
+          <div className="h-20 flex items-center justify-between px-6 border-b border-gray-200 dark:border-zinc-800 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-black dark:bg-white rounded-xl flex items-center justify-center">
+                <Activity className="text-white dark:text-black w-5 h-5" />
+              </div>
+              <div className="font-bold text-lg leading-tight">Menu</div>
+            </div>
+            <button 
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 bg-gray-200 dark:bg-zinc-800 rounded-full"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            {navItems.map(item => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link 
+                  key={item.path} 
+                  to={item.path} 
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl text-base font-semibold transition-all ${
+                    isActive 
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'bg-white dark:bg-zinc-950 text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-zinc-900 shadow-sm'
+                  }`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+            <a href="/admin/logout" className="flex items-center gap-4 px-5 py-4 mt-6 rounded-2xl text-base font-bold text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-500 shadow-sm">
+              <LogOut size={20} />
+              Logout
+            </a>
+          </nav>
+        </div>
       )}
 
-      {/* Sidebar */}
-      <aside className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-white dark:bg-zinc-950 border-r border-gray-200 dark:border-zinc-800 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      {/* Desktop Sidebar (hidden on mobile) */}
+      <aside className="hidden md:flex flex-col inset-y-0 left-0 z-30 w-64 bg-white dark:bg-zinc-950 border-r border-gray-200 dark:border-zinc-800 transition-transform duration-300 shrink-0">
         <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-zinc-800 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-black dark:bg-white rounded flex items-center justify-center">
@@ -113,16 +149,10 @@ function Layout({ children }) {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
         <header className="h-20 bg-gray-50 dark:bg-black flex items-center justify-between px-4 sm:px-8 z-10 shrink-0">
           <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
-            <button 
-              className="md:hidden p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-md shrink-0"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <Menu size={22} />
-            </button>
-            <h1 className="text-[15px] sm:text-xl font-bold truncate max-w-[130px] sm:max-w-none">{pageTitle}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold truncate">{pageTitle}</h1>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-6 shrink-0">
@@ -146,6 +176,35 @@ function Layout({ children }) {
             {children}
           </div>
         </main>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-zinc-950 border-t border-gray-100 dark:border-zinc-900 flex justify-around items-center z-40 px-2 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-none">
+        {navItems.slice(0, 3).map(item => {
+           const isActive = location.pathname === item.path;
+           return (
+             <Link 
+               key={item.path} 
+               to={item.path} 
+               onClick={() => setSidebarOpen(false)}
+               className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
+                 isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+               }`}
+             >
+               {React.cloneElement(item.icon, { size: isActive ? 24 : 22 })}
+               <span className="text-[10px] font-bold">{item.label.split(' ')[0]}</span>
+             </Link>
+           );
+        })}
+        <button 
+          onClick={() => setSidebarOpen(true)} 
+          className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
+            sidebarOpen ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+          }`}
+        >
+          <Menu size={sidebarOpen ? 24 : 22} />
+          <span className="text-[10px] font-bold">Menu</span>
+        </button>
       </div>
     </div>
   );

@@ -71,7 +71,8 @@ export default function Connections() {
           </div>
         </div>
         
-        <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr>
@@ -129,6 +130,45 @@ export default function Connections() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile List View */}
+        <div className="md:hidden flex flex-col gap-3 mt-2">
+          {filteredMacs.length === 0 ? (
+            <div className="py-12 text-center text-gray-500">
+               {searchQuery ? "No matching devices found." : "No active devices connected."}
+            </div>
+          ) : (
+            filteredMacs.map((mac, idx) => {
+              const u = users[mac];
+              return (
+                <div key={mac} onClick={() => window.location.href = `/admin/user/${mac}`} className="bg-gray-50 dark:bg-zinc-900/50 rounded-xl p-4 flex flex-col gap-3 border border-gray-100 dark:border-zinc-800/50 shadow-sm active:scale-[0.98] transition-transform">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="font-bold text-gray-900 dark:text-white text-base">{u.device_name || 'Unknown Device'}</div>
+                      <div className="text-xs text-gray-500 font-mono mt-0.5">{mac}</div>
+                    </div>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      u.status === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
+                      u.status === 'paused' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
+                      'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'
+                    }`}>
+                      {u.status}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-end mt-1">
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">{u.ip}</div>
+                    <div className="flex flex-col items-end">
+                      <div className="font-bold text-gray-900 dark:text-white text-lg">{u.time > 0 ? u.time_formatted : '0s'}</div>
+                      {u.points > 0 && (
+                        <div className="text-[10px] text-amber-500 font-bold mt-0.5 uppercase tracking-wider">★ {u.points} pts</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
