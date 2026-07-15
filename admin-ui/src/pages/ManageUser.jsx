@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, ShieldBan, Trash2, Edit3, Check } from 'lucide-react';
+import { ArrowLeft, Clock, ShieldBan, Trash2, Check, Activity } from 'lucide-react';
 
 export default function ManageUser() {
   const { mac } = useParams();
@@ -28,7 +28,7 @@ export default function ManageUser() {
         body: JSON.stringify({ mac, ...payload })
       });
       if (res.ok) {
-        window.location.reload(); // Simple reload for now to get fresh data
+        window.location.reload(); 
       } else {
         alert('Action failed.');
       }
@@ -37,105 +37,131 @@ export default function ManageUser() {
     }
   };
 
-  if (loading) return <div>Loading user details...</div>;
-  if (!data || data.error) return <div>User not found.</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+      <Activity className="animate-spin w-8 h-8 mr-3" />
+      <span>Loading user details...</span>
+    </div>
+  );
+  if (!data || data.error) return <div className="text-red-500 font-bold text-xl">User not found.</div>;
 
   const { user, device_name, time_formatted, history } = data;
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-        <Link to="/admin" className="btn btn-outline btn-sm"><ArrowLeft size={16}/> Back</Link>
-        <h2 style={{ margin: 0 }}>Manage User</h2>
+    <div className="space-y-6 max-w-5xl">
+      <div className="flex items-center gap-4 mb-6">
+        <Link to="/admin" className="p-2 border border-gray-300 dark:border-zinc-700 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+          <ArrowLeft size={20} />
+        </Link>
+        <h2 className="text-2xl font-bold">Manage Device</h2>
       </div>
 
-      <div className="card" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6 shadow-sm">
         <div>
-          <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{device_name || 'Unknown Device'}</div>
-          <div style={{ color: 'var(--text-muted)' }}>MAC: {mac}</div>
-          <div style={{ color: 'var(--text-muted)' }}>IP: {user.IP}</div>
-          <div style={{ marginTop: '10px' }}>
-             <span className={`status-badge status-${user.Status}`}>{user.Status}</span>
+          <div className="text-2xl font-black">{device_name || 'Unknown Device'}</div>
+          <div className="text-gray-500 dark:text-gray-400 font-mono mt-1">MAC: {mac}</div>
+          <div className="text-gray-500 dark:text-gray-400 font-mono">IP: {user.IP}</div>
+          <div className="mt-4">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${
+              user.Status === 'connected' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20' :
+              user.Status === 'paused' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' :
+              'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${
+                user.Status === 'connected' ? 'bg-green-600 dark:bg-green-400' :
+                user.Status === 'paused' ? 'bg-amber-600 dark:bg-amber-400' :
+                'bg-red-600 dark:bg-red-400'
+              }`}></span>
+              {user.Status}
+            </span>
           </div>
         </div>
         
-        <div style={{ textAlign: 'right' }}>
-           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Time Remaining</div>
-           <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--primary)' }}>{time_formatted}</div>
+        <div className="md:text-right flex flex-col justify-center">
+           <div className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Time Remaining</div>
+           <div className="text-4xl md:text-5xl font-black font-mono tracking-tight">{time_formatted}</div>
         </div>
       </div>
 
-      <div className="settings-grid">
-        <div className="card">
-          <h3 style={{ marginBottom: '16px' }}>Manage Time</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
+          <h3 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200 dark:border-zinc-800">Time Adjustments</h3>
           <form onSubmit={(e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
             handleAction('/admin/manage_time', Object.fromEntries(formData));
-          }}>
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-               <select name="action" style={{ width: '100px' }}>
+          }} className="space-y-4">
+            <div className="flex gap-3">
+               <select name="action" className="w-1/3 px-3 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white">
                  <option value="add">Add</option>
-                 <option value="subtract">Subtract</option>
+                 <option value="subtract">Deduct</option>
                </select>
-               <input type="number" name="amount" placeholder="Amount" required />
-               <select name="unit" style={{ width: '120px' }}>
-                 <option value="minutes">Minutes</option>
+               <input type="number" name="amount" placeholder="Amt" required className="w-1/3 px-3 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
+               <select name="unit" className="w-1/3 px-3 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white">
+                 <option value="minutes">Mins</option>
                  <option value="hours">Hours</option>
                  <option value="days">Days</option>
                </select>
             </div>
-            <button type="submit" className="btn btn-primary"><Clock size={16}/> Apply Time</button>
+            <button type="submit" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+              <Clock size={18}/> Apply Time
+            </button>
           </form>
         </div>
 
-        <div className="card">
-          <h3 style={{ marginBottom: '16px' }}>Quick Actions</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
+          <h3 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200 dark:border-zinc-800">Security Actions</h3>
+          <div className="space-y-3">
             {user.Status === 'blocked' ? (
-              <button className="btn btn-success" onClick={() => handleAction('/admin/unblock', {})}>
-                <Check size={16}/> Unblock Device
+              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors" onClick={() => handleAction('/admin/unblock', {})}>
+                <Check size={18}/> Unblock Device
               </button>
             ) : (
-              <button className="btn btn-warning" onClick={() => handleAction('/admin/block', {})}>
-                <ShieldBan size={16}/> Block Device
+              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-black dark:bg-black dark:text-white border-2 border-black dark:border-white font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors" onClick={() => handleAction('/admin/block', {})}>
+                <ShieldBan size={18}/> Block Device
               </button>
             )}
             
-            <button className="btn btn-danger" onClick={() => {
-              if (window.confirm('Are you sure you want to delete this user?')) {
+            <button className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-500 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors" onClick={() => {
+              if (window.confirm('Are you sure you want to completely erase this user?')) {
                 handleAction('/admin/delete_user', {}).then(() => window.location.href = '/admin');
               }
             }}>
-              <Trash2 size={16}/> Delete User
+              <Trash2 size={18}/> Delete User
             </button>
           </div>
         </div>
       </div>
 
-      <div className="card">
-        <h3 style={{ marginBottom: '16px' }}>Sales History</h3>
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-200 dark:border-zinc-800">
+          <h3 className="text-lg font-bold">Sales History</h3>
+        </div>
         {history && history.length > 0 ? (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Time Added</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((h, i) => (
-                <tr key={i}>
-                  <td>{h.DateStr}</td>
-                  <td style={{ fontWeight: 600 }}>₱{h.Amount.toFixed(2)}</td>
-                  <td>{h.TimeAdded} mins</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-zinc-900/50">
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time Added</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
+                {history.map((h, i) => (
+                  <tr key={i} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
+                    <td className="px-6 py-4 text-sm">{h.DateStr}</td>
+                    <td className="px-6 py-4 font-bold">₱{h.Amount.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-sm">{h.TimeAdded} mins</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <div style={{ color: 'var(--text-muted)' }}>No sales history found for this device.</div>
+          <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+            No sales history found for this device.
+          </div>
         )}
       </div>
     </div>

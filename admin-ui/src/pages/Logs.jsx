@@ -6,7 +6,6 @@ export default function Logs() {
   const logsEndRef = useRef(null);
 
   useEffect(() => {
-    // Initial fetch to get history
     fetch('/admin/api/logs?limit=100')
       .then(res => res.json())
       .then(data => {
@@ -15,7 +14,6 @@ export default function Logs() {
         }
       });
 
-    // Setup WebSocket for real-time updates
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/admin/ws/logs`;
     
@@ -24,7 +22,7 @@ export default function Logs() {
       ws = new WebSocket(wsUrl);
       ws.onmessage = (event) => {
         const log = JSON.parse(event.data);
-        setLogs(prev => [...prev, log].slice(-200)); // Keep last 200 logs
+        setLogs(prev => [...prev, log].slice(-200)); 
       };
     } catch (e) {
       console.error("WebSocket connection failed", e);
@@ -41,44 +39,43 @@ export default function Logs() {
     }
   }, [logs]);
 
-  const getLogColor = (type) => {
+  // Keep colors strictly monochromatic/minimalist per user request,
+  // except for subtle text colors for severe warnings to keep logs readable.
+  const getLogColorClass = (type) => {
     switch (type) {
-      case 'ERROR': return '#ef4444';
-      case 'WARNING': return '#f59e0b';
-      case 'SUCCESS': return '#10b981';
-      case 'SECURITY_ALERT': return '#ec4899';
-      default: return '#94a3b8';
+      case 'ERROR': return 'text-red-500 font-bold';
+      case 'WARNING': return 'text-amber-500 font-bold';
+      case 'SUCCESS': return 'text-green-500 font-bold';
+      case 'SECURITY_ALERT': return 'text-fuchsia-500 font-bold';
+      default: return 'text-gray-500 dark:text-gray-400 font-semibold';
     }
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-        <Terminal size={24} color="var(--primary)" />
-        <h2 style={{ margin: 0 }}>System Logs</h2>
+    <div className="max-w-5xl">
+      <div className="flex items-center gap-3 mb-6">
+        <Terminal size={28} className="text-black dark:text-white" />
+        <h2 className="text-2xl font-bold">System Logs</h2>
       </div>
 
-      <div className="card" style={{ background: '#0f172a', padding: '0', overflow: 'hidden' }}>
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ef4444' }}></div>
-          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#f59e0b' }}></div>
-          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10b981' }}></div>
-          <div style={{ marginLeft: '10px', color: '#64748b', fontSize: '0.75rem', fontWeight: 600 }}>LIVE TERMINAL FEED</div>
+      <div className="bg-white dark:bg-black border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        <div className="px-4 py-3 bg-gray-50 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 flex items-center gap-2">
+          {/* Grayscale terminal dots to match the chromatic theme */}
+          <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-zinc-700"></div>
+          <div className="w-3 h-3 rounded-full bg-gray-400 dark:bg-zinc-600"></div>
+          <div className="w-3 h-3 rounded-full bg-gray-500 dark:bg-zinc-500"></div>
+          <div className="ml-3 text-xs font-bold text-gray-500 dark:text-gray-400 tracking-widest uppercase">Live Terminal</div>
         </div>
 
-        <div style={{ 
-          height: '600px', overflowY: 'auto', padding: '16px', 
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-          fontSize: '0.85rem', lineHeight: '1.5'
-        }}>
+        <div className="h-[600px] overflow-y-auto p-4 bg-gray-50 dark:bg-zinc-950 font-mono text-sm leading-relaxed">
           {logs.length === 0 ? (
-            <div style={{ color: '#475569' }}>Waiting for system events...</div>
+            <div className="text-gray-400 dark:text-gray-500 italic">Waiting for system events...</div>
           ) : (
             logs.map((log, i) => (
-              <div key={i} style={{ marginBottom: '4px', display: 'flex', gap: '12px' }}>
-                <span style={{ color: '#64748b', minWidth: '160px' }}>[{log.timestamp}]</span>
-                <span style={{ color: getLogColor(log.type), minWidth: '80px', fontWeight: 600 }}>[{log.type}]</span>
-                <span style={{ color: '#e2e8f0' }}>{log.message}</span>
+              <div key={i} className="flex gap-4 mb-1.5 hover:bg-white dark:hover:bg-zinc-900 px-2 py-0.5 rounded transition-colors">
+                <span className="text-gray-400 dark:text-gray-500 shrink-0 w-40">[{log.timestamp}]</span>
+                <span className={`shrink-0 w-24 ${getLogColorClass(log.type)}`}>[{log.type}]</span>
+                <span className="text-gray-800 dark:text-gray-200 break-words">{log.message}</span>
               </div>
             ))
           )}
