@@ -1,11 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, Search, Users } from 'lucide-react';
+import { Activity, Search, Users, ChevronDown } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 export default function Connections() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('time');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const searchQuery = searchParams.get('q') || '';
+  const sortBy = searchParams.get('sort') || 'time';
+
+  const setSearchQuery = (val) => {
+    setSearchParams(prev => {
+      if (val) prev.set('q', val);
+      else prev.delete('q');
+      return prev;
+    }, { replace: true });
+  };
+
+  const setSortBy = (val) => {
+    setSearchParams(prev => {
+      if (val !== 'time') prev.set('sort', val);
+      else prev.delete('sort');
+      return prev;
+    }, { replace: true });
+  };
 
   useEffect(() => {
     fetch('/admin/api/dashboard_data')
@@ -68,14 +87,17 @@ export default function Connections() {
             </span>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="px-4 py-2 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800/50 rounded-xl outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-zinc-700 w-full sm:w-auto transition-all cursor-pointer font-medium"
-            >
-              <option value="time">Order by Time</option>
-              <option value="points">Order by Points</option>
-            </select>
+            <div className="relative w-full sm:w-auto">
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value)}
+                className="appearance-none pr-10 pl-4 py-2 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800/50 rounded-xl outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-zinc-700 w-full sm:w-auto transition-all cursor-pointer font-medium"
+              >
+                <option value="time">Order by Time</option>
+                <option value="points">Order by Points</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+            </div>
             <div className="relative w-full sm:w-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input 
@@ -90,7 +112,7 @@ export default function Connections() {
         </div>
         
         {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
+        <div className="hidden md:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr>
@@ -116,7 +138,7 @@ export default function Connections() {
                       u.status === 'connected' ? 'bg-green-50/50 dark:bg-green-500/5 hover:bg-green-100/50 dark:hover:bg-green-500/10' :
                       u.status === 'paused' ? 'bg-amber-50/50 dark:bg-amber-500/5 hover:bg-amber-100/50 dark:hover:bg-amber-500/10' :
                       'hover:bg-gray-50/50 dark:hover:bg-zinc-900/20'
-                    }`} onClick={() => window.location.href = `/admin/user/${mac}`}>
+                    }`} onClick={() => navigate(`/admin/user/${mac}`)}>
                       <td className="pr-4 py-4 text-sm font-medium text-gray-400">
                         {idx + 1}
                       </td>
@@ -155,7 +177,7 @@ export default function Connections() {
         </div>
 
         {/* Mobile List View (Flat, Edge-to-Edge) */}
-        <div className="md:hidden flex flex-col -mx-6 mt-4 border-t border-gray-100 dark:border-zinc-800">
+        <div className="md:hidden flex flex-col -mx-4 mt-4 border-t border-gray-100 dark:border-zinc-800">
           {filteredMacs.length === 0 ? (
             <div className="py-12 text-center text-gray-500">
                {searchQuery ? "No matching devices found." : "No active devices connected."}
@@ -164,7 +186,7 @@ export default function Connections() {
             filteredMacs.map((mac, idx) => {
               const u = users[mac];
               return (
-                <div key={mac} onClick={() => window.location.href = `/admin/user/${mac}`} className={`flex flex-col py-3 px-6 border-b border-gray-100 dark:border-zinc-800/50 transition-colors cursor-pointer ${
+                <div key={mac} onClick={() => navigate(`/admin/user/${mac}`)} className={`flex flex-col py-3 px-6 border-b border-gray-100 dark:border-zinc-800/50 transition-colors cursor-pointer ${
                   u.status === 'connected' ? 'bg-green-50/50 dark:bg-green-500/5 active:bg-green-100/50 dark:active:bg-green-500/10' :
                   u.status === 'paused' ? 'bg-amber-50/50 dark:bg-amber-500/5 active:bg-amber-100/50 dark:active:bg-amber-500/10' :
                   'active:bg-gray-50 dark:active:bg-zinc-900'

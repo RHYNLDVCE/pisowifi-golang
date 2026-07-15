@@ -1,10 +1,29 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Terminal, Search } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 
 export default function Logs() {
   const [logs, setLogs] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchTerm = searchParams.get('q') || '';
+  const activeFilter = searchParams.get('filter') || 'All';
+
+  const setSearchTerm = (val) => {
+    setSearchParams(prev => {
+      if (val) prev.set('q', val);
+      else prev.delete('q');
+      return prev;
+    }, { replace: true });
+  };
+
+  const setActiveFilter = (val) => {
+    setSearchParams(prev => {
+      if (val !== 'All') prev.set('filter', val);
+      else prev.delete('filter');
+      return prev;
+    }, { replace: true });
+  };
+
   const logsEndRef = useRef(null);
 
   useEffect(() => {
@@ -145,7 +164,7 @@ export default function Logs() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-black sm:border border-gray-200 dark:border-zinc-800 sm:rounded-md sm:shadow-sm overflow-hidden flex flex-col -mx-6 sm:mx-0 border-y sm:border-t-0">
+      <div className="bg-white dark:bg-black sm:border border-gray-200 dark:border-zinc-800 sm:rounded-md sm:shadow-sm overflow-hidden flex flex-col -mx-4 sm:mx-0 border-y sm:border-t-0">
         <div className="px-4 py-3 bg-gray-50 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 flex items-center gap-2">
           {/* Grayscale terminal dots to match the chromatic theme */}
           <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-zinc-700"></div>

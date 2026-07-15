@@ -67,7 +67,7 @@ export default function Devices() {
         </button>
       </div>
 
-      <div className="bg-white dark:bg-zinc-950 sm:border border-gray-200 dark:border-zinc-800 sm:rounded-md sm:shadow-sm overflow-hidden flex flex-col -mx-6 sm:mx-0">
+      <div className="bg-white dark:bg-zinc-950 sm:border border-gray-200 dark:border-zinc-800 sm:rounded-md sm:shadow-sm overflow-hidden flex flex-col -mx-4 sm:mx-0">
         {devices.length === 0 ? (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400 border-t sm:border-t-0 border-gray-200 dark:border-zinc-800">
             No infrastructure devices detected.
