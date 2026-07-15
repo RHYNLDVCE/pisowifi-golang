@@ -68,21 +68,21 @@ export default function Dashboard() {
                  {kpi.icon}
                </div>
             </div>
-            <div className="flex flex-col flex-1 justify-end">
+            <div className="flex flex-col flex-1 justify-end mt-1">
               {kpi.secondaryLabel ? (
-                <div className="flex items-center">
-                  <div className="flex-1">
-                    <div className={`text-xl sm:text-2xl font-black sm:font-bold ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className={`text-2xl sm:text-3xl font-black sm:font-bold tracking-tight ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
                   </div>
-                  <div className="w-px h-8 bg-gray-200 dark:bg-zinc-800 mx-3 sm:mx-4"></div>
-                  <div className="flex-1">
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">{kpi.secondaryLabel}</div>
-                    <div className={`text-sm sm:text-lg font-bold text-gray-500 dark:text-gray-400`}>₱{kpi.secondaryValue ? kpi.secondaryValue.toFixed(2) : "0.00"}</div>
+                  <div className="w-px h-10 bg-gray-200 dark:bg-zinc-800 mx-3 shrink-0"></div>
+                  <div className="text-right flex flex-col justify-center">
+                    <div className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">{kpi.secondaryLabel}</div>
+                    <div className={`text-sm sm:text-base font-bold text-gray-500 dark:text-gray-400`}>₱{kpi.secondaryValue ? kpi.secondaryValue.toFixed(2) : "0.00"}</div>
                   </div>
                 </div>
               ) : (
                 <>
-                  <div className={`text-xl sm:text-3xl font-black sm:font-bold ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
+                  <div className={`text-2xl sm:text-3xl font-black sm:font-bold tracking-tight ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
                   {trend}
                 </>
               )}
