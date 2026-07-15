@@ -70,16 +70,13 @@ export default function Dashboard() {
             </div>
             <div className="flex flex-col flex-1 justify-end mt-1">
               {kpi.secondaryLabel ? (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className={`text-2xl sm:text-3xl font-black sm:font-bold tracking-tight ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
+                <>
+                  <div className={`text-2xl sm:text-3xl font-black sm:font-bold tracking-tight ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
+                  <div className="flex items-center gap-2 mt-2 bg-gray-50 dark:bg-zinc-900/50 p-1.5 px-2 rounded-lg self-start">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{kpi.secondaryLabel}:</span>
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300">₱{kpi.secondaryValue ? kpi.secondaryValue.toFixed(2) : "0.00"}</span>
                   </div>
-                  <div className="w-px h-10 bg-gray-200 dark:bg-zinc-800 mx-3 shrink-0"></div>
-                  <div className="text-right flex flex-col justify-center">
-                    <div className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">{kpi.secondaryLabel}</div>
-                    <div className={`text-sm sm:text-base font-bold text-gray-500 dark:text-gray-400`}>₱{kpi.secondaryValue ? kpi.secondaryValue.toFixed(2) : "0.00"}</div>
-                  </div>
-                </div>
+                </>
               ) : (
                 <>
                   <div className={`text-2xl sm:text-3xl font-black sm:font-bold tracking-tight ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
