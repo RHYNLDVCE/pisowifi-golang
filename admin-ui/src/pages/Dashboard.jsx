@@ -83,8 +83,8 @@ export default function Dashboard() {
             <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Revenue Overview</h3>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Income over the last 7 days</div>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white">Revenue Overview</h3>
+            <div className="text-xs text-gray-500 dark:text-gray-400">Income over the last 7 days</div>
           </div>
         </div>
         <div className="h-[300px] w-full">

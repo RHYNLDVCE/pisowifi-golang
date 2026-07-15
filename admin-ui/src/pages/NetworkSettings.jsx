@@ -74,7 +74,7 @@ export default function NetworkSettings() {
                </div>
                <div>
                  <h3 className="text-base font-bold text-gray-900 dark:text-white">Global Speed Limit</h3>
-                 <p className="text-xs text-gray-500">Enforce global bandwidth cap</p>
+                 <p className="text-xs text-gray-500 dark:text-gray-400">Enforce global bandwidth cap</p>
                </div>
              </div>
              <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
@@ -104,7 +104,7 @@ export default function NetworkSettings() {
                </div>
                <div>
                  <h3 className="text-base font-bold text-gray-900 dark:text-white">Gaming Mode</h3>
-                 <p className="text-xs text-gray-500">Anti-Bufferbloat QoS optimization</p>
+                 <p className="text-xs text-gray-500 dark:text-gray-400">Anti-Bufferbloat QoS optimization</p>
                </div>
              </div>
              <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">

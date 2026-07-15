@@ -79,7 +79,7 @@ export default function ManageUser() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md p-6 shadow-sm">
-          <h3 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200 dark:border-zinc-800">Time Adjustments</h3>
+          <h3 className="text-base font-bold mb-4 pb-2 border-b border-gray-200 dark:border-zinc-800">Time Adjustments</h3>
           <form onSubmit={(e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -104,7 +104,7 @@ export default function ManageUser() {
         </div>
 
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md p-6 shadow-sm">
-          <h3 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200 dark:border-zinc-800">Security Actions</h3>
+          <h3 className="text-base font-bold mb-4 pb-2 border-b border-gray-200 dark:border-zinc-800">Security Actions</h3>
           <div className="space-y-3">
             {user.Status === 'blocked' ? (
               <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors" onClick={() => handleAction('/admin/unblock', {})}>
@@ -129,7 +129,7 @@ export default function ManageUser() {
 
       <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-200 dark:border-zinc-800">
-          <h3 className="text-lg font-bold">Sales History</h3>
+          <h3 className="text-base font-bold">Sales History</h3>
         </div>
         {history && history.length > 0 ? (
           <div className="overflow-x-auto">

@@ -74,7 +74,7 @@ export default function SessionSettings() {
              </div>
              <div>
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Session & Auto-Pause</h3>
-               <p className="text-xs text-gray-500">Automatically manage inactive connections</p>
+               <p className="text-xs text-gray-500 dark:text-gray-400">Automatically manage inactive connections</p>
              </div>
           </div>
           <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 space-y-6">
@@ -109,7 +109,7 @@ export default function SessionSettings() {
              </div>
              <div>
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Free Time Trial</h3>
-               <p className="text-xs text-gray-500">Offer free internet to new devices</p>
+               <p className="text-xs text-gray-500 dark:text-gray-400">Offer free internet to new devices</p>
              </div>
           </div>
           <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 space-y-6">

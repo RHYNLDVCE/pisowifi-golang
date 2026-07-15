@@ -140,7 +140,7 @@ export default function PortalSettings() {
              </div>
              <div>
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Coin Slot Configuration</h3>
-               <p className="text-xs text-gray-500">Manage hardware timeouts</p>
+               <p className="text-xs text-gray-500 dark:text-gray-400">Manage hardware timeouts</p>
              </div>
           </div>
           <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
@@ -165,7 +165,7 @@ export default function PortalSettings() {
              </div>
              <div>
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Interface Configuration</h3>
-               <p className="text-xs text-gray-500">Customize the captive portal banner</p>
+               <p className="text-xs text-gray-500 dark:text-gray-400">Customize the captive portal banner</p>
              </div>
           </div>
           <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
@@ -190,7 +190,7 @@ export default function PortalSettings() {
              </div>
              <div>
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Event Sounds Configuration</h3>
-               <p className="text-xs text-gray-500">Select sounds for coin insertion</p>
+               <p className="text-xs text-gray-500 dark:text-gray-400">Select sounds for coin insertion</p>
              </div>
           </div>
           <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
@@ -231,7 +231,7 @@ export default function PortalSettings() {
              </div>
              <div>
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Promotional Banners</h3>
-               <p className="text-xs text-gray-500">Upload images for the captive portal slider</p>
+               <p className="text-xs text-gray-500 dark:text-gray-400">Upload images for the captive portal slider</p>
              </div>
           </div>
           <button 
@@ -304,7 +304,7 @@ export default function PortalSettings() {
            </div>
            <div>
              <h3 className="text-base font-bold text-gray-900 dark:text-white">Custom Audio Assets</h3>
-             <p className="text-xs text-gray-500">Upload new `.mp3` or `.wav` sounds</p>
+             <p className="text-xs text-gray-500 dark:text-gray-400">Upload new `.mp3` or `.wav` sounds</p>
            </div>
         </div>
         
