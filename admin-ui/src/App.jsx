@@ -152,13 +152,13 @@ function Layout({ children }) {
       <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
         <header className="h-20 bg-gray-50 dark:bg-black flex items-center justify-between px-4 sm:px-8 z-10 shrink-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-none">
           <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
-            <h1 className="text-xl sm:text-2xl font-bold truncate">{pageTitle}</h1>
+            <h1 className="text-lg sm:text-xl font-bold truncate">{pageTitle}</h1>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-6 shrink-0">
             <div className="flex flex-col items-end">
-              <span className="text-[11px] sm:text-sm font-bold">{formatTime(currentTime)}</span>
-              <span className="text-[8px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest">{formatDate(currentTime)}</span>
+              <span className="text-[10px] sm:text-xs font-bold">{formatTime(currentTime)}</span>
+              <span className="text-[7px] sm:text-[9px] font-bold text-gray-500 uppercase tracking-widest">{formatDate(currentTime)}</span>
             </div>
             
             <button
@@ -171,7 +171,7 @@ function Layout({ children }) {
           </div>
         </header>
 
-        <main className="flex-1 px-4 sm:px-8 pb-8 overflow-y-auto">
+        <main className="flex-1 px-4 sm:px-8 pt-6 pb-8 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
