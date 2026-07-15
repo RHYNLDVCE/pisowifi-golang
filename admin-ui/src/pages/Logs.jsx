@@ -60,12 +60,8 @@ export default function Logs() {
 
   const categories = ['All', 'Coin', 'Portal', 'Admin', 'Security', 'System'];
   
-  const filteredLogs = logs.filter(log => {
-    // 1. Filter by category
-    if (activeFilter !== 'All') {
-      if (getLogCategory(log.type) !== activeFilter) return false;
-    }
-    // 2. Filter by search
+  // First, filter by search term so category counts reflect the search results
+  const searchFilteredLogs = logs.filter(log => {
     if (searchTerm) {
       const s = searchTerm.toLowerCase();
       if (!((log.type || '').toLowerCase().includes(s) || (log.message || '').toLowerCase().includes(s))) {
@@ -75,9 +71,17 @@ export default function Logs() {
     return true;
   });
 
+  // Then, filter by the active tab
+  const filteredLogs = searchFilteredLogs.filter(log => {
+    if (activeFilter !== 'All') {
+      if (getLogCategory(log.type) !== activeFilter) return false;
+    }
+    return true;
+  });
+
   const getCategoryCount = (cat) => {
-    if (cat === 'All') return logs.length;
-    return logs.filter(l => getLogCategory(l.type) === cat).length;
+    if (cat === 'All') return searchFilteredLogs.length;
+    return searchFilteredLogs.filter(l => getLogCategory(l.type) === cat).length;
   };
 
   const getFilterStyle = (cat, isActive) => {
@@ -155,12 +159,12 @@ export default function Logs() {
             <div className="text-gray-400 dark:text-gray-500 italic">No logs found matching filters.</div>
           ) : (
             filteredLogs.map((log, i) => (
-              <div key={i} className="flex flex-col sm:flex-row sm:gap-4 mb-2 sm:mb-1.5 hover:bg-white dark:hover:bg-zinc-900 px-1 sm:px-2 py-0.5 rounded transition-colors border-b border-gray-200 dark:border-zinc-800 sm:border-0 pb-1 sm:pb-0">
-                <div className="flex gap-2 sm:gap-4">
+              <div key={i} className={`flex flex-col sm:flex-row sm:gap-4 px-2 py-1.5 rounded-md mb-1.5 transition-colors ${i % 2 === 0 ? 'bg-gray-200/40 dark:bg-zinc-900/60' : 'bg-transparent'} hover:bg-gray-200 dark:hover:bg-zinc-800`}>
+                <div className="flex gap-2 sm:gap-4 pt-0.5">
                   <span className="text-gray-400 dark:text-gray-500 shrink-0 sm:w-40">[{log.timestamp}]</span>
                   <span className={`shrink-0 sm:w-24 ${getLogColorClass(log.type)}`}>[{log.type}]</span>
                 </div>
-                <span className="text-gray-800 dark:text-gray-200 break-words mt-0.5 sm:mt-0">{log.message}</span>
+                <span className="text-gray-800 dark:text-gray-200 break-words mt-0.5 sm:mt-0 whitespace-pre-wrap">{log.message}</span>
               </div>
             ))
           )}

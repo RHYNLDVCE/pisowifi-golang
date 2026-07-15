@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Clock, ShieldBan, Trash2, Check, Activity } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function ManageUser() {
   const { mac } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
     fetch(`/admin/api/user/${mac}`)
       .then(res => res.json())
       .then(json => {
@@ -20,6 +21,10 @@ export default function ManageUser() {
       });
   }, [mac]);
 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const handleAction = async (endpoint, payload) => {
     try {
       const res = await fetch(endpoint, {
@@ -28,12 +33,12 @@ export default function ManageUser() {
         body: JSON.stringify({ mac, ...payload })
       });
       if (res.ok) {
-        window.location.reload(); 
+        fetchData();
       } else {
-        alert('Action failed.');
+        toast.error('Action failed.');
       }
     } catch (err) {
-      alert('Error performing action.');
+      toast.error('Error performing action.');
     }
   };
 

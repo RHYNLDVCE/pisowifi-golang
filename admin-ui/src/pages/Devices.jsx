@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Server, Wifi, RefreshCw, Activity } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Devices() {
   const [devices, setDevices] = useState([]);
@@ -30,14 +31,19 @@ export default function Devices() {
     const newName = window.prompt(`Enter new name for device ${mac}:`, currentName);
     if (newName !== null && newName !== currentName) {
       try {
-        await fetch('/admin/rename_device', {
+        const res = await fetch('/admin/rename_device', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ mac, name: newName })
         });
-        fetchDevices();
+        if (res.ok) {
+          toast.success('Device renamed');
+          fetchDevices();
+        } else {
+          toast.error('Failed to rename device');
+        }
       } catch (err) {
-        alert('Failed to rename device');
+        toast.error('Failed to rename device');
       }
     }
   };

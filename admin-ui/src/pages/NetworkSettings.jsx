@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Activity, Clock, Timer, PauseCircle, Gift, Gauge } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function NetworkSettings() {
   const [data, setData] = useState(null);
@@ -41,10 +42,10 @@ export default function NetworkSettings() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (res.ok) alert('Network settings saved successfully!');
-      else alert('Failed to save settings.');
+      if (res.ok) toast.success('Network settings saved successfully!');
+      else toast.error('Failed to save settings.');
     } catch (err) {
-      alert('Error saving settings.');
+      toast.error('Error saving settings.');
     }
     setSaving(false);
   };

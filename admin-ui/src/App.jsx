@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award, Server, LogOut, X, Clock } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Connections from './pages/Connections';
@@ -206,6 +207,15 @@ function Layout({ children }) {
           <span className="text-[10px] font-bold">Menu</span>
         </button>
       </div>
+      <Toaster position="top-right" toastOptions={{
+        className: 'dark:bg-zinc-900 dark:text-white',
+        style: {
+          borderRadius: '12px',
+          background: '#fff',
+          color: '#363636',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        }
+      }} />
     </div>
   );
 }

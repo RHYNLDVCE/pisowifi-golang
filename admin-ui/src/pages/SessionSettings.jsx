@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Activity, PauseCircle, Gift } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function SessionSettings() {
   const [data, setData] = useState(null);
@@ -44,10 +45,10 @@ export default function SessionSettings() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (res.ok) alert('Session settings saved successfully!');
-      else alert('Failed to save settings.');
+      if (res.ok) toast.success('Session settings saved successfully!');
+      else toast.error('Failed to save settings.');
     } catch (err) {
-      alert('Error saving settings.');
+      toast.error('Error saving settings.');
     }
     setSaving(false);
   };
@@ -77,8 +78,8 @@ export default function SessionSettings() {
                <p className="text-xs text-gray-500 dark:text-gray-400">Automatically manage inactive connections</p>
              </div>
           </div>
-          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 space-y-6">
-             <label className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl cursor-pointer shadow-sm max-w-sm">
+          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 grid grid-cols-1 md:grid-cols-2 gap-6">
+             <label className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl cursor-pointer shadow-sm">
                 <div>
                    <div className="text-sm font-bold text-gray-900 dark:text-white">Enable Auto-Pause</div>
                    <div className="text-xs text-gray-500 mt-0.5">Pause a user's time when disconnected.</div>
@@ -89,7 +90,7 @@ export default function SessionSettings() {
                 </div>
              </label>
 
-             <div className="space-y-2 max-w-sm">
+             <div className="flex flex-col justify-center space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Inactive Disconnect (Seconds)</label>
                 <input 
                   type="number" 
@@ -112,8 +113,8 @@ export default function SessionSettings() {
                <p className="text-xs text-gray-500 dark:text-gray-400">Offer free internet to new devices</p>
              </div>
           </div>
-          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 space-y-6">
-             <label className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl cursor-pointer shadow-sm max-w-sm">
+          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 grid grid-cols-1 md:grid-cols-2 gap-6">
+             <label className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl cursor-pointer shadow-sm">
                 <div>
                    <div className="text-sm font-bold text-gray-900 dark:text-white">Enable Free Trial</div>
                 </div>
@@ -123,7 +124,7 @@ export default function SessionSettings() {
                 </div>
              </label>
 
-             <div className="space-y-2 max-w-sm">
+             <div className="flex flex-col justify-center space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Free Time Duration (Minutes)</label>
                 <input 
                   type="number" 

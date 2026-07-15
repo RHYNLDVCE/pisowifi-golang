@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Activity, Award, Plus, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function LoyaltySettings() {
   const [pointsConfig, setPointsConfig] = useState(null);
@@ -29,10 +30,10 @@ export default function LoyaltySettings() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pointsConfig)
       });
-      if (res.ok) alert('Points configuration saved successfully!');
-      else alert('Failed to save points configuration.');
+      if (res.ok) toast.success('Points configuration saved successfully!');
+      else toast.error('Failed to save points configuration.');
     } catch (err) {
-      alert('Error saving points configuration.');
+      toast.error('Error saving points configuration.');
     }
     setSavingPoints(false);
   };

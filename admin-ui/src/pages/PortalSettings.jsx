@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Activity, MonitorSmartphone, Volume2, Timer, Image, Trash2, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function PortalSettings() {
   const [data, setData] = useState(null);
@@ -49,10 +50,10 @@ export default function PortalSettings() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (res.ok) alert('Portal settings saved successfully!');
-      else alert('Failed to save portal settings.');
+      if (res.ok) toast.success('Portal settings saved successfully!');
+      else toast.error('Failed to save portal settings.');
     } catch (err) {
-      alert('Error saving settings.');
+      toast.error('Error saving settings.');
     }
     setSavingSettings(false);
   };
@@ -65,10 +66,14 @@ export default function PortalSettings() {
         method: 'POST',
         body: formData,
       });
-      if (res.ok) fetchData();
-      else alert('Upload failed');
+      if (res.ok) {
+        toast.success('Upload successful');
+        fetchData();
+      } else {
+        toast.error('Upload failed');
+      }
     } catch (err) {
-      alert('Error uploading');
+      toast.error('Error uploading');
     }
     e.target.reset();
   };
@@ -81,9 +86,10 @@ export default function PortalSettings() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `filename=${encodeURIComponent(filename)}`
       });
+      toast.success('Banner deleted');
       fetchData();
     } catch (err) {
-      alert('Failed to delete banner');
+      toast.error('Failed to delete banner');
     }
   };
 
@@ -110,10 +116,10 @@ export default function PortalSettings() {
         method: 'POST',
         body: formData
       });
-      if (res.ok) alert('Banner order saved!');
-      else alert('Failed to save order.');
+      if (res.ok) toast.success('Banner order saved!');
+      else toast.error('Failed to save order.');
     } catch (err) {
-      alert('Error saving order');
+      toast.error('Error saving order');
     }
     setSavingOrder(false);
   };
@@ -130,6 +136,147 @@ export default function PortalSettings() {
   return (
     <div className="space-y-6">
       
+      {/* --- MEDIA UPLOADS --- */}
+
+      {/* Promotional Banners */}
+      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50">
+          <div className="flex items-center gap-3">
+             <div className="p-2 rounded-xl bg-pink-50 text-pink-600 dark:bg-pink-500/10 dark:text-pink-400">
+                <Image size={20} />
+             </div>
+             <div>
+               <h3 className="text-base font-bold text-gray-900 dark:text-white">Promotional Banners</h3>
+               <p className="text-xs text-gray-500 dark:text-gray-400">Upload images for the captive portal slider</p>
+             </div>
+          </div>
+          <button 
+            onClick={saveBannerOrder}
+            disabled={savingOrder || banners.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm shadow-sm"
+          >
+            <Save size={16} /> {savingOrder ? 'Saving...' : 'Save Order Layout'}
+          </button>
+        </div>
+        
+        <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
+          <form onSubmit={(e) => handleUpload('/admin/upload_banners', e)} className="flex flex-col sm:flex-row gap-4 mb-8">
+            <input 
+              type="file" 
+              name="files" 
+              multiple 
+              accept="image/*" 
+              className="flex-1 px-4 py-2 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm shadow-sm" 
+            />
+            <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-black text-black dark:border-white dark:text-white font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
+              <Upload size={18}/> Upload
+            </button>
+          </form>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {banners.map((file, idx) => (
+              <div key={file} className="group relative border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden aspect-video bg-gray-100 dark:bg-zinc-900 flex flex-col shadow-sm">
+                <div className="flex-1 relative overflow-hidden">
+                  <img src={`/static/banners/set/${file}`} alt="Banner" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                  <button 
+                    onClick={() => moveBanner(idx, -1)}
+                    disabled={idx === 0}
+                    className="flex-1 py-1.5 flex justify-center text-gray-500 hover:text-black hover:bg-gray-100 dark:hover:bg-zinc-900 dark:hover:text-white disabled:opacity-30 transition-colors border-r border-gray-200 dark:border-zinc-800"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button 
+                    onClick={() => deleteBanner(file)}
+                    className="flex-1 py-1.5 flex justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-r border-gray-200 dark:border-zinc-800"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                  <button 
+                    onClick={() => moveBanner(idx, 1)}
+                    disabled={idx === banners.length - 1}
+                    className="flex-1 py-1.5 flex justify-center text-gray-500 hover:text-black hover:bg-gray-100 dark:hover:bg-zinc-900 dark:hover:text-white disabled:opacity-30 transition-colors"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {banners.length === 0 && (
+              <div className="col-span-full py-8 text-center text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900">
+                No banners uploaded yet.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Custom Audio Uploads */}
+      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden pb-8 w-full">
+        <div className="flex items-center gap-3 p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50">
+           <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+              <Volume2 size={20} />
+           </div>
+           <div>
+             <h3 className="text-base font-bold text-gray-900 dark:text-white">Custom Audio Assets</h3>
+             <p className="text-xs text-gray-500 dark:text-gray-400">Upload new `.mp3` or `.wav` sounds</p>
+           </div>
+        </div>
+        
+        <div className="p-5 sm:p-6">
+          <form onSubmit={(e) => handleUpload('/admin/upload_sound', e)} className="flex flex-col sm:flex-row gap-4 mb-8">
+            <input 
+              type="file" 
+              name="file" 
+              accept="audio/*" 
+              className="flex-1 px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm shadow-sm" 
+            />
+            <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-black text-black dark:border-white dark:text-white font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
+              <Upload size={18}/> Upload
+            </button>
+          </form>
+
+          <div className="overflow-x-auto sm:border border-gray-200 dark:border-zinc-800 sm:rounded-xl -mx-5 sm:mx-0 border-y sm:border-t-0 shadow-sm">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-zinc-900/50">
+                  <th className="pl-5 sm:px-6 py-3 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Filename</th>
+                  <th className="pr-5 sm:px-6 py-3 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
+                {data.sound_files && data.sound_files.map((file, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
+                    <td className="pl-5 sm:px-6 py-3 sm:py-4 font-mono text-[10px] sm:text-sm whitespace-nowrap">{file}</td>
+                    <td className="pr-5 sm:px-6 py-3 sm:py-4 text-right whitespace-nowrap">
+                      <button 
+                        className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shadow-sm"
+                        onClick={() => {
+                          const audio = new Audio(`/static/sounds/${file}`);
+                          audio.play();
+                        }}
+                      >
+                        Play Sound
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {(!data.sound_files || data.sound_files.length === 0) && (
+                  <tr>
+                    <td colSpan="2" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-zinc-900/20">
+                      No custom sounds uploaded yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <hr className="my-10 border-gray-200 dark:border-zinc-800" />
+
       <form onSubmit={handleSaveSettings} className="space-y-6">
         
         {/* Coin Slot Settings */}
@@ -217,147 +364,6 @@ export default function PortalSettings() {
           </button>
         </div>
       </form>
-
-      {/* --- MEDIA UPLOADS --- */}
-
-      <hr className="my-10 border-gray-200 dark:border-zinc-800" />
-
-      {/* Promotional Banners */}
-      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50">
-          <div className="flex items-center gap-3">
-             <div className="p-2 rounded-xl bg-pink-50 text-pink-600 dark:bg-pink-500/10 dark:text-pink-400">
-                <Image size={20} />
-             </div>
-             <div>
-               <h3 className="text-base font-bold text-gray-900 dark:text-white">Promotional Banners</h3>
-               <p className="text-xs text-gray-500 dark:text-gray-400">Upload images for the captive portal slider</p>
-             </div>
-          </div>
-          <button 
-            onClick={saveBannerOrder}
-            disabled={savingOrder || banners.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm shadow-sm"
-          >
-            <Save size={16} /> {savingOrder ? 'Saving...' : 'Save Order Layout'}
-          </button>
-        </div>
-        
-        <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
-          <form onSubmit={(e) => handleUpload('/admin/upload_banners', e)} className="flex flex-col sm:flex-row gap-4 mb-8">
-            <input 
-              type="file" 
-              name="files" 
-              multiple 
-              accept="image/*" 
-              className="flex-1 px-4 py-2 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm shadow-sm" 
-            />
-            <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-black text-black dark:border-white dark:text-white font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
-              <Upload size={18}/> Upload
-            </button>
-          </form>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {banners.map((file, idx) => (
-              <div key={file} className="group relative border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden aspect-video bg-gray-100 dark:bg-zinc-900 flex flex-col shadow-sm">
-                <div className="flex-1 relative overflow-hidden">
-                  <img src={`/static/banners/set/${file}`} alt="Banner" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-                  <button 
-                    onClick={() => moveBanner(idx, -1)}
-                    disabled={idx === 0}
-                    className="flex-1 py-1.5 flex justify-center text-gray-500 hover:text-black hover:bg-gray-100 dark:hover:bg-zinc-900 dark:hover:text-white disabled:opacity-30 transition-colors border-r border-gray-200 dark:border-zinc-800"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-                  <button 
-                    onClick={() => deleteBanner(file)}
-                    className="flex-1 py-1.5 flex justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-r border-gray-200 dark:border-zinc-800"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                  <button 
-                    onClick={() => moveBanner(idx, 1)}
-                    disabled={idx === banners.length - 1}
-                    className="flex-1 py-1.5 flex justify-center text-gray-500 hover:text-black hover:bg-gray-100 dark:hover:bg-zinc-900 dark:hover:text-white disabled:opacity-30 transition-colors"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
-              </div>
-            ))}
-            {banners.length === 0 && (
-              <div className="col-span-full py-8 text-center text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900">
-                No banners uploaded yet.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Custom Audio Uploads */}
-      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden pb-8">
-        <div className="flex items-center gap-3 p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50">
-           <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
-              <Volume2 size={20} />
-           </div>
-           <div>
-             <h3 className="text-base font-bold text-gray-900 dark:text-white">Custom Audio Assets</h3>
-             <p className="text-xs text-gray-500 dark:text-gray-400">Upload new `.mp3` or `.wav` sounds</p>
-           </div>
-        </div>
-        
-        <div className="p-5 sm:p-6">
-          <form onSubmit={(e) => handleUpload('/admin/upload_sound', e)} className="flex flex-col sm:flex-row gap-4 mb-8">
-            <input 
-              type="file" 
-              name="file" 
-              accept="audio/*" 
-              className="flex-1 px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm shadow-sm" 
-            />
-            <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-black text-black dark:border-white dark:text-white font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
-              <Upload size={18}/> Upload
-            </button>
-          </form>
-
-          <div className="overflow-x-auto sm:border border-gray-200 dark:border-zinc-800 sm:rounded-xl -mx-5 sm:mx-0 border-y sm:border-t-0 shadow-sm">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 dark:bg-zinc-900/50">
-                  <th className="pl-5 sm:px-6 py-3 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Filename</th>
-                  <th className="pr-5 sm:px-6 py-3 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
-                {data.sound_files && data.sound_files.map((file, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
-                    <td className="pl-5 sm:px-6 py-3 sm:py-4 font-mono text-[10px] sm:text-sm whitespace-nowrap">{file}</td>
-                    <td className="pr-5 sm:px-6 py-3 sm:py-4 text-right whitespace-nowrap">
-                      <button 
-                        className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shadow-sm"
-                        onClick={() => {
-                          const audio = new Audio(`/static/sounds/${file}`);
-                          audio.play();
-                        }}
-                      >
-                        Play Sound
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {(!data.sound_files || data.sound_files.length === 0) && (
-                  <tr>
-                    <td colSpan="2" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-zinc-900/20">
-                      No custom sounds uploaded yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Activity, Coins } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function CoinSettings() {
   const [data, setData] = useState(null);
@@ -62,14 +63,14 @@ export default function CoinSettings() {
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        alert('Coin configuration saved successfully!');
+        toast.success('Coin configuration saved successfully!');
         // Update local data context to not lose the string
         setData({...data, coin_rates: payload.coin_rates});
       } else {
-        alert('Failed to save coin configuration.');
+        toast.error('Failed to save coin configuration.');
       }
     } catch (err) {
-      alert('Error saving settings.');
+      toast.error('Error saving settings.');
     }
     setSaving(false);
   };
