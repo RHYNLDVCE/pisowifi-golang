@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award } from 'lucide-react';
+import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award, Server, LogOut } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import ManageUser from './pages/ManageUser';
 import Devices from './pages/Devices';
@@ -10,6 +10,7 @@ import NetworkSettings from './pages/NetworkSettings';
 import PortalSettings from './pages/PortalSettings';
 import CoinSettings from './pages/CoinSettings';
 import LoyaltySettings from './pages/LoyaltySettings';
+import SystemStats from './pages/SystemStats';
 
 function Layout({ children }) {
   const location = useLocation();
@@ -17,6 +18,7 @@ function Layout({ children }) {
     return localStorage.getItem('theme') === 'dark';
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     if (darkMode) {
@@ -28,8 +30,21 @@ function Layout({ children }) {
     }
   }, [darkMode]);
 
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  };
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+  };
+
   const navItems = [
     { path: '/admin', icon: <Home size={20} />, label: 'Dashboard' },
+    { path: '/admin/system', icon: <Server size={20} />, label: 'System Stats' },
     { path: '/admin/network', icon: <Wifi size={20} />, label: 'Network Settings' },
     { path: '/admin/portal', icon: <MonitorSmartphone size={20} />, label: 'Portal UI & Sounds' },
     { path: '/admin/coins', icon: <Coins size={20} />, label: 'Coin Configuration' },
@@ -51,7 +66,7 @@ function Layout({ children }) {
 
       {/* Sidebar */}
       <aside className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-white dark:bg-zinc-950 border-r border-gray-200 dark:border-zinc-800 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-        <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-zinc-800">
+        <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-zinc-800 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-black dark:bg-white rounded flex items-center justify-center">
               <Activity className="text-white dark:text-black w-5 h-5" />
@@ -83,6 +98,13 @@ function Layout({ children }) {
             );
           })}
         </nav>
+        
+        <div className="p-4 border-t border-gray-200 dark:border-zinc-800 shrink-0">
+          <a href="/admin/logout" className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-bold text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-500 rounded-md hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
+            <LogOut size={16} />
+            Logout
+          </a>
+        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -98,13 +120,18 @@ function Layout({ children }) {
             <h1 className="text-xl font-bold hidden sm:block">Control Center</h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex flex-col items-end">
+              <span className="text-sm font-bold">{formatTime(currentTime)}</span>
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{formatDate(currentTime)}</span>
+            </div>
+            
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors"
+              className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors border border-gray-200 dark:border-zinc-800"
               aria-label="Toggle Dark Mode"
             >
-              {darkMode ? <Sun size={20} className="text-gray-400 hover:text-white" /> : <Moon size={20} className="text-gray-600 hover:text-black" />}
+              {darkMode ? <Sun size={18} className="text-gray-400 hover:text-white" /> : <Moon size={18} className="text-gray-600 hover:text-black" />}
             </button>
           </div>
         </header>
@@ -125,6 +152,7 @@ export default function App() {
        <Layout>
          <Routes>
            <Route path="/admin" element={<Dashboard />} />
+           <Route path="/admin/system" element={<SystemStats />} />
            <Route path="/admin/network" element={<NetworkSettings />} />
            <Route path="/admin/portal" element={<PortalSettings />} />
            <Route path="/admin/coins" element={<CoinSettings />} />
