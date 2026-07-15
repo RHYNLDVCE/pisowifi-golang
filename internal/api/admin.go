@@ -389,25 +389,50 @@ func updateSettings(c *fiber.Ctx) error {
 	clientIP := c.IP()
 	clientMAC := infrastructure.GetMACFromIP(clientIP)
 
-	var body struct {
-		Timeout          string `json:"timeout"`
-		InactiveTimeout  string `json:"inactive_timeout"`
-		AutoPause        string `json:"auto_pause"`
-		SpeedLimitVal    string `json:"speed_limit_val"`
-		SpeedLimitToggle string `json:"speed_limit_toggle"`
-		GamingMode       string `json:"gaming_mode"`
-		CoinRates        string `json:"coin_rates"`
-		BannerText       string `json:"banner_text"`
-		BannerLink       string `json:"banner_link"`
-		FreeTimeToggle   string `json:"free_time_toggle"`
-		FreeTimeDuration string `json:"free_time_duration"`
-		SoundInsert      string `json:"sound_insert"`
-		SoundCoin        string `json:"sound_coin"`
-		OpenNAT          string `json:"open_nat"`
-		CustomTTL        string `json:"custom_ttl"`
+	var rawBody map[string]interface{}
+	if err := c.BodyParser(&rawBody); err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": err.Error()})
 	}
-	if err := c.BodyParser(&body); err != nil {
-		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
+
+	getString := func(key string) string {
+		if val, ok := rawBody[key]; ok {
+			return fmt.Sprintf("%v", val)
+		}
+		return ""
+	}
+
+	body := struct {
+		Timeout          string
+		InactiveTimeout  string
+		AutoPause        string
+		SpeedLimitVal    string
+		SpeedLimitToggle string
+		GamingMode       string
+		CoinRates        string
+		BannerText       string
+		BannerLink       string
+		FreeTimeToggle   string
+		FreeTimeDuration string
+		SoundInsert      string
+		SoundCoin        string
+		OpenNAT          string
+		CustomTTL        string
+	}{
+		Timeout:          getString("timeout"),
+		InactiveTimeout:  getString("inactive_timeout"),
+		AutoPause:        getString("auto_pause"),
+		SpeedLimitVal:    getString("speed_limit_val"),
+		SpeedLimitToggle: getString("speed_limit_toggle"),
+		GamingMode:       getString("gaming_mode"),
+		CoinRates:        getString("coin_rates"),
+		BannerText:       getString("banner_text"),
+		BannerLink:       getString("banner_link"),
+		FreeTimeToggle:   getString("free_time_toggle"),
+		FreeTimeDuration: getString("free_time_duration"),
+		SoundInsert:      getString("sound_insert"),
+		SoundCoin:        getString("sound_coin"),
+		OpenNAT:          getString("open_nat"),
+		CustomTTL:        getString("custom_ttl"),
 	}
 
 	newFreeEnabled := body.FreeTimeToggle == "on"
