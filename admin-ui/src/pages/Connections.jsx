@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, Search, Users, ChevronDown } from 'lucide-react';
+import { Activity, Search, Users, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import CustomSelect from '../components/CustomSelect';
 
@@ -9,9 +9,11 @@ export default function Connections() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const searchQuery = searchParams.get('q') || '';
-  const sortBy = searchParams.get('sort') || 'time';
+  const sortBy = searchParams.get('sort') || 'status';
+  const [currentPage, setCurrentPage] = useState(1);
 
   const setSearchQuery = (val) => {
+    setCurrentPage(1);
     setSearchParams(prev => {
       if (val) prev.set('q', val);
       else prev.delete('q');
@@ -20,8 +22,9 @@ export default function Connections() {
   };
 
   const setSortBy = (val) => {
+    setCurrentPage(1);
     setSearchParams(prev => {
-      if (val !== 'time') prev.set('sort', val);
+      if (val !== 'status') prev.set('sort', val);
       else prev.delete('sort');
       return prev;
     }, { replace: true });
@@ -55,6 +58,9 @@ export default function Connections() {
 
   const { users } = data;
 
+  const statusOrder = { connected: 1, paused: 2, expired: 3, new: 4 };
+  const getStatusWeight = (status) => statusOrder[status?.toLowerCase()] || 5;
+
   const filteredMacs = Object.keys(users).filter(mac => {
     const u = users[mac];
     const term = searchQuery.toLowerCase();
@@ -64,11 +70,21 @@ export default function Connections() {
   }).sort((a, b) => {
     const ua = users[a];
     const ub = users[b];
+    if (sortBy === 'status') {
+      const weightA = getStatusWeight(ua.status);
+      const weightB = getStatusWeight(ub.status);
+      if (weightA !== weightB) return weightA - weightB;
+      return (ub.time || 0) - (ua.time || 0);
+    }
     if (sortBy === 'points') {
       return (ub.points || 0) - (ua.points || 0);
     }
     return (ub.time || 0) - (ua.time || 0);
   });
+
+  const ITEMS_PER_PAGE = 10;
+  const totalPages = Math.max(1, Math.ceil(filteredMacs.length / ITEMS_PER_PAGE));
+  const paginatedMacs = filteredMacs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-6">
@@ -92,6 +108,7 @@ export default function Connections() {
               value={sortBy}
               onChange={(val) => setSortBy(val)}
               options={[
+                { value: 'status', label: 'Order by Status' },
                 { value: 'time', label: 'Order by Time' },
                 { value: 'points', label: 'Order by Points' }
               ]}
@@ -111,9 +128,9 @@ export default function Connections() {
         </div>
         
         {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <table className="w-full text-left border-collapse">
-            <thead>
+        <div className="hidden md:block overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)] -mx-4 px-4 sm:mx-0 sm:px-0">
+          <table className="w-full text-left border-collapse relative">
+            <thead className="sticky top-0 bg-white dark:bg-zinc-950 z-10 shadow-[0_1px_0_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)]">
               <tr>
                 <th className="pr-4 py-3 text-xs font-medium text-gray-400 dark:text-gray-500 w-8">#</th>
                 <th className="px-4 py-3 text-xs font-medium text-gray-400 dark:text-gray-500">Device</th>
@@ -123,15 +140,16 @@ export default function Connections() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-zinc-900/50">
-              {filteredMacs.length === 0 ? (
+              {paginatedMacs.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="py-12 text-center text-gray-500">
                     {searchQuery ? "No matching devices found." : "No active devices connected."}
                   </td>
                 </tr>
               ) : (
-                filteredMacs.map((mac, idx) => {
+                paginatedMacs.map((mac, idx) => {
                   const u = users[mac];
+                  const absoluteIdx = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
                   return (
                     <tr key={mac} className={`transition-colors group cursor-pointer ${
                       u.status === 'connected' ? 'bg-green-50/50 dark:bg-green-500/5 hover:bg-green-100/50 dark:hover:bg-green-500/10' :
@@ -139,7 +157,7 @@ export default function Connections() {
                       'hover:bg-gray-50/50 dark:hover:bg-zinc-900/20'
                     }`} onClick={() => navigate(`/admin/user/${mac}`)}>
                       <td className="pr-4 py-4 text-sm font-medium text-gray-400">
-                        {idx + 1}
+                        {absoluteIdx}
                       </td>
                       <td className="px-4 py-4">
                         <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">{u.device_name || 'Unknown Device'}</div>
@@ -177,13 +195,14 @@ export default function Connections() {
 
         {/* Mobile List View (Flat, Edge-to-Edge) */}
         <div className="md:hidden flex flex-col -mx-4 mt-4 border-t border-gray-100 dark:border-zinc-800">
-          {filteredMacs.length === 0 ? (
+          {paginatedMacs.length === 0 ? (
             <div className="py-12 text-center text-gray-500">
                {searchQuery ? "No matching devices found." : "No active devices connected."}
             </div>
           ) : (
-            filteredMacs.map((mac, idx) => {
+            paginatedMacs.map((mac, idx) => {
               const u = users[mac];
+              const absoluteIdx = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
               return (
                 <div key={mac} onClick={() => navigate(`/admin/user/${mac}`)} className={`flex flex-col py-3 px-6 border-b border-gray-100 dark:border-zinc-800/50 transition-colors cursor-pointer ${
                   u.status === 'connected' ? 'bg-green-50/50 dark:bg-green-500/5 active:bg-green-100/50 dark:active:bg-green-500/10' :
@@ -192,7 +211,7 @@ export default function Connections() {
                 }`}>
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
-                      <div className="text-gray-400 font-medium text-xs">{idx + 1}.</div>
+                      <div className="text-gray-400 font-medium text-xs">{absoluteIdx}.</div>
                       <div className="font-bold text-gray-900 dark:text-white text-[15px] leading-tight truncate max-w-[160px]">{u.device_name || 'Unknown Device'}</div>
                     </div>
                     <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider shrink-0 ${
@@ -217,6 +236,34 @@ export default function Connections() {
             })
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 dark:border-zinc-800/50 pt-4 mt-4 gap-4">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Showing <span className="font-medium text-gray-900 dark:text-white">{filteredMacs.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="font-medium text-gray-900 dark:text-white">{Math.min(currentPage * ITEMS_PER_PAGE, filteredMacs.length)}</span> of <span className="font-medium text-gray-900 dark:text-white">{filteredMacs.length}</span> entries
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">
+                Page {currentPage} of {totalPages}
+              </div>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
