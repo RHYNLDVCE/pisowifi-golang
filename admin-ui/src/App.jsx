@@ -21,6 +21,7 @@ function Layout({ children }) {
     return localStorage.getItem('theme') === 'dark';
   });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -100,10 +101,10 @@ function Layout({ children }) {
                 </Link>
               );
             })}
-            <a href="/admin/logout" className="flex items-center gap-4 px-5 py-4 mt-2 rounded-xl text-base font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+            <button onClick={() => { setSidebarOpen(false); setShowLogoutConfirm(true); }} className="w-full flex items-center gap-4 px-5 py-4 mt-2 rounded-xl text-base font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
               <LogOut size={20} />
               Logout
-            </a>
+            </button>
           </nav>
         </div>
       )}
@@ -144,10 +145,10 @@ function Layout({ children }) {
         </nav>
         
         <div className="p-4 border-t border-gray-200 dark:border-zinc-800 shrink-0">
-          <a href="/admin/logout" className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-bold text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-500 rounded-md hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
+          <button onClick={() => setShowLogoutConfirm(true)} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-bold text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-500 rounded-md hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
             <LogOut size={16} />
             Logout
-          </a>
+          </button>
         </div>
       </aside>
 
@@ -180,6 +181,36 @@ function Layout({ children }) {
           </div>
         </main>
       </div>
+
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <LogOut className="w-8 h-8 text-red-600 dark:text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Logout</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+                Are you sure you want to log out of the admin panel?
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
+                  onClick={() => setShowLogoutConfirm(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="flex-1 px-4 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors"
+                  onClick={() => window.location.href = '/logout'}
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-zinc-950 border-t border-gray-100 dark:border-zinc-900 flex justify-around items-center z-40 px-2 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-none">
