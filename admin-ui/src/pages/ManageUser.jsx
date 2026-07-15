@@ -2,12 +2,17 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, ShieldBan, Trash2, Check, Activity, Star, ChevronDown } from 'lucide-react';
 import toast from 'react-hot-toast';
+import CustomSelect from '../components/CustomSelect';
 
 export default function ManageUser() {
   const { mac } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [timeAction, setTimeAction] = useState('add');
+  const [timeUnit, setTimeUnit] = useState('minutes');
+  const [pointsAction, setPointsAction] = useState('add');
 
   const fetchData = useCallback(() => {
     fetch(`/admin/api/user/${mac}`)
@@ -97,22 +102,27 @@ export default function ManageUser() {
               handleAction('/admin/manage_time', Object.fromEntries(formData));
             }} className="space-y-4">
               <div className="flex flex-col sm:flex-row gap-3 relative">
-                <div className="relative flex-1">
-                  <select name="action" className="w-full appearance-none px-4 py-3 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all cursor-pointer font-medium text-sm">
-                    <option value="add">Add Time</option>
-                    <option value="subtract">Deduct Time</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                </div>
+                <CustomSelect
+                  name="action"
+                  value={timeAction}
+                  onChange={setTimeAction}
+                  options={[
+                    { value: 'add', label: 'Add Time' },
+                    { value: 'subtract', label: 'Deduct Time' }
+                  ]}
+                  className="flex-1"
+                />
                 <input type="number" name="amount" placeholder="Amount" required className="flex-1 px-4 py-3 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm font-medium placeholder-gray-400" />
-                <div className="relative flex-1">
-                  <select name="unit" className="w-full appearance-none px-4 py-3 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all cursor-pointer font-medium text-sm">
-                    <option value="minutes">Minutes</option>
-                    <option value="hours">Hours</option>
-                    <option value="days">Days</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                </div>
+                <CustomSelect
+                  name="unit"
+                  value={timeUnit}
+                  onChange={setTimeUnit}
+                  options={[
+                    { value: 'minutes', label: 'Minutes' },
+                    { value: 'hours', label: 'Hours' }
+                  ]}
+                  className="flex-1"
+                />
               </div>
               <button type="submit" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-sm">
                 <Clock size={18}/> Apply Time
@@ -126,13 +136,16 @@ export default function ManageUser() {
               handleAction('/admin/manage_points', Object.fromEntries(formData));
             }} className="space-y-4">
               <div className="flex gap-3 relative">
-                <div className="relative flex-1">
-                  <select name="action" className="w-full appearance-none px-4 py-3 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all cursor-pointer font-medium text-sm">
-                    <option value="add">Add Points</option>
-                    <option value="subtract">Deduct Points</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                </div>
+                <CustomSelect
+                  name="action"
+                  value={pointsAction}
+                  onChange={setPointsAction}
+                  options={[
+                    { value: 'add', label: 'Add Points' },
+                    { value: 'subtract', label: 'Deduct Points' }
+                  ]}
+                  className="flex-1"
+                />
                 <input type="number" name="amount" placeholder="Amount" required className="flex-1 px-4 py-3 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm font-medium placeholder-gray-400" />
               </div>
               <button type="submit" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-colors shadow-sm">

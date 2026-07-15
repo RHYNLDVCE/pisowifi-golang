@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Activity, Search, Users, ChevronDown } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import CustomSelect from '../components/CustomSelect';
 
 export default function Connections() {
   const [data, setData] = useState(null);
@@ -87,17 +88,15 @@ export default function Connections() {
             </span>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-            <div className="relative w-full sm:w-auto">
-              <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
-                className="appearance-none pr-10 pl-4 py-2 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800/50 rounded-xl outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-zinc-700 w-full sm:w-auto transition-all cursor-pointer font-medium"
-              >
-                <option value="time">Order by Time</option>
-                <option value="points">Order by Points</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-            </div>
+            <CustomSelect
+              value={sortBy}
+              onChange={(val) => setSortBy(val)}
+              options={[
+                { value: 'time', label: 'Order by Time' },
+                { value: 'points', label: 'Order by Points' }
+              ]}
+              className="w-full sm:w-48"
+            />
             <div className="relative w-full sm:w-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input 
