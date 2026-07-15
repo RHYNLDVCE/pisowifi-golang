@@ -12,13 +12,19 @@ import (
 // AdminService — replaces services/admin_service.py
 // ---------------------------------------------------------------------------
 
+type DailyStat struct {
+	Date  string `json:"date"`
+	Total int    `json:"total"`
+}
+
 type DashboardStats struct {
-	Total     int `json:"total"`
-	Yesterday int `json:"yesterday"`
-	Daily     int `json:"daily"`
-	Weekly    int `json:"weekly"`
-	Monthly   int `json:"monthly"`
-	Yearly    int `json:"yearly"`
+	Total     int         `json:"total"`
+	Yesterday int         `json:"yesterday"`
+	Daily     int         `json:"daily"`
+	Weekly    int         `json:"weekly"`
+	Monthly   int         `json:"monthly"`
+	Yearly    int         `json:"yearly"`
+	ChartData []DailyStat `json:"chart_data"`
 }
 
 func GetDashboardStats() DashboardStats {
@@ -30,6 +36,17 @@ func GetDashboardStats() DashboardStats {
 	startOfYear := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
 	yesterday := startOfDay.AddDate(0, 0, -1)
 
+	var chartData []DailyStat
+	for i := 6; i >= 0; i-- {
+		dayStart := startOfDay.AddDate(0, 0, -i)
+		dayEnd := dayStart.AddDate(0, 0, 1)
+		dayTotal := db.GetSalesRange(dayStart.Unix(), dayEnd.Unix())
+		chartData = append(chartData, DailyStat{
+			Date:  dayStart.Format("Mon"),
+			Total: dayTotal,
+		})
+	}
+
 	return DashboardStats{
 		Total:     db.GetTotalSales(),
 		Yesterday: db.GetSalesRange(yesterday.Unix(), startOfDay.Unix()),
@@ -37,6 +54,7 @@ func GetDashboardStats() DashboardStats {
 		Weekly:    db.GetSalesSince(startOfWeek.Unix()),
 		Monthly:   db.GetSalesSince(startOfMonth.Unix()),
 		Yearly:    db.GetSalesSince(startOfYear.Unix()),
+		ChartData: chartData,
 	}
 }
 
