@@ -39,14 +39,14 @@ export default function Dashboard() {
     <div className="space-y-6">
       
       {/* 6 KPI Cards (Enterprise Style) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         {[
-          { label: 'Total All Time', value: stats.total, color: 'text-gray-900 dark:text-white', icon: <Coins size={20}/>, iconBg: 'bg-blue-50 text-blue-500 dark:bg-blue-500/10' },
-          { label: 'Yesterday', value: stats.yesterday, color: 'text-gray-900 dark:text-white', icon: <Clock size={20}/>, iconBg: 'bg-purple-50 text-purple-500 dark:bg-purple-500/10' },
-          { label: 'Today', value: stats.daily, color: 'text-gray-900 dark:text-white', icon: <Activity size={20}/>, iconBg: 'bg-green-50 text-green-500 dark:bg-green-500/10', compareTo: stats.yesterday },
-          { label: 'This Week', value: stats.weekly, color: 'text-gray-900 dark:text-white', icon: <Activity size={20}/>, iconBg: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10' },
-          { label: 'This Month', value: stats.monthly, color: 'text-gray-900 dark:text-white', icon: <Activity size={20}/>, iconBg: 'bg-red-50 text-red-500 dark:bg-red-500/10' },
-          { label: 'This Year', value: stats.yearly, color: 'text-gray-900 dark:text-white', icon: <Activity size={20}/>, iconBg: 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10' },
+          { label: 'Total All Time', value: stats.total, color: 'text-gray-900 dark:text-white', icon: <Coins className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-blue-50 text-blue-500 dark:bg-blue-500/10' },
+          { label: 'Yesterday', value: stats.yesterday, color: 'text-gray-900 dark:text-white', icon: <Clock className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-purple-50 text-purple-500 dark:bg-purple-500/10' },
+          { label: 'Today', value: stats.daily, color: 'text-gray-900 dark:text-white', icon: <Activity className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-green-50 text-green-500 dark:bg-green-500/10', compareTo: stats.yesterday },
+          { label: 'This Week', value: stats.weekly, color: 'text-gray-900 dark:text-white', icon: <Activity className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10' },
+          { label: 'This Month', value: stats.monthly, color: 'text-gray-900 dark:text-white', icon: <Activity className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-red-50 text-red-500 dark:bg-red-500/10' },
+          { label: 'This Year', value: stats.yearly, color: 'text-gray-900 dark:text-white', icon: <Activity className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10' },
         ].map((kpi, idx) => {
           let trend = null;
           if (kpi.compareTo !== undefined) {
@@ -61,15 +61,15 @@ export default function Dashboard() {
              );
           }
           return (
-          <div key={idx} className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-4">
-               <div className="text-sm font-medium text-gray-500 dark:text-gray-400">{kpi.label}</div>
-               <div className={`p-2.5 rounded-xl ${kpi.iconBg}`}>
+          <div key={idx} className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col justify-between">
+            <div className="flex justify-between items-start mb-3 sm:mb-4">
+               <div className="text-[11px] sm:text-sm font-bold sm:font-medium text-gray-500 dark:text-gray-400">{kpi.label}</div>
+               <div className={`p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl ${kpi.iconBg}`}>
                  {kpi.icon}
                </div>
             </div>
             <div>
-              <div className={`text-3xl font-bold ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
+              <div className={`text-xl sm:text-3xl font-black sm:font-bold ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
               {trend}
             </div>
           </div>
@@ -77,10 +77,10 @@ export default function Dashboard() {
       </div>
 
       {/* Revenue Graph */}
-      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm flex flex-col p-6 mt-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-            <BarChart2 size={20} />
+      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm flex flex-col p-4 sm:p-6 mt-6 sm:mt-8">
+        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+          <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+            <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Revenue Overview</h3>

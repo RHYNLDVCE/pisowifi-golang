@@ -132,8 +132,8 @@ export default function Connections() {
           </table>
         </div>
 
-        {/* Mobile List View */}
-        <div className="md:hidden flex flex-col gap-3 mt-2">
+        {/* Mobile List View (Flat, Edge-to-Edge) */}
+        <div className="md:hidden flex flex-col -mx-6 mt-4 border-t border-gray-100 dark:border-zinc-800">
           {filteredMacs.length === 0 ? (
             <div className="py-12 text-center text-gray-500">
                {searchQuery ? "No matching devices found." : "No active devices connected."}
@@ -142,27 +142,27 @@ export default function Connections() {
             filteredMacs.map((mac, idx) => {
               const u = users[mac];
               return (
-                <div key={mac} onClick={() => window.location.href = `/admin/user/${mac}`} className="bg-gray-50 dark:bg-zinc-900/50 rounded-xl p-4 flex flex-col gap-3 border border-gray-100 dark:border-zinc-800/50 shadow-sm active:scale-[0.98] transition-transform">
+                <div key={mac} onClick={() => window.location.href = `/admin/user/${mac}`} className="flex flex-col py-3 px-6 border-b border-gray-100 dark:border-zinc-800/50 active:bg-gray-50 dark:active:bg-zinc-900 transition-colors cursor-pointer">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-bold text-gray-900 dark:text-white text-base">{u.device_name || 'Unknown Device'}</div>
-                      <div className="text-xs text-gray-500 font-mono mt-0.5">{mac}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-gray-400 font-medium text-xs">{idx + 1}.</div>
+                      <div className="font-bold text-gray-900 dark:text-white text-[15px] leading-tight truncate max-w-[160px]">{u.device_name || 'Unknown Device'}</div>
                     </div>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      u.status === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
-                      u.status === 'paused' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
-                      'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400'
+                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider shrink-0 ${
+                      u.status === 'connected' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10' :
+                      u.status === 'paused' ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10' :
+                      'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10'
                     }`}>
                       {u.status}
                     </span>
                   </div>
-                  <div className="flex justify-between items-end mt-1">
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">{u.ip}</div>
-                    <div className="flex flex-col items-end">
-                      <div className="font-bold text-gray-900 dark:text-white text-lg">{u.time > 0 ? u.time_formatted : '0s'}</div>
+                  <div className="flex justify-between items-end mt-1.5 pl-[22px]">
+                    <div className="text-[13px] font-medium text-gray-500 dark:text-gray-400">{u.ip}</div>
+                    <div className="flex items-center gap-2">
                       {u.points > 0 && (
-                        <div className="text-[10px] text-amber-500 font-bold mt-0.5 uppercase tracking-wider">★ {u.points} pts</div>
+                        <div className="text-[10px] text-amber-500 font-bold uppercase tracking-wider">★ {u.points}</div>
                       )}
+                      <div className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">{u.time > 0 ? u.time_formatted : '0s'}</div>
                     </div>
                   </div>
                 </div>

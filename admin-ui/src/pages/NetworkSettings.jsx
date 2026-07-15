@@ -61,11 +61,11 @@ export default function NetworkSettings() {
   if (!data) return <div className="text-red-500">Error loading settings.</div>;
 
   return (
-    <div className="max-w-4xl space-y-6">
-      <h2 className="text-2xl font-bold mb-6">Network & Operations</h2>
+    <div className="max-w-4xl space-y-4 sm:space-y-6">
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Network & Operations</h2>
       
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-        <h3 className="flex items-center gap-2 text-lg font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-8">
+        <h3 className="flex items-center gap-2 text-base sm:text-lg font-bold mb-4 sm:mb-6 pb-2 border-b border-gray-100 dark:border-zinc-800/50">
           <Wifi size={20} /> Connection Rules
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -107,8 +107,8 @@ export default function NetworkSettings() {
           </div>
         </div>
 
-        <h3 className="text-sm font-bold mt-10 mb-4 uppercase tracking-widest text-gray-500">Feature Toggles</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <h3 className="text-xs sm:text-sm font-bold mt-8 sm:mt-10 mb-3 sm:mb-4 uppercase tracking-widest text-gray-500">Feature Toggles</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {[
             { name: 'speed_limit_toggle', label: 'Enable Speed Limits', default: data.speed_limit_enabled },
             { name: 'auto_pause', label: 'Enable Auto-Pause', default: data.auto_pause_enabled },
@@ -125,9 +125,9 @@ export default function NetworkSettings() {
           ))}
         </div>
         
-        <div className="mt-10 flex justify-end">
-          <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50">
-            <Save size={18} /> {saving ? 'Saving...' : 'Save Network Settings'}
+        <div className="mt-8 sm:mt-10 flex justify-end">
+          <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-2.5 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 w-full sm:w-auto justify-center">
+            <Save size={18} /> {saving ? 'Saving...' : 'Save Settings'}
           </button>
         </div>
       </form>
