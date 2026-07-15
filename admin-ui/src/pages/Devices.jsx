@@ -62,27 +62,27 @@ export default function Devices() {
         </button>
       </div>
 
-      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-zinc-950 sm:border border-gray-200 dark:border-zinc-800 sm:rounded-md sm:shadow-sm overflow-hidden flex flex-col -mx-6 sm:mx-0">
         {devices.length === 0 ? (
-          <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+          <div className="p-8 text-center text-gray-500 dark:text-gray-400 border-t sm:border-t-0 border-gray-200 dark:border-zinc-800">
             No infrastructure devices detected.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 dark:bg-zinc-900/50">
-                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Type</th>
+                <tr className="bg-gray-50 dark:bg-zinc-900/50 border-y sm:border-t-0 border-gray-200 dark:border-zinc-800">
+                  <th className="pl-4 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Type</th>
                   <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Device Info</th>
                   <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">MAC Address</th>
                   <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">IP Address</th>
-                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right whitespace-nowrap">Action</th>
+                  <th className="pr-4 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
                 {devices.map((dev, idx) => (
                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
-                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
+                    <td className="pl-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                       {dev.IsRouter ? (
                         <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[9px] sm:text-xs font-bold uppercase tracking-wide bg-gray-100 text-black dark:bg-zinc-800 dark:text-white border border-gray-200 dark:border-zinc-700">
                           <Server size={12} className="sm:w-3.5 sm:h-3.5" /> Gateway
@@ -96,7 +96,7 @@ export default function Devices() {
                     <td className="px-3 sm:px-6 py-2 sm:py-4 font-bold text-[11px] sm:text-sm whitespace-nowrap">{dev.Name || dev.Vendor || 'Unknown Device'}</td>
                     <td className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">{dev.MAC}</td>
                     <td className="px-3 sm:px-6 py-2 sm:py-4 text-[11px] sm:text-sm font-medium whitespace-nowrap">{dev.IP}</td>
-                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap">
+                    <td className="pr-4 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap">
                       <button 
                         className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                         onClick={() => handleRename(dev.MAC, dev.Name)}

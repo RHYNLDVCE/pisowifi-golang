@@ -118,7 +118,7 @@ export default function NetworkSettings() {
             <label key={i} className="flex items-center gap-3 p-4 border border-gray-200 dark:border-zinc-800 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
               <div className="relative flex items-center">
                 <input type="checkbox" name={toggle.name} defaultChecked={toggle.default} className="peer sr-only" />
-                <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-black/20 dark:peer-focus:ring-white/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black dark:peer-checked:bg-white"></div>
+                <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-black/20 dark:peer-focus:ring-blue-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black dark:peer-checked:bg-blue-600"></div>
               </div>
               <span className="text-sm font-semibold">{toggle.label}</span>
             </label>

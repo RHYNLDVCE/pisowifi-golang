@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetch('/admin/api/dashboard_data')
@@ -34,6 +35,14 @@ export default function Dashboard() {
 
   const { stats, users } = data;
 
+  const filteredMacs = Object.keys(users).filter(mac => {
+    const u = users[mac];
+    const term = searchQuery.toLowerCase();
+    return mac.toLowerCase().includes(term) || 
+           (u.ip && u.ip.toLowerCase().includes(term)) || 
+           (u.device_name && u.device_name.toLowerCase().includes(term));
+  });
+
   return (
     <div className="space-y-6">
       
@@ -54,9 +63,9 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Main Table Card */}
-      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm flex flex-col">
-        <div className="px-5 py-4 border-b border-gray-200 dark:border-zinc-800 flex flex-wrap gap-4 justify-between items-center bg-gray-50 dark:bg-zinc-900/50">
+      {/* Main Table Card (Edge-to-edge on mobile) */}
+      <div className="bg-white dark:bg-zinc-950 sm:border border-gray-200 dark:border-zinc-800 sm:rounded-md sm:shadow-sm flex flex-col -mx-6 sm:mx-0">
+        <div className="px-4 sm:px-5 py-3 sm:py-4 border-y sm:border-t-0 border-gray-200 dark:border-zinc-800 flex flex-wrap gap-4 justify-between items-center bg-gray-50 dark:bg-zinc-900/50">
           <div className="flex items-center gap-3">
             <h3 className="text-lg font-bold">Connections</h3>
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-400 border border-green-200 dark:border-green-500/30">
@@ -64,9 +73,15 @@ export default function Dashboard() {
                {data.active_users} Active
             </span>
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input type="text" placeholder="Search MAC address..." className="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-black border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-1 focus:ring-black dark:focus:ring-white w-full sm:w-64" />
+            <input 
+              type="text" 
+              placeholder="Search MAC, IP, or Name..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-black border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-1 focus:ring-black dark:focus:ring-white w-full sm:w-64" 
+            />
           </div>
         </div>
         
@@ -74,6 +89,7 @@ export default function Dashboard() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-200 dark:border-zinc-800">
+                <th className="pl-4 sm:pl-5 pr-2 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950 whitespace-nowrap w-8">#</th>
                 <th className="px-3 sm:px-5 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950 whitespace-nowrap">Device</th>
                 <th className="px-3 sm:px-5 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950 whitespace-nowrap">IP / MAC</th>
                 <th className="px-3 sm:px-5 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950 whitespace-nowrap">Status</th>
@@ -81,17 +97,20 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
-              {Object.keys(users).length === 0 ? (
+              {filteredMacs.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-5 py-10 text-center text-gray-500 dark:text-gray-400">
-                    No active devices connected.
+                  <td colSpan="5" className="px-5 py-10 text-center text-gray-500 dark:text-gray-400">
+                    {searchQuery ? "No matching devices found." : "No active devices connected."}
                   </td>
                 </tr>
               ) : (
-                Object.keys(users).map(mac => {
+                filteredMacs.map((mac, idx) => {
                   const u = users[mac];
                   return (
                     <tr key={mac} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors group cursor-pointer" onClick={() => window.location.href = `/admin/user/${mac}`}>
+                      <td className="pl-4 sm:pl-5 pr-2 py-2 sm:py-3 text-[10px] sm:text-sm font-bold text-gray-400 dark:text-gray-600">
+                        {idx + 1}
+                      </td>
                       <td className="px-3 sm:px-5 py-2 sm:py-3">
                         <div className="font-semibold text-[11px] sm:text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors whitespace-nowrap">{u.device_name || 'Unknown Device'}</div>
                       </td>

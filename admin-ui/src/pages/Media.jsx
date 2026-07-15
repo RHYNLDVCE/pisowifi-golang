@@ -175,19 +175,19 @@ export default function Media() {
           </button>
         </form>
 
-        <div className="overflow-x-auto border border-gray-200 dark:border-zinc-800 rounded">
+        <div className="overflow-x-auto sm:border border-gray-200 dark:border-zinc-800 sm:rounded -mx-6 sm:mx-0 border-y sm:border-t-0">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 dark:bg-zinc-900/50">
-                <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Filename</th>
-                <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Action</th>
+                <th className="pl-4 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Filename</th>
+                <th className="pr-4 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
               {data.sound_files && data.sound_files.map((file, idx) => (
                 <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
-                  <td className="px-3 sm:px-6 py-2 sm:py-4 font-mono text-[10px] sm:text-sm whitespace-nowrap">{file}</td>
-                  <td className="px-3 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap">
+                  <td className="pl-4 sm:px-6 py-2 sm:py-4 font-mono text-[10px] sm:text-sm whitespace-nowrap">{file}</td>
+                  <td className="pr-4 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap">
                     <button 
                       className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                       onClick={() => {

@@ -58,7 +58,7 @@ function Layout({ children }) {
   const pageTitle = currentNavItem ? currentNavItem.label : (location.pathname.startsWith('/admin/user') ? 'User Details' : 'Control Center');
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 text-gray-900 dark:bg-black dark:text-white transition-colors duration-200">
+    <div className="flex h-screen overflow-hidden bg-gray-50 text-gray-900 dark:bg-black dark:text-zinc-300 transition-colors duration-200">
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div 
