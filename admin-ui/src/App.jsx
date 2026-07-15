@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award, Server, LogOut } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
+import Connections from './pages/Connections';
 import ManageUser from './pages/ManageUser';
 import Devices from './pages/Devices';
 import Logs from './pages/Logs';
@@ -43,7 +44,8 @@ function Layout({ children }) {
   };
 
   const navItems = [
-    { path: '/admin', icon: <Home size={20} />, label: 'Dashboard' },
+    { path: '/admin', icon: <Home size={20} />, label: 'Analytics' },
+    { path: '/admin/connections', icon: <Users size={20} />, label: 'Active Connections' },
     { path: '/admin/system', icon: <Server size={20} />, label: 'System Stats' },
     { path: '/admin/network', icon: <Wifi size={20} />, label: 'Network Settings' },
     { path: '/admin/portal', icon: <MonitorSmartphone size={20} />, label: 'Portal UI & Sounds' },
@@ -155,6 +157,7 @@ export default function App() {
        <Layout>
          <Routes>
            <Route path="/admin" element={<Dashboard />} />
+           <Route path="/admin/connections" element={<Connections />} />
            <Route path="/admin/system" element={<SystemStats />} />
            <Route path="/admin/network" element={<NetworkSettings />} />
            <Route path="/admin/portal" element={<PortalSettings />} />
