@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Coins, Activity, Clock, TrendingUp, TrendingDown, BarChart2 } from 'lucide-react';
+import { Users, Coins, Clock, TrendingUp, TrendingDown, BarChart2, Sun, Calendar, CalendarDays, Landmark } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
 
@@ -43,10 +43,10 @@ export default function Dashboard() {
         {[
           { label: 'Total All Time', value: stats.total, color: 'text-gray-900 dark:text-white', icon: <Coins className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-blue-50 text-blue-500 dark:bg-blue-500/10' },
           { label: 'Yesterday', value: stats.yesterday, color: 'text-gray-900 dark:text-white', icon: <Clock className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-purple-50 text-purple-500 dark:bg-purple-500/10' },
-          { label: 'Today', value: stats.daily, color: 'text-gray-900 dark:text-white', icon: <Activity className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-green-50 text-green-500 dark:bg-green-500/10', compareTo: stats.yesterday },
-          { label: 'This Week', value: stats.weekly, color: 'text-gray-900 dark:text-white', icon: <Activity className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10' },
-          { label: 'This Month', value: stats.monthly, color: 'text-gray-900 dark:text-white', icon: <Activity className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-red-50 text-red-500 dark:bg-red-500/10' },
-          { label: 'This Year', value: stats.yearly, color: 'text-gray-900 dark:text-white', icon: <Activity className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10' },
+          { label: 'Today', value: stats.daily, color: 'text-gray-900 dark:text-white', icon: <Sun className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-green-50 text-green-500 dark:bg-green-500/10', compareTo: stats.yesterday },
+          { label: 'This Week', value: stats.weekly, color: 'text-gray-900 dark:text-white', icon: <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10' },
+          { label: 'This Month', value: stats.monthly, color: 'text-gray-900 dark:text-white', icon: <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-red-50 text-red-500 dark:bg-red-500/10' },
+          { label: 'This Year', value: stats.yearly, color: 'text-gray-900 dark:text-white', icon: <Landmark className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10' },
         ].map((kpi, idx) => {
           let trend = null;
           if (kpi.compareTo !== undefined) {

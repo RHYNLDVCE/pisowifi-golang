@@ -54,8 +54,8 @@ export default function Connections() {
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">Active Connections</h3>
               <div className="text-sm font-medium text-gray-500">Managing live user sessions on the network</div>
             </div>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400 ml-2">
-               <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400 ml-2 shrink-0 whitespace-nowrap">
+               <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></span>
                {data.active_users} Active
             </span>
           </div>

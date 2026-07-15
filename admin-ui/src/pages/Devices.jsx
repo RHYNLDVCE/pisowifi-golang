@@ -51,8 +51,7 @@ export default function Devices() {
 
   return (
     <div className="max-w-6xl">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Network Infrastructure</h2>
+      <div className="flex justify-end mb-4">
         <button 
           className="flex items-center gap-2 px-4 py-2 bg-white text-black dark:bg-black dark:text-white border border-gray-300 dark:border-zinc-700 font-bold rounded hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors disabled:opacity-50" 
           onClick={fetchDevices} 

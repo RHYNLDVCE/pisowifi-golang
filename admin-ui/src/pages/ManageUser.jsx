@@ -49,12 +49,6 @@ export default function ManageUser() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div className="flex items-center gap-4 mb-6">
-        <Link to="/admin" className="p-2 border border-gray-300 dark:border-zinc-700 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
-          <ArrowLeft size={20} />
-        </Link>
-        <h2 className="text-2xl font-bold">Manage Device</h2>
-      </div>
 
       <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6 shadow-sm">
         <div>

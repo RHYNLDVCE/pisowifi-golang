@@ -67,7 +67,6 @@ export default function LoyaltySettings() {
 
   return (
     <div className="max-w-4xl space-y-6">
-      <h2 className="text-2xl font-bold mb-6">Loyalty & Rewards</h2>
       
       <form onSubmit={handlePointsSubmit} className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
         <h3 className="flex items-center gap-2 text-lg font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">

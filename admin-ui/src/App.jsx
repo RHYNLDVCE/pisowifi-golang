@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award, Server, LogOut, X } from 'lucide-react';
+import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award, Server, LogOut, X, Clock } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Connections from './pages/Connections';
 import ManageUser from './pages/ManageUser';
 import Devices from './pages/Devices';
 import Logs from './pages/Logs';
-import Media from './pages/Media';
 import NetworkSettings from './pages/NetworkSettings';
 import PortalSettings from './pages/PortalSettings';
+import SessionSettings from './pages/SessionSettings';
 import CoinSettings from './pages/CoinSettings';
 import LoyaltySettings from './pages/LoyaltySettings';
 import SystemStats from './pages/SystemStats';
@@ -47,12 +47,12 @@ function Layout({ children }) {
     { path: '/admin', icon: <Home size={20} />, label: 'Analytics' },
     { path: '/admin/connections', icon: <Users size={20} />, label: 'Active Connections' },
     { path: '/admin/system', icon: <Server size={20} />, label: 'System Stats' },
-    { path: '/admin/network', icon: <Wifi size={20} />, label: 'Network Settings' },
+    { path: '/admin/network', icon: <Wifi size={20} />, label: 'Network Bandwidth' },
+    { path: '/admin/session', icon: <Clock size={20} />, label: 'Session & Access' },
     { path: '/admin/portal', icon: <MonitorSmartphone size={20} />, label: 'Portal UI & Sounds' },
     { path: '/admin/coins', icon: <Coins size={20} />, label: 'Coin Configuration' },
     { path: '/admin/loyalty', icon: <Award size={20} />, label: 'Loyalty & Rewards' },
     { path: '/admin/devices', icon: <Activity size={20} />, label: 'Infrastructure' },
-    { path: '/admin/media', icon: <Image size={20} />, label: 'Media & Assets' },
     { path: '/admin/logs', icon: <ShieldAlert size={20} />, label: 'System Logs' },
   ];
 
@@ -66,8 +66,8 @@ function Layout({ children }) {
         <div className="fixed inset-0 z-50 bg-gray-50 dark:bg-black md:hidden flex flex-col">
           <div className="h-20 flex items-center justify-between px-6 border-b border-gray-200 dark:border-zinc-800 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-black dark:bg-white rounded-xl flex items-center justify-center">
-                <Activity className="text-white dark:text-black w-5 h-5" />
+              <div className="w-8 h-8 flex items-center justify-center">
+                <Menu className="w-6 h-6" />
               </div>
               <div className="font-bold text-lg leading-tight">Menu</div>
             </div>
@@ -86,10 +86,10 @@ function Layout({ children }) {
                   key={item.path} 
                   to={item.path} 
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl text-base font-semibold transition-all ${
+                  className={`flex items-center gap-4 px-5 py-4 rounded-xl text-base font-semibold transition-all ${
                     isActive 
-                      ? 'bg-blue-600 text-white shadow-md' 
-                      : 'bg-white dark:bg-zinc-950 text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-zinc-900 shadow-sm'
+                      ? 'bg-gray-200 text-black dark:bg-zinc-800 dark:text-white' 
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900'
                   }`}
                 >
                   {item.icon}
@@ -97,7 +97,7 @@ function Layout({ children }) {
                 </Link>
               );
             })}
-            <a href="/admin/logout" className="flex items-center gap-4 px-5 py-4 mt-6 rounded-2xl text-base font-bold text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-500 shadow-sm">
+            <a href="/admin/logout" className="flex items-center gap-4 px-5 py-4 mt-2 rounded-xl text-base font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
               <LogOut size={20} />
               Logout
             </a>
@@ -110,7 +110,7 @@ function Layout({ children }) {
         <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-zinc-800 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-black dark:bg-white rounded flex items-center justify-center">
-              <Activity className="text-white dark:text-black w-5 h-5" />
+              <Wifi className="text-white dark:text-black w-5 h-5" />
             </div>
             <div>
               <div className="font-bold text-lg leading-tight">PisoWifi</div>
@@ -150,7 +150,7 @@ function Layout({ children }) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0">
-        <header className="h-20 bg-gray-50 dark:bg-black flex items-center justify-between px-4 sm:px-8 z-10 shrink-0">
+        <header className="h-20 bg-gray-50 dark:bg-black flex items-center justify-between px-4 sm:px-8 z-10 shrink-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-none">
           <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
             <h1 className="text-xl sm:text-2xl font-bold truncate">{pageTitle}</h1>
           </div>
@@ -219,11 +219,11 @@ export default function App() {
            <Route path="/admin/connections" element={<Connections />} />
            <Route path="/admin/system" element={<SystemStats />} />
            <Route path="/admin/network" element={<NetworkSettings />} />
+           <Route path="/admin/session" element={<SessionSettings />} />
            <Route path="/admin/portal" element={<PortalSettings />} />
            <Route path="/admin/coins" element={<CoinSettings />} />
            <Route path="/admin/loyalty" element={<LoyaltySettings />} />
            <Route path="/admin/devices" element={<Devices />} />
-           <Route path="/admin/media" element={<Media />} />
            <Route path="/admin/logs" element={<Logs />} />
            <Route path="/admin/user/:mac" element={<ManageUser />} />
          </Routes>

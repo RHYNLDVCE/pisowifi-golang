@@ -18,7 +18,6 @@ export default function SystemStats() {
 
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // Use window.location.host, but fallback to localhost:8080 during dev if needed
     const host = process.env.NODE_ENV === 'development' ? 'localhost:8080' : window.location.host;
     const wsUrl = `${protocol}//${host}/admin/ws/system_stats`;
     const ws = new WebSocket(wsUrl);
@@ -61,103 +60,117 @@ export default function SystemStats() {
   };
 
   return (
-    <div className="max-w-5xl space-y-6">
-      <h2 className="text-2xl font-bold mb-6">Realtime System Status</h2>
-
+    <div className="max-w-5xl space-y-4 sm:space-y-6">
+      
       {/* Network Flow Panel */}
-      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 mb-6">
-        <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6">Network Flow</h3>
-        <div className="flex flex-col md:flex-row items-center gap-4 bg-gray-50 dark:bg-zinc-900/50 p-6 rounded-md border border-gray-200 dark:border-zinc-800 relative overflow-hidden">
+      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+        <h3 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-gray-500 mb-4 sm:mb-6">Realtime Network Flow</h3>
+        <div className="flex flex-col md:flex-row items-center gap-4 bg-gray-50 dark:bg-zinc-900/30 p-4 sm:p-6 rounded-2xl border border-gray-100 dark:border-zinc-800/50 relative overflow-hidden">
            
            {/* Background Grid Pattern */}
            <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
            
            {/* WAN Node */}
-           <div className="flex-1 w-full flex items-center gap-4 relative z-10">
-             <div className="w-14 h-14 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-md flex items-center justify-center shrink-0 shadow-sm">
-               <Usb size={28} className="text-blue-500" />
+           <div className="flex-1 w-full flex items-center gap-4 relative z-10 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] dark:shadow-none">
+             <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+               <Usb size={24} />
              </div>
              <div>
-               <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">WAN Access</div>
-               <div className="flex gap-4">
-                 <div className="flex items-center gap-1.5 text-green-500 font-mono text-sm font-bold">
-                   <ArrowDownToLine size={16} /> {formatSpeed(speeds.rx)}
+               <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">WAN Access</div>
+               <div className="flex flex-col sm:flex-row sm:gap-4 gap-1.5">
+                 <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-mono text-[13px] font-bold">
+                   <ArrowDownToLine size={14} /> {formatSpeed(speeds.rx)}
                  </div>
-                 <div className="flex items-center gap-1.5 text-amber-500 font-mono text-sm font-bold">
-                   <ArrowUpToLine size={16} /> {formatSpeed(speeds.tx)}
+                 <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-mono text-[13px] font-bold">
+                   <ArrowUpToLine size={14} /> {formatSpeed(speeds.tx)}
                  </div>
                </div>
              </div>
            </div>
 
-           <div className="hidden md:flex shrink-0 px-4 relative z-10 text-gray-300 dark:text-zinc-700">
-              <ArrowRightLeft size={24} />
+           <div className="hidden md:flex shrink-0 px-2 relative z-10 text-gray-300 dark:text-zinc-700">
+              <ArrowRightLeft size={20} />
            </div>
 
            {/* LAN Node Placeholder */}
-           <div className="flex-1 w-full flex items-center gap-4 relative z-10">
-             <div className="w-14 h-14 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-md flex items-center justify-center shrink-0 shadow-sm">
-               <Usb size={28} className="text-emerald-500" />
+           <div className="flex-1 w-full flex items-center gap-4 relative z-10 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-xl shadow-[0_2px_10px_-3px_rgba(16,185,129,0.1)] dark:shadow-none">
+             <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+               <Usb size={24} />
              </div>
              <div>
-               <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">LAN Router</div>
-               <div className="text-xs text-gray-400 font-medium">Traffic distributed to users</div>
+               <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">LAN Router</div>
+               <div className="text-xs text-gray-500 font-medium">Traffic distributed to users</div>
              </div>
            </div>
         </div>
       </div>
 
       {/* Hardware Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 relative overflow-hidden group">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-l-md"></div>
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
-            <Cpu size={16} className="text-blue-500" /> 
-            <span className="text-sm font-bold uppercase tracking-widest">CPU Load</span>
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-3">
+             <div className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">CPU Load</div>
+             <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-500/10">
+               <Cpu size={16} />
+             </div>
           </div>
-          <div className="text-3xl font-black mb-1">{stats.cpu}%</div>
-          <div className="text-xs font-bold text-gray-500">Temp: {stats.temp}°C</div>
+          <div>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.cpu}%</div>
+            <div className="text-[10px] sm:text-xs font-medium text-gray-500 mt-1">Temp: {stats.temp}°C</div>
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 relative overflow-hidden group">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500 rounded-l-md"></div>
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
-            <MemoryStick size={16} className="text-purple-500" /> 
-            <span className="text-sm font-bold uppercase tracking-widest">Memory</span>
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-3">
+             <div className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Memory</div>
+             <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-purple-50 text-purple-500 dark:bg-purple-500/10">
+               <MemoryStick size={16} />
+             </div>
           </div>
-          <div className="text-3xl font-black mb-1">{stats.ram}%</div>
-          <div className="text-xs font-bold text-gray-500">Used: {stats.ram_used}GB / Total: {stats.ram_total}GB</div>
+          <div>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.ram}%</div>
+            <div className="text-[10px] sm:text-xs font-medium text-gray-500 mt-1 truncate">Used: {stats.ram_used}G / {stats.ram_total}G</div>
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 relative overflow-hidden group">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-l-md"></div>
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
-            <HardDrive size={16} className="text-amber-500" /> 
-            <span className="text-sm font-bold uppercase tracking-widest">Storage</span>
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-3">
+             <div className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Storage</div>
+             <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-amber-50 text-amber-500 dark:bg-amber-500/10">
+               <HardDrive size={16} />
+             </div>
           </div>
-          <div className="text-3xl font-black mb-1">{stats.disk}%</div>
-          <div className="text-xs font-bold text-gray-500">Free: {stats.disk_free}GB</div>
+          <div>
+            <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.disk}%</div>
+            <div className="text-[10px] sm:text-xs font-medium text-gray-500 mt-1">Free: {stats.disk_free}GB</div>
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 relative overflow-hidden group lg:col-span-2">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-l-md"></div>
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
-            <Network size={16} className="text-emerald-500" /> 
-            <span className="text-sm font-bold uppercase tracking-widest">IP Addresses</span>
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col justify-between col-span-2 lg:col-span-2">
+          <div className="flex justify-between items-start mb-3">
+             <div className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">IP Addresses</div>
+             <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10">
+               <Network size={16} />
+             </div>
           </div>
-          <div className="text-lg font-mono font-bold mb-1 break-all text-gray-900 dark:text-white leading-relaxed">{stats.ips}</div>
-          <div className="text-xs font-bold text-gray-500">Local Network</div>
+          <div>
+            <div className="text-sm sm:text-base font-mono font-bold text-gray-900 dark:text-white break-all leading-relaxed">{stats.ips}</div>
+            <div className="text-[10px] sm:text-xs font-medium text-gray-500 mt-1">Local Network Interfaces</div>
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 relative overflow-hidden group">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 rounded-l-md"></div>
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
-            <Timer size={16} className="text-cyan-500" /> 
-            <span className="text-sm font-bold uppercase tracking-widest">Uptime</span>
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col justify-between col-span-2 lg:col-span-1">
+          <div className="flex justify-between items-start mb-3">
+             <div className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Uptime</div>
+             <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-cyan-50 text-cyan-500 dark:bg-cyan-500/10">
+               <Timer size={16} />
+             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black mb-1 truncate">{stats.uptime}</div>
-          <div className="text-xs font-bold text-gray-500">Since Last Boot</div>
+          <div>
+            <div className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">{stats.uptime}</div>
+            <div className="text-[10px] sm:text-xs font-medium text-gray-500 mt-1">Since Last Boot</div>
+          </div>
         </div>
 
       </div>
