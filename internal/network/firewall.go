@@ -59,6 +59,17 @@ func runTcCmd(args []string) {
 		if ctx.Err() != nil {
 			logger.SystemLog(fmt.Sprintf("[TC Timeout] %s", strings.Join(args, " ")))
 		} else {
+			// Exit status 2 on 'del' commands just means the rule didn't exist to be deleted.
+			isDelError := false
+			for _, arg := range args {
+				if arg == "del" {
+					isDelError = true
+					break
+				}
+			}
+			if isDelError && strings.Contains(err.Error(), "exit status 2") {
+				return // harmless cleanup error, ignore
+			}
 			logger.SystemLog(fmt.Sprintf("[TC Error] %s: %v", strings.Join(args, " "), err))
 		}
 	}
