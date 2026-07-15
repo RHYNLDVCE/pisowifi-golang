@@ -358,7 +358,7 @@ export default function PortalSettings() {
           </div>
         </div>
 
-        <div className="flex justify-start w-full">
+        <div className="flex justify-end w-full">
           <button type="submit" disabled={savingSettings} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 w-full sm:w-auto justify-center shadow-lg">
             <Save size={18} /> {savingSettings ? 'Saving...' : 'Save General Settings'}
           </button>

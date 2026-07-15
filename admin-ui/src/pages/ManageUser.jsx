@@ -85,9 +85,13 @@ export default function ManageUser() {
           </div>
         </div>
         
-        <div className="md:text-right flex flex-col justify-center">
+        <div className="md:text-right flex flex-col justify-center items-end mt-6 md:mt-0">
            <div className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Time Remaining</div>
            <div className="text-4xl md:text-5xl font-black font-mono tracking-tight">{time_formatted}</div>
+           <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-xl text-sm font-bold shadow-sm border border-amber-100 dark:border-amber-500/20">
+             <Star size={16} />
+             {user.Points || 0} Points
+           </div>
         </div>
       </div>
 
