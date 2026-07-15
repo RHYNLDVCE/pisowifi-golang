@@ -54,6 +54,9 @@ function Layout({ children }) {
     { path: '/admin/logs', icon: <ShieldAlert size={20} />, label: 'System Logs' },
   ];
 
+  const currentNavItem = navItems.find(item => item.path === location.pathname);
+  const pageTitle = currentNavItem ? currentNavItem.label : (location.pathname.startsWith('/admin/user') ? 'User Details' : 'Control Center');
+
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 text-gray-900 dark:bg-black dark:text-white transition-colors duration-200">
       {/* Mobile Overlay */}
@@ -109,21 +112,21 @@ function Layout({ children }) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between px-6 z-10 shrink-0">
-          <div className="flex items-center gap-4">
+        <header className="h-16 bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between px-4 sm:px-6 z-10 shrink-0">
+          <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
             <button 
-              className="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-md"
+              className="md:hidden p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-md shrink-0"
               onClick={() => setSidebarOpen(true)}
             >
-              <Menu size={24} />
+              <Menu size={22} />
             </button>
-            <h1 className="text-xl font-bold hidden sm:block">Control Center</h1>
+            <h1 className="text-[15px] sm:text-xl font-bold truncate max-w-[130px] sm:max-w-none">{pageTitle}</h1>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="hidden md:flex flex-col items-end">
-              <span className="text-sm font-bold">{formatTime(currentTime)}</span>
-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{formatDate(currentTime)}</span>
+          <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+            <div className="flex flex-col items-end">
+              <span className="text-[11px] sm:text-sm font-bold">{formatTime(currentTime)}</span>
+              <span className="text-[8px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest">{formatDate(currentTime)}</span>
             </div>
             
             <button

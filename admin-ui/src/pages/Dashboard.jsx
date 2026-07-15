@@ -74,10 +74,10 @@ export default function Dashboard() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-200 dark:border-zinc-800">
-                <th className="px-5 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950">Device</th>
-                <th className="px-5 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950">IP / MAC</th>
-                <th className="px-5 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950">Status</th>
-                <th className="px-5 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950">Time Left</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950 whitespace-nowrap">Device</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950 whitespace-nowrap">IP / MAC</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950 whitespace-nowrap">Status</th>
+                <th className="px-3 sm:px-5 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950 whitespace-nowrap">Time Left</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
@@ -92,20 +92,20 @@ export default function Dashboard() {
                   const u = users[mac];
                   return (
                     <tr key={mac} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors group cursor-pointer" onClick={() => window.location.href = `/admin/user/${mac}`}>
-                      <td className="px-5 py-3">
-                        <div className="font-semibold text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{u.device_name || 'Unknown Device'}</div>
+                      <td className="px-3 sm:px-5 py-2 sm:py-3">
+                        <div className="font-semibold text-[11px] sm:text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors whitespace-nowrap">{u.device_name || 'Unknown Device'}</div>
                       </td>
-                      <td className="px-5 py-3">
-                        <div className="text-sm font-medium">{u.ip}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5">{mac}</div>
+                      <td className="px-3 sm:px-5 py-2 sm:py-3">
+                        <div className="text-[11px] sm:text-sm font-medium whitespace-nowrap">{u.ip}</div>
+                        <div className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5 whitespace-nowrap">{mac}</div>
                       </td>
-                      <td className="px-5 py-3">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                      <td className="px-3 sm:px-5 py-2 sm:py-3">
+                        <span className={`inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded text-[8px] sm:text-[10px] font-bold uppercase tracking-wider border whitespace-nowrap ${
                           u.status === 'connected' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20' :
                           u.status === 'paused' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' :
                           'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'
                         }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${
+                          <span className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${
                             u.status === 'connected' ? 'bg-green-600 dark:bg-green-400' :
                             u.status === 'paused' ? 'bg-amber-600 dark:bg-amber-400' :
                             'bg-red-600 dark:bg-red-400'
@@ -113,11 +113,11 @@ export default function Dashboard() {
                           {u.status}
                         </span>
                       </td>
-                      <td className="px-5 py-3">
-                        <div className="flex items-center gap-2">
-                           <div className="font-semibold text-sm font-mono">{u.time > 0 ? u.time_formatted : '0s'}</div>
+                      <td className="px-3 sm:px-5 py-2 sm:py-3">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                           <div className="font-semibold text-[11px] sm:text-sm font-mono whitespace-nowrap">{u.time > 0 ? u.time_formatted : '0s'}</div>
                            {u.points > 0 && (
-                             <span className="bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 px-1.5 py-0.5 rounded text-[10px] font-bold border border-amber-200 dark:border-amber-500/30">
+                             <span className="bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 px-1 sm:px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold border border-amber-200 dark:border-amber-500/30 whitespace-nowrap">
                                ★ {u.points}
                              </span>
                            )}

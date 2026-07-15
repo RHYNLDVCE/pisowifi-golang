@@ -72,31 +72,31 @@ export default function Devices() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 dark:bg-zinc-900/50">
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Device Info</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">MAC Address</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">IP Address</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Action</th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Type</th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Device Info</th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">MAC Address</th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">IP Address</th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
                 {devices.map((dev, idx) => (
                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                       {dev.IsRouter ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide bg-gray-100 text-black dark:bg-zinc-800 dark:text-white border border-gray-200 dark:border-zinc-700">
-                          <Server size={14} /> Gateway
+                        <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[9px] sm:text-xs font-bold uppercase tracking-wide bg-gray-100 text-black dark:bg-zinc-800 dark:text-white border border-gray-200 dark:border-zinc-700">
+                          <Server size={12} className="sm:w-3.5 sm:h-3.5" /> Gateway
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wide bg-gray-100 text-black dark:bg-zinc-800 dark:text-white border border-gray-200 dark:border-zinc-700">
-                          <Wifi size={14} /> AP / Switch
+                        <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[9px] sm:text-xs font-bold uppercase tracking-wide bg-gray-100 text-black dark:bg-zinc-800 dark:text-white border border-gray-200 dark:border-zinc-700">
+                          <Wifi size={12} className="sm:w-3.5 sm:h-3.5" /> AP / Switch
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 font-bold text-sm">{dev.Name || dev.Vendor || 'Unknown Device'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 font-mono">{dev.MAC}</td>
-                    <td className="px-6 py-4 text-sm font-medium">{dev.IP}</td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 font-bold text-[11px] sm:text-sm whitespace-nowrap">{dev.Name || dev.Vendor || 'Unknown Device'}</td>
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">{dev.MAC}</td>
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-[11px] sm:text-sm font-medium whitespace-nowrap">{dev.IP}</td>
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap">
                       <button 
                         className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                         onClick={() => handleRename(dev.MAC, dev.Name)}
