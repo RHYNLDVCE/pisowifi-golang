@@ -60,7 +60,7 @@ export default function SystemStats() {
   };
 
   return (
-    <div className="max-w-5xl space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       
       {/* Network Flow Panel */}
       <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">

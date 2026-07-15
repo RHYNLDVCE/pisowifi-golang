@@ -62,7 +62,7 @@ export default function SessionSettings() {
   if (!data) return <div className="text-red-500">Error loading settings.</div>;
 
   return (
-    <div className="max-w-3xl space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       
       <form onSubmit={handleSubmit} className="space-y-6">
         

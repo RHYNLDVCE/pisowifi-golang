@@ -48,7 +48,7 @@ export default function ManageUser() {
   const { user, device_name, time_formatted, history } = data;
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
 
       <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6 shadow-sm">
         <div>

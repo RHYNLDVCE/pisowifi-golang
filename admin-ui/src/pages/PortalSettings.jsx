@@ -128,12 +128,12 @@ export default function PortalSettings() {
   if (!data) return <div className="text-red-500">Error loading settings.</div>;
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="space-y-6">
       
       <form onSubmit={handleSaveSettings} className="space-y-6">
         
         {/* Coin Slot Settings */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden max-w-3xl">
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden w-full">
           <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center gap-3">
              <div className="p-2 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
                 <Timer size={20} />
@@ -158,7 +158,7 @@ export default function PortalSettings() {
         </div>
 
         {/* Portal Customization */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden max-w-3xl">
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden w-full">
           <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center gap-3">
              <div className="p-2 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
                 <MonitorSmartphone size={20} />
@@ -183,7 +183,7 @@ export default function PortalSettings() {
         </div>
         
         {/* Event Sounds (Selection) */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden max-w-3xl">
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden w-full">
           <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center gap-3">
              <div className="p-2 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400">
                 <Volume2 size={20} />
@@ -211,7 +211,7 @@ export default function PortalSettings() {
           </div>
         </div>
 
-        <div className="flex justify-start max-w-3xl">
+        <div className="flex justify-start w-full">
           <button type="submit" disabled={savingSettings} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 w-full sm:w-auto justify-center shadow-lg">
             <Save size={18} /> {savingSettings ? 'Saving...' : 'Save General Settings'}
           </button>

@@ -100,7 +100,7 @@ export default function Logs() {
   };
 
   return (
-    <div className="max-w-5xl">
+    <div className="w-full">
       {/* Filter and Search Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
