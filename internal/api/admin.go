@@ -412,7 +412,7 @@ func updateSettings(c *fiber.Ctx) error {
 
 	newFreeEnabled := body.FreeTimeToggle == "on"
 	oldFreeEnabled := config.Get().FreeTimeEnabled
-	if newFreeEnabled && !oldFreeEnabled {
+	if newFreeEnabled != oldFreeEnabled {
 		db.ResetAllFreeClaimed()
 		state.Users.Range(func(mac string, u *state.UserRecord) {
 			state.Users.UpdateField(mac, func(u *state.UserRecord) { u.FreeClaimed = 0 })
