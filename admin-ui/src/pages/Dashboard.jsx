@@ -71,15 +71,15 @@ export default function Dashboard() {
             <div className="flex flex-col flex-1 justify-end mt-1">
               {kpi.secondaryLabel ? (
                 <>
-                  <div className={`text-2xl sm:text-3xl font-black sm:font-bold tracking-tight ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
+                  <div className={`text-2xl sm:text-3xl font-black sm:font-bold tracking-tight ${kpi.color}`}>₱{kpi.value ? kpi.value.toLocaleString() : "0"}</div>
                   <div className="flex items-center gap-2 mt-2 bg-gray-50 dark:bg-zinc-900/50 p-1.5 px-2 rounded-lg self-start">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{kpi.secondaryLabel}:</span>
-                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300">₱{kpi.secondaryValue ? kpi.secondaryValue.toFixed(2) : "0.00"}</span>
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-300">₱{kpi.secondaryValue ? kpi.secondaryValue.toLocaleString() : "0"}</span>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className={`text-2xl sm:text-3xl font-black sm:font-bold tracking-tight ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
+                  <div className={`text-2xl sm:text-3xl font-black sm:font-bold tracking-tight ${kpi.color}`}>₱{kpi.value ? kpi.value.toLocaleString() : "0"}</div>
                   {trend}
                 </>
               )}
