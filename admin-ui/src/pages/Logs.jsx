@@ -58,7 +58,7 @@ export default function Logs() {
         <h2 className="text-2xl font-bold">System Logs</h2>
       </div>
 
-      <div className="bg-white dark:bg-black border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-black border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden flex flex-col">
         <div className="px-4 py-3 bg-gray-50 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 flex items-center gap-2">
           {/* Grayscale terminal dots to match the chromatic theme */}
           <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-zinc-700"></div>

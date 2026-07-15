@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Coins, Activity, Clock, Server } from 'lucide-react';
+import { Users, Coins, Activity, Clock, Server, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -36,50 +36,54 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Stat Card 1 */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
-          <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-zinc-900 flex items-center justify-center">
-             <Users className="w-6 h-6 text-black dark:text-white" />
+      
+      {/* 6 KPI Cards (Enterprise Style) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {[
+          { label: 'All Time', value: stats.total, color: 'text-green-600 dark:text-green-500' },
+          { label: 'Yesterday', value: stats.yesterday, color: 'text-gray-900 dark:text-white' },
+          { label: 'Today', value: stats.daily, color: 'text-gray-900 dark:text-white' },
+          { label: 'This Week', value: stats.weekly, color: 'text-gray-900 dark:text-white' },
+          { label: 'This Month', value: stats.monthly, color: 'text-gray-900 dark:text-white' },
+          { label: 'This Year', value: stats.yearly, color: 'text-gray-900 dark:text-white' },
+        ].map((kpi, idx) => (
+          <div key={idx} className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md p-4 shadow-sm flex flex-col justify-between">
+            <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">{kpi.label}</div>
+            <div className={`text-xl md:text-2xl font-black ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
           </div>
-          <div>
-            <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Active Users</div>
-            <div className="text-3xl font-black mt-1">{data.active_users}</div>
-          </div>
-        </div>
-
-        {/* Stat Card 2 */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl p-6 flex items-center gap-5 shadow-sm">
-          <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-zinc-900 flex items-center justify-center">
-             <Coins className="w-6 h-6 text-black dark:text-white" />
-          </div>
-          <div>
-            <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Sales</div>
-            <div className="text-3xl font-black mt-1">₱{stats.total ? stats.total.toFixed(2) : "0.00"}</div>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 dark:border-zinc-800">
-          <h3 className="text-lg font-bold">Connected Devices</h3>
+      {/* Main Table Card */}
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm flex flex-col">
+        <div className="px-5 py-4 border-b border-gray-200 dark:border-zinc-800 flex flex-wrap gap-4 justify-between items-center bg-gray-50 dark:bg-zinc-900/50">
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-bold">Connections</h3>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-400 border border-green-200 dark:border-green-500/30">
+               <span className="w-1.5 h-1.5 rounded-full bg-green-600 dark:bg-green-400"></span>
+               {data.active_users} Active
+            </span>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input type="text" placeholder="Search MAC address..." className="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-black border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-1 focus:ring-black dark:focus:ring-white w-full sm:w-64" />
+          </div>
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50 dark:bg-zinc-900/50">
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Device</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">IP / MAC</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time Left</th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Action</th>
+              <tr className="border-b border-gray-200 dark:border-zinc-800">
+                <th className="px-5 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950">Device</th>
+                <th className="px-5 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950">IP / MAC</th>
+                <th className="px-5 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950">Status</th>
+                <th className="px-5 py-3 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-950">Time Left</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
               {Object.keys(users).length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="4" className="px-5 py-10 text-center text-gray-500 dark:text-gray-400">
                     No active devices connected.
                   </td>
                 </tr>
@@ -87,16 +91,16 @@ export default function Dashboard() {
                 Object.keys(users).map(mac => {
                   const u = users[mac];
                   return (
-                    <tr key={mac} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-sm">{u.device_name || 'Unknown Device'}</div>
+                    <tr key={mac} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors group cursor-pointer" onClick={() => window.location.href = `/admin/user/${mac}`}>
+                      <td className="px-5 py-3">
+                        <div className="font-semibold text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{u.device_name || 'Unknown Device'}</div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3">
                         <div className="text-sm font-medium">{u.ip}</div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5">{mac}</div>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${
+                      <td className="px-5 py-3">
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
                           u.status === 'connected' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20' :
                           u.status === 'paused' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' :
                           'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'
@@ -109,16 +113,15 @@ export default function Dashboard() {
                           {u.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-sm font-mono">{u.time_formatted}</div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <Link 
-                          to={`/admin/user/${mac}`} 
-                          className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                        >
-                          Manage
-                        </Link>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-2">
+                           <div className="font-semibold text-sm font-mono">{u.time > 0 ? u.time_formatted : '0s'}</div>
+                           {u.points > 0 && (
+                             <span className="bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 px-1.5 py-0.5 rounded text-[10px] font-bold border border-amber-200 dark:border-amber-500/30">
+                               ★ {u.points}
+                             </span>
+                           )}
+                        </div>
                       </td>
                     </tr>
                   );

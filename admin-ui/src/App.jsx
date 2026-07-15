@@ -47,7 +47,7 @@ function Layout({ children }) {
       <aside className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-white dark:bg-zinc-950 border-r border-gray-200 dark:border-zinc-800 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-zinc-800">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-black dark:bg-white rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-black dark:bg-white rounded flex items-center justify-center">
               <Activity className="text-white dark:text-black w-5 h-5" />
             </div>
             <div>
@@ -65,9 +65,9 @@ function Layout({ children }) {
                 key={item.path} 
                 to={item.path} 
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
                   isActive 
-                    ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
+                    ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm' 
                     : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-900'
                 }`}
               >
@@ -84,7 +84,7 @@ function Layout({ children }) {
         <header className="h-16 bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between px-6 sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <button 
-              className="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-lg"
+              className="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-md"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={24} />

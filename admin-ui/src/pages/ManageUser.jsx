@@ -50,13 +50,13 @@ export default function ManageUser() {
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center gap-4 mb-6">
-        <Link to="/admin" className="p-2 border border-gray-300 dark:border-zinc-700 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+        <Link to="/admin" className="p-2 border border-gray-300 dark:border-zinc-700 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
           <ArrowLeft size={20} />
         </Link>
         <h2 className="text-2xl font-bold">Manage Device</h2>
       </div>
 
-      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6 shadow-sm">
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6 shadow-sm">
         <div>
           <div className="text-2xl font-black">{device_name || 'Unknown Device'}</div>
           <div className="text-gray-500 dark:text-gray-400 font-mono mt-1">MAC: {mac}</div>
@@ -84,7 +84,7 @@ export default function ManageUser() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md p-6 shadow-sm">
           <h3 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200 dark:border-zinc-800">Time Adjustments</h3>
           <form onSubmit={(e) => {
             e.preventDefault();
@@ -92,37 +92,37 @@ export default function ManageUser() {
             handleAction('/admin/manage_time', Object.fromEntries(formData));
           }} className="space-y-4">
             <div className="flex gap-3">
-               <select name="action" className="w-1/3 px-3 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white">
+               <select name="action" className="w-1/3 px-3 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white">
                  <option value="add">Add</option>
                  <option value="subtract">Deduct</option>
                </select>
-               <input type="number" name="amount" placeholder="Amt" required className="w-1/3 px-3 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
-               <select name="unit" className="w-1/3 px-3 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-black dark:focus:ring-white">
+               <input type="number" name="amount" placeholder="Amt" required className="w-1/3 px-3 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
+               <select name="unit" className="w-1/3 px-3 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white">
                  <option value="minutes">Mins</option>
                  <option value="hours">Hours</option>
                  <option value="days">Days</option>
                </select>
             </div>
-            <button type="submit" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+            <button type="submit" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
               <Clock size={18}/> Apply Time
             </button>
           </form>
         </div>
 
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md p-6 shadow-sm">
           <h3 className="text-lg font-bold mb-4 pb-2 border-b border-gray-200 dark:border-zinc-800">Security Actions</h3>
           <div className="space-y-3">
             {user.Status === 'blocked' ? (
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors" onClick={() => handleAction('/admin/unblock', {})}>
+              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors" onClick={() => handleAction('/admin/unblock', {})}>
                 <Check size={18}/> Unblock Device
               </button>
             ) : (
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-black dark:bg-black dark:text-white border-2 border-black dark:border-white font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors" onClick={() => handleAction('/admin/block', {})}>
+              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-black dark:bg-black dark:text-white border-2 border-black dark:border-white font-bold rounded hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors" onClick={() => handleAction('/admin/block', {})}>
                 <ShieldBan size={18}/> Block Device
               </button>
             )}
             
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-500 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors" onClick={() => {
+            <button className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-500 font-bold rounded hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors" onClick={() => {
               if (window.confirm('Are you sure you want to completely erase this user?')) {
                 handleAction('/admin/delete_user', {}).then(() => window.location.href = '/admin');
               }
@@ -133,7 +133,7 @@ export default function ManageUser() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-gray-200 dark:border-zinc-800">
           <h3 className="text-lg font-bold">Sales History</h3>
         </div>

@@ -103,7 +103,7 @@ export default function GlobalSettings() {
                 type="text" 
                 name="coin_rates" 
                 defaultValue={data.coin_rates} 
-                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl font-mono text-sm focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none"
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded font-mono text-sm focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent transition-all outline-none"
               />
             </div>
           </div>
@@ -146,7 +146,7 @@ export default function GlobalSettings() {
             <button 
               type="submit" 
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50"
             >
               <Save size={18} />
               {saving ? 'Saving...' : 'Save Configuration'}

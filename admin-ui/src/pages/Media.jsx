@@ -59,7 +59,7 @@ export default function Media() {
     <div className="max-w-5xl space-y-6">
       <h2 className="text-2xl font-bold mb-6">Media & Assets</h2>
       
-      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6 md:p-8">
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
         <h3 className="flex items-center gap-2 text-lg font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
           <Image size={20} className="text-black dark:text-white" /> Promotional Banners
         </h3>
@@ -70,16 +70,16 @@ export default function Media() {
             name="files" 
             multiple 
             accept="image/*" 
-            className="flex-1 px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
+            className="flex-1 px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
           />
-          <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+          <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
             <Upload size={18}/> Upload
           </button>
         </form>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {data.banner_files && data.banner_files.map((file, idx) => (
-            <div key={idx} className="group relative border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden aspect-video bg-gray-100 dark:bg-zinc-900">
+            <div key={idx} className="group relative border border-gray-200 dark:border-zinc-800 rounded overflow-hidden aspect-video bg-gray-100 dark:bg-zinc-900">
               <img src={`/static/banners/set/${file}`} alt="Banner" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <button 
@@ -92,14 +92,14 @@ export default function Media() {
             </div>
           ))}
           {(!data.banner_files || data.banner_files.length === 0) && (
-            <div className="col-span-full py-8 text-center text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-xl">
+            <div className="col-span-full py-8 text-center text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded">
               No banners uploaded yet.
             </div>
           )}
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6 md:p-8">
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
         <h3 className="flex items-center gap-2 text-lg font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
           <Volume2 size={20} className="text-black dark:text-white" /> Custom Sounds
         </h3>
@@ -109,14 +109,14 @@ export default function Media() {
             type="file" 
             name="file" 
             accept="audio/*" 
-            className="flex-1 px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
+            className="flex-1 px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
           />
-          <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+          <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
             <Upload size={18}/> Upload
           </button>
         </form>
 
-        <div className="overflow-x-auto border border-gray-200 dark:border-zinc-800 rounded-xl">
+        <div className="overflow-x-auto border border-gray-200 dark:border-zinc-800 rounded">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 dark:bg-zinc-900/50">

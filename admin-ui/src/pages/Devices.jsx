@@ -54,7 +54,7 @@ export default function Devices() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Network Infrastructure</h2>
         <button 
-          className="flex items-center gap-2 px-4 py-2 bg-white text-black dark:bg-black dark:text-white border border-gray-300 dark:border-zinc-700 font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors disabled:opacity-50" 
+          className="flex items-center gap-2 px-4 py-2 bg-white text-black dark:bg-black dark:text-white border border-gray-300 dark:border-zinc-700 font-bold rounded hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors disabled:opacity-50" 
           onClick={fetchDevices} 
           disabled={refreshing}
         >
@@ -62,7 +62,7 @@ export default function Devices() {
         </button>
       </div>
 
-      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden">
         {devices.length === 0 ? (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">
             No infrastructure devices detected.
