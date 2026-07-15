@@ -71,14 +71,6 @@ func main() {
 	// 7. Init firewall (flushes ipset, so do BEFORE re-adding users)
 	network.InitFirewall()
 
-	// 7b. Re-add users with remaining time to ipset so they aren't fully locked out.
-	//     They will still show as "paused" in the UI and need to click Connect,
-	//     but their MAC gets provisioned into the ipset so the transition is instant.
-	state.Users.Range(func(mac string, u *state.UserRecord) {
-		if u.Time > 0 && u.IP != "" {
-			network.AllowUser(mac, u.IP)
-		}
-	})
 
 	// 8. Flush conntrack
 	exec.Command("conntrack", "-F").Run()
