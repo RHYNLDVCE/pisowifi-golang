@@ -21,6 +21,7 @@ type DashboardStats struct {
 	Total     int         `json:"total"`
 	Yesterday int         `json:"yesterday"`
 	Daily     int         `json:"daily"`
+	Weekly    int         `json:"weekly"`
 	Monthly   int         `json:"monthly"`
 	LastMonth int         `json:"last_month"`
 	Yearly    int         `json:"yearly"`
