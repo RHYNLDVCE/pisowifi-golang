@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Volume2, Trash2, Upload, Activity } from 'lucide-react';
+import { Image, Volume2, Trash2, Upload, Activity, ChevronLeft, ChevronRight, Save } from 'lucide-react';
 
 export default function Media() {
   const [data, setData] = useState(null);
+  const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [savingOrder, setSavingOrder] = useState(false);
 
   const fetchMedia = () => {
     fetch('/admin/api/dashboard_data')
       .then(res => res.json())
       .then(json => {
         setData(json);
+        setBanners(json.banner_files || []);
         setLoading(false);
       });
   };
@@ -48,6 +51,37 @@ export default function Media() {
     }
   };
 
+  const moveBanner = (index, direction) => {
+    const newBanners = [...banners];
+    if (direction === -1 && index > 0) {
+      const temp = newBanners[index - 1];
+      newBanners[index - 1] = newBanners[index];
+      newBanners[index] = temp;
+    } else if (direction === 1 && index < newBanners.length - 1) {
+      const temp = newBanners[index + 1];
+      newBanners[index + 1] = newBanners[index];
+      newBanners[index] = temp;
+    }
+    setBanners(newBanners);
+  };
+
+  const saveBannerOrder = async () => {
+    setSavingOrder(true);
+    const formData = new FormData();
+    formData.append('order', JSON.stringify(banners));
+    try {
+      const res = await fetch('/admin/save_banner_order', {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) alert('Banner order saved!');
+      else alert('Failed to save order.');
+    } catch (err) {
+      alert('Error saving order');
+    }
+    setSavingOrder(false);
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
       <Activity className="animate-spin w-8 h-8 mr-3" />
@@ -60,9 +94,18 @@ export default function Media() {
       <h2 className="text-2xl font-bold mb-6">Media & Assets</h2>
       
       <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-        <h3 className="flex items-center gap-2 text-lg font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
-          <Image size={20} className="text-black dark:text-white" /> Promotional Banners
-        </h3>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+          <h3 className="flex items-center gap-2 text-lg font-bold">
+            <Image size={20} className="text-black dark:text-white" /> Promotional Banners
+          </h3>
+          <button 
+            onClick={saveBannerOrder}
+            disabled={savingOrder || banners.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50"
+          >
+            <Save size={16} /> {savingOrder ? 'Saving...' : 'Save Layout'}
+          </button>
+        </div>
         
         <form onSubmit={(e) => handleUpload('/admin/upload_banners', e)} className="flex flex-col sm:flex-row gap-4 mb-8">
           <input 
@@ -72,26 +115,42 @@ export default function Media() {
             accept="image/*" 
             className="flex-1 px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
           />
-          <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+          <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-black text-black dark:border-white dark:text-white font-bold rounded hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
             <Upload size={18}/> Upload
           </button>
         </form>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {data.banner_files && data.banner_files.map((file, idx) => (
-            <div key={idx} className="group relative border border-gray-200 dark:border-zinc-800 rounded overflow-hidden aspect-video bg-gray-100 dark:bg-zinc-900">
-              <img src={`/static/banners/set/${file}`} alt="Banner" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          {banners.map((file, idx) => (
+            <div key={file} className="group relative border border-gray-200 dark:border-zinc-800 rounded overflow-hidden aspect-video bg-gray-100 dark:bg-zinc-900 flex flex-col">
+              <div className="flex-1 relative overflow-hidden">
+                <img src={`/static/banners/set/${file}`} alt="Banner" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                <button 
+                  onClick={() => moveBanner(idx, -1)}
+                  disabled={idx === 0}
+                  className="flex-1 py-1.5 flex justify-center text-gray-500 hover:text-black hover:bg-gray-100 dark:hover:bg-zinc-900 dark:hover:text-white disabled:opacity-30 transition-colors border-r border-gray-200 dark:border-zinc-800"
+                >
+                  <ChevronLeft size={18} />
+                </button>
                 <button 
                   onClick={() => deleteBanner(file)}
-                  className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors transform hover:scale-110"
+                  className="flex-1 py-1.5 flex justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-r border-gray-200 dark:border-zinc-800"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={18} />
+                </button>
+                <button 
+                  onClick={() => moveBanner(idx, 1)}
+                  disabled={idx === banners.length - 1}
+                  className="flex-1 py-1.5 flex justify-center text-gray-500 hover:text-black hover:bg-gray-100 dark:hover:bg-zinc-900 dark:hover:text-white disabled:opacity-30 transition-colors"
+                >
+                  <ChevronRight size={18} />
                 </button>
               </div>
             </div>
           ))}
-          {(!data.banner_files || data.banner_files.length === 0) && (
+          {banners.length === 0 && (
             <div className="col-span-full py-8 text-center text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded">
               No banners uploaded yet.
             </div>
@@ -111,7 +170,7 @@ export default function Media() {
             accept="audio/*" 
             className="flex-1 px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm" 
           />
-          <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors">
+          <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-black text-black dark:border-white dark:text-white font-bold rounded hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
             <Upload size={18}/> Upload
           </button>
         </form>
