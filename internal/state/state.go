@@ -105,17 +105,22 @@ func (s *UserStore) UpdateField(mac string, fn func(*UserRecord)) bool {
 // WsManager — thread-safe per-MAC WebSocket connection map
 // ---------------------------------------------------------------------------
 
-type WsManager struct {
-	mu    sync.RWMutex
-	conns map[string]*websocket.Conn
+type wsConnWrapper struct {
+	conn *websocket.Conn
+	mu   sync.Mutex
 }
 
-var Manager = &WsManager{conns: make(map[string]*websocket.Conn)}
+type WsManager struct {
+	mu    sync.RWMutex
+	conns map[string]*wsConnWrapper
+}
+
+var Manager = &WsManager{conns: make(map[string]*wsConnWrapper)}
 
 func (m *WsManager) Connect(mac string, conn *websocket.Conn) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	m.conns[mac] = conn
+	m.conns[mac] = &wsConnWrapper{conn: conn}
 }
 
 func (m *WsManager) Disconnect(mac string) {
@@ -127,26 +132,26 @@ func (m *WsManager) Disconnect(mac string) {
 func (m *WsManager) Get(mac string) (*websocket.Conn, bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	c, ok := m.conns[mac]
-	return c, ok
+	wrapper, ok := m.conns[mac]
+	if ok {
+		return wrapper.conn, true
+	}
+	return nil, false
 }
 
 // Send writes a JSON message to a specific MAC's WebSocket connection.
 func (m *WsManager) Send(mac string, msg any) {
 	m.mu.RLock()
-	conn, ok := m.conns[mac]
+	wrapper, ok := m.conns[mac]
 	m.mu.RUnlock()
 	if !ok {
 		return
 	}
-	// WriteJSON is safe to call from any goroutine per Fiber's WS docs,
-	// but we serialize per-connection with a separate per-conn mutex.
-	// For simplicity we use the connection's own WriteJSON which is goroutine-safe
-	// when only one goroutine writes at a time. We use a no-op recovery to handle
-	// already-closed connections gracefully.
 	func() {
 		defer func() { recover() }()
-		conn.WriteJSON(msg)
+		wrapper.mu.Lock()
+		defer wrapper.mu.Unlock()
+		wrapper.conn.WriteJSON(msg)
 	}()
 }
 
@@ -154,10 +159,12 @@ func (m *WsManager) Send(mac string, msg any) {
 func (m *WsManager) CloseAll() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	for _, conn := range m.conns {
+	for _, wrapper := range m.conns {
 		func() {
 			defer func() { recover() }()
-			conn.Close()
+			wrapper.mu.Lock()
+			defer wrapper.mu.Unlock()
+			wrapper.conn.Close()
 		}()
 	}
 }

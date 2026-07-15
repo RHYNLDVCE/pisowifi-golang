@@ -2,6 +2,7 @@ package network
 
 import (
 	"context"
+	"encoding/xml"
 	"fmt"
 	"os"
 	"os/exec"
@@ -41,8 +42,12 @@ func runCmd(args []string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
-	if err := cmd.Run(); err != nil && ctx.Err() != nil {
-		logger.SystemLog(fmt.Sprintf("[Firewall Timeout] %s", strings.Join(args, " ")))
+	if err := cmd.Run(); err != nil {
+		if ctx.Err() != nil {
+			logger.SystemLog(fmt.Sprintf("[Firewall Timeout] %s", strings.Join(args, " ")))
+		} else {
+			logger.SystemLog(fmt.Sprintf("[Firewall Error] %s: %v", strings.Join(args, " "), err))
+		}
 	}
 }
 
@@ -50,8 +55,12 @@ func runTcCmd(args []string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
-	if err := cmd.Run(); err != nil && ctx.Err() != nil {
-		logger.SystemLog(fmt.Sprintf("[TC Timeout] %s", strings.Join(args, " ")))
+	if err := cmd.Run(); err != nil {
+		if ctx.Err() != nil {
+			logger.SystemLog(fmt.Sprintf("[TC Timeout] %s", strings.Join(args, " ")))
+		} else {
+			logger.SystemLog(fmt.Sprintf("[TC Error] %s: %v", strings.Join(args, " "), err))
+		}
 	}
 }
 
@@ -294,37 +303,37 @@ func AllowUser(mac, ip string) {
 
 var trafficLineRe = regexp.MustCompile(`packets\s+(\d+)\s+bytes\s+(\d+)`)
 
+type ipsetXMLData struct {
+	XMLName xml.Name `xml:"ips"`
+	IPSets  []struct {
+		Name    string `xml:"name,attr"`
+		Members []struct {
+			Elem    string `xml:"elem"`
+			Packets int64  `xml:"packets"`
+			Bytes   int64  `xml:"bytes"`
+		} `xml:"members>member"`
+	} `xml:"ipset"`
+}
+
 func GetAllTraffic() map[string][2]int64 {
-	out, err := exec.Command("ipset", "list", ipsetName).Output()
+	out, err := exec.Command("ipset", "list", ipsetName, "-o", "xml").Output()
 	if err != nil {
 		return nil
 	}
+	
+	var data ipsetXMLData
+	if err := xml.Unmarshal(out, &data); err != nil {
+		return nil
+	}
+
 	result := make(map[string][2]int64)
-	lines := strings.Split(string(out), "\n")
-	for _, line := range lines {
-		fields := strings.Fields(line)
-		if len(fields) < 6 {
-			continue
-		}
-		// Line format: <MAC> packets <N> bytes <N>
-		pktsIdx := -1
-		bytesIdx := -1
-		for i, f := range fields {
-			if f == "packets" {
-				pktsIdx = i + 1
-			}
-			if f == "bytes" {
-				bytesIdx = i + 1
+	for _, set := range data.IPSets {
+		if set.Name == ipsetName {
+			for _, m := range set.Members {
+				mac := strings.ToLower(m.Elem)
+				result[mac] = [2]int64{m.Bytes, m.Packets}
 			}
 		}
-		if pktsIdx < 0 || bytesIdx < 0 {
-			continue
-		}
-		mac := strings.ToLower(fields[0])
-		var pkts, bytes int64
-		fmt.Sscan(fields[pktsIdx], &pkts)
-		fmt.Sscan(fields[bytesIdx], &bytes)
-		result[mac] = [2]int64{bytes, pkts}
 	}
 	return result
 }

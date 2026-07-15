@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"pisowifi/internal/config"
@@ -70,6 +71,9 @@ func Setup() {
 	_ = setDirection(relayPin, "out")
 	_ = writeValue(relayPin, 0) // relay off by default
 
+	// Enable edge interrupts for the coin pin
+	_ = os.WriteFile(gpioPath(coinPin, "edge"), []byte("both"), 0644)
+
 	logger.SystemLog(fmt.Sprintf("[HW] Hardware ready (Coin GPIO: %d, Relay GPIO: %d)", coinPin, relayPin))
 }
 
@@ -109,58 +113,101 @@ func WaitForPulse(onDetected func()) int {
 		logger.SystemLog("[HW] Signal cleared. Ready.")
 	}
 
-	lastState := 1
+	valuePath := gpioPath(pin, "value")
+	fd, err := syscall.Open(valuePath, syscall.O_RDONLY|syscall.O_NONBLOCK, 0)
+	if err != nil {
+		logger.SystemLog(fmt.Sprintf("[HW] Error opening GPIO value for poll: %v", err))
+		time.Sleep(time.Second) // fallback sleep
+		return 0
+	}
+	defer syscall.Close(fd)
+
+	epfd, err := syscall.EpollCreate1(0)
+	if err != nil {
+		logger.SystemLog(fmt.Sprintf("[HW] Error creating epoll: %v", err))
+		time.Sleep(time.Second)
+		return 0
+	}
+	defer syscall.Close(epfd)
+
+	event := syscall.EpollEvent{
+		Events: syscall.EPOLLPRI | syscall.EPOLLERR,
+		Fd:     int32(fd),
+	}
+	if err := syscall.EpollCtl(epfd, syscall.EPOLL_CTL_ADD, fd, &event); err != nil {
+		logger.SystemLog(fmt.Sprintf("[HW] Error in epoll ctl: %v", err))
+		time.Sleep(time.Second)
+		return 0
+	}
+
+	events := make([]syscall.EpollEvent, 1)
+
+	waitForEdge := func(timeoutMs int) bool {
+		// Read to clear interrupt flag
+		buf := make([]byte, 2)
+		syscall.Seek(fd, 0, 0)
+		syscall.Read(fd, buf)
+
+		n, err := syscall.EpollWait(epfd, events, timeoutMs)
+		if err != nil && err != syscall.EINTR {
+			return false
+		}
+		return n > 0
+	}
 
 	// PHASE 1 — Wait for first pulse (HIGH → LOW edge)
 	for {
-		current := readValue(pin)
-		if current == 0 && lastState == 1 {
-			// First pulse detected
-			if onDetected != nil {
-				func() {
-					defer func() { recover() }()
-					onDetected()
-				}()
-			}
+		if ReadPin() == 0 {
 			break
 		}
-		lastState = current
-		time.Sleep(1 * time.Millisecond)
+		// Block for up to 1s to allow shutting-down checks in background.go
+		if !waitForEdge(1000) {
+			return 0
+		}
+	}
+
+	// First pulse detected
+	if onDetected != nil {
+		func() {
+			defer func() { recover() }()
+			onDetected()
+		}()
 	}
 
 	// PHASE 2 — Count remaining pulses within 0.6 s silence window
 	totalPulses := 1
 	lastPulseTime := time.Now()
-	lastState = 0
 
 	// Wait for the first pulse to finish (go back HIGH), timeout 0.5 s
 	timeout := time.Now()
-	for readValue(pin) == 0 {
+	for ReadPin() == 0 {
 		if time.Since(timeout) > 500*time.Millisecond {
 			break
 		}
-		time.Sleep(1 * time.Millisecond)
+		waitForEdge(10)
 	}
-	lastState = 1
 
 	// Keep counting until 0.6 s of silence
 	for time.Since(lastPulseTime) < 600*time.Millisecond {
-		current := readValue(pin)
-		if current == 0 && lastState == 1 {
-			totalPulses++
-			lastPulseTime = time.Now()
-
-			timeout = time.Now()
-			for readValue(pin) == 0 {
-				if time.Since(timeout) > 500*time.Millisecond {
-					break
-				}
-				time.Sleep(1 * time.Millisecond)
-			}
-			current = 1
+		timeRemaining := int(600 - time.Since(lastPulseTime).Milliseconds())
+		if timeRemaining <= 0 {
+			break
 		}
-		lastState = current
-		time.Sleep(1 * time.Millisecond)
+		
+		if waitForEdge(timeRemaining) {
+			if ReadPin() == 0 {
+				totalPulses++
+				lastPulseTime = time.Now()
+
+				timeout = time.Now()
+				for ReadPin() == 0 {
+					if time.Since(timeout) > 500*time.Millisecond {
+						break
+					}
+					waitForEdge(10)
+				}
+			}
+		}
 	}
 
 	return totalPulses

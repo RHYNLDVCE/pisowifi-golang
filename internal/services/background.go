@@ -2,12 +2,16 @@ package services
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"pisowifi/internal/hardware"
 	"pisowifi/internal/logger"
 	"pisowifi/internal/state"
 )
+
+// Wg tracks the background goroutines for graceful shutdown
+var Wg sync.WaitGroup
 
 // ---------------------------------------------------------------------------
 // Background — replaces services/background.py
@@ -16,6 +20,7 @@ import (
 
 // StartBackgroundTasks launches all three daemon goroutines.
 func StartBackgroundTasks() {
+	Wg.Add(3)
 	go coinListener()
 	go timeManager()
 	go connectivityMonitor()
@@ -24,6 +29,7 @@ func StartBackgroundTasks() {
 // coinListener polls the coin GPIO and credits users on pulse detection.
 // Mirrors _coin_listener() from background.py.
 func coinListener() {
+	defer Wg.Done()
 	logger.SystemLog("Coin Listener STARTED (Polling Mode).")
 	for {
 		if state.IsShuttingDown.Load() {
@@ -69,6 +75,7 @@ func coinListener() {
 // timeManager ticks every 1 second, managing user time and scheduled tasks.
 // Mirrors _time_manager() from background.py.
 func timeManager() {
+	defer Wg.Done()
 	logger.SystemLog("Time Manager & Scheduler Started...")
 	ticks := 0
 	for {
@@ -101,6 +108,7 @@ func timeManager() {
 // connectivityMonitor checks idle users every 15 seconds.
 // Mirrors _connectivity_monitor() from background.py.
 func connectivityMonitor() {
+	defer Wg.Done()
 	logger.SystemLog("Connectivity Monitor STARTED.")
 	for {
 		if state.IsShuttingDown.Load() {

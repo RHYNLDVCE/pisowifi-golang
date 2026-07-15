@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"pisowifi/internal/api"
 	"pisowifi/internal/config"
@@ -121,6 +122,19 @@ func main() {
 			defer func() { recover() }()
 			hardware.TurnSlotOff()
 		}()
+
+		// Wait for background tasks with a 3 second timeout
+		waitCh := make(chan struct{})
+		go func() {
+			services.Wg.Wait()
+			close(waitCh)
+		}()
+		select {
+		case <-waitCh:
+			logger.SystemLog("Background services exited cleanly.")
+		case <-time.After(3 * time.Second):
+			logger.SystemLog("Timeout waiting for background services. Forcing shutdown.")
+		}
 
 		// Run fail_safe.sh
 		failSafePath := "fail_safe.sh"
