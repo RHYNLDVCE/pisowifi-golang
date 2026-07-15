@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Home, Settings, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu } from 'lucide-react';
+import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
-import GlobalSettings from './pages/GlobalSettings';
 import ManageUser from './pages/ManageUser';
 import Devices from './pages/Devices';
 import Logs from './pages/Logs';
 import Media from './pages/Media';
+import NetworkSettings from './pages/NetworkSettings';
+import PortalSettings from './pages/PortalSettings';
+import CoinSettings from './pages/CoinSettings';
+import LoyaltySettings from './pages/LoyaltySettings';
 
 function Layout({ children }) {
   const location = useLocation();
@@ -27,14 +30,17 @@ function Layout({ children }) {
 
   const navItems = [
     { path: '/admin', icon: <Home size={20} />, label: 'Dashboard' },
-    { path: '/admin/settings', icon: <Settings size={20} />, label: 'System Settings' },
+    { path: '/admin/network', icon: <Wifi size={20} />, label: 'Network Settings' },
+    { path: '/admin/portal', icon: <MonitorSmartphone size={20} />, label: 'Portal UI & Sounds' },
+    { path: '/admin/coins', icon: <Coins size={20} />, label: 'Coin Configuration' },
+    { path: '/admin/loyalty', icon: <Award size={20} />, label: 'Loyalty & Rewards' },
     { path: '/admin/devices', icon: <Activity size={20} />, label: 'Infrastructure' },
     { path: '/admin/media', icon: <Image size={20} />, label: 'Media & Assets' },
     { path: '/admin/logs', icon: <ShieldAlert size={20} />, label: 'System Logs' },
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900 dark:bg-black dark:text-white transition-colors duration-200">
+    <div className="flex h-screen overflow-hidden bg-gray-50 text-gray-900 dark:bg-black dark:text-white transition-colors duration-200">
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div 
@@ -81,7 +87,7 @@ function Layout({ children }) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between px-6 sticky top-0 z-10">
+        <header className="h-16 bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between px-6 z-10 shrink-0">
           <div className="flex items-center gap-4">
             <button 
               className="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-md"
@@ -119,7 +125,10 @@ export default function App() {
        <Layout>
          <Routes>
            <Route path="/admin" element={<Dashboard />} />
-           <Route path="/admin/settings" element={<GlobalSettings />} />
+           <Route path="/admin/network" element={<NetworkSettings />} />
+           <Route path="/admin/portal" element={<PortalSettings />} />
+           <Route path="/admin/coins" element={<CoinSettings />} />
+           <Route path="/admin/loyalty" element={<LoyaltySettings />} />
            <Route path="/admin/devices" element={<Devices />} />
            <Route path="/admin/media" element={<Media />} />
            <Route path="/admin/logs" element={<Logs />} />
