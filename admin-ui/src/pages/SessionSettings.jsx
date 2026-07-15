@@ -33,6 +33,9 @@ export default function SessionSettings() {
     // Pass existing values for omitted fields
     payload.speed_limit_toggle = data.speed_limit_enabled ? 'on' : '';
     payload.gaming_mode = data.gaming_mode_enabled ? 'on' : '';
+    payload.open_nat = data.open_nat_enabled ? 'on' : '';
+    payload.custom_ttl = data.custom_ttl ?? 1;
+    payload.free_time_toggle = formData.get('free_time_toggle') ? 'on' : '';
     payload.speed_limit_val = data.global_speed_limit || 0;
     payload.coin_rates = data.coin_rates || '';
     payload.banner_text = data.banner_text || '';

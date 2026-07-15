@@ -21,8 +21,8 @@ type DashboardStats struct {
 	Total     int         `json:"total"`
 	Yesterday int         `json:"yesterday"`
 	Daily     int         `json:"daily"`
-	Weekly    int         `json:"weekly"`
 	Monthly   int         `json:"monthly"`
+	LastMonth int         `json:"last_month"`
 	Yearly    int         `json:"yearly"`
 	ChartData []DailyStat `json:"chart_data"`
 }
@@ -33,6 +33,7 @@ func GetDashboardStats() DashboardStats {
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	startOfWeek := startOfDay.AddDate(0, 0, -int(now.Weekday()))
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	startOfLastMonth := startOfMonth.AddDate(0, -1, 0)
 	startOfYear := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
 	yesterday := startOfDay.AddDate(0, 0, -1)
 
@@ -53,6 +54,7 @@ func GetDashboardStats() DashboardStats {
 		Daily:     db.GetSalesSince(startOfDay.Unix()),
 		Weekly:    db.GetSalesSince(startOfWeek.Unix()),
 		Monthly:   db.GetSalesSince(startOfMonth.Unix()),
+		LastMonth: db.GetSalesRange(startOfLastMonth.Unix(), startOfMonth.Unix()),
 		Yearly:    db.GetSalesSince(startOfYear.Unix()),
 		ChartData: chartData,
 	}

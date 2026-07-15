@@ -1,6 +1,8 @@
 package api
 
 import (
+	"archive/zip"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -48,6 +50,9 @@ func RegisterAdminRoutes(app *fiber.App) {
 	admin.Post("/save_banner_order", saveBannerOrder)
 	admin.Post("/delete_banner", deleteBanner)
 	admin.Post("/upload_sound", uploadSound)
+	admin.Get("/backup", downloadBackup)
+	admin.Post("/restore", restoreBackup)
+	admin.Post("/reset_settings", resetSettings)
 	admin.Get("/api/user/:mac", getSingleUser)
 	admin.Post("/manage_time", adminManageTime)
 	admin.Post("/manage_points", adminManagePoints)
@@ -236,6 +241,8 @@ func getDashboardData(c *fiber.Ctx) error {
 		"coin_rates":           cfg.CoinRates,
 		"banner_text":          cfg.BannerText,
 		"banner_link":          cfg.BannerLink,
+		"open_nat_enabled":     cfg.OpenNATEnabled,
+		"custom_ttl":           cfg.CustomTTL,
 		"banner_files":         bannerFiles,
 		"free_time_enabled":    cfg.FreeTimeEnabled,
 		"free_time_duration":   cfg.FreeTimeDuration,
@@ -397,6 +404,8 @@ func updateSettings(c *fiber.Ctx) error {
 		FreeTimeDuration string `json:"free_time_duration"`
 		SoundInsert      string `json:"sound_insert"`
 		SoundCoin        string `json:"sound_coin"`
+		OpenNAT          string `json:"open_nat"`
+		CustomTTL        string `json:"custom_ttl"`
 	}
 	if err := c.BodyParser(&body); err != nil {
 		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
@@ -432,6 +441,8 @@ func updateSettings(c *fiber.Ctx) error {
 		cfg.FreeTimeDuration = parseInt(body.FreeTimeDuration, 5)
 		cfg.SoundInsert = body.SoundInsert
 		cfg.SoundCoin = body.SoundCoin
+		cfg.OpenNATEnabled = body.OpenNAT == "on"
+		cfg.CustomTTL = parseInt(body.CustomTTL, 1)
 	})
 	config.Save()
 	network.RefreshAllLimits()
@@ -442,8 +453,116 @@ func updateSettings(c *fiber.Ctx) error {
 func rebootDevice(c *fiber.Ctx) error {
 	clientIP := c.IP()
 	logger.AuditLog("SYSTEM_REBOOT", clientIP, infrastructure.GetMACFromIP(clientIP), "Initiated manual system reboot")
-	infrastructure.RebootDevice()
+	go func() {
+		time.Sleep(2 * time.Second)
+		infrastructure.RebootDevice()
+	}()
 	return c.JSON(fiber.Map{"status": "success", "message": "Rebooting now..."})
+}
+
+func resetSettings(c *fiber.Ctx) error {
+	clientIP := c.IP()
+	
+	if err := config.ResetToDefaults(); err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Failed to reset configuration"})
+	}
+
+	logger.AuditLog("SYSTEM_RESET", clientIP, infrastructure.GetMACFromIP(clientIP), "Performed a factory reset of system configuration settings. Rebooting...")
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		infrastructure.RebootDevice()
+	}()
+
+	return c.JSON(fiber.Map{"status": "success", "message": "Settings reset to defaults. Rebooting system..."})
+}
+
+func downloadBackup(c *fiber.Ctx) error {
+	clientIP := c.IP()
+	
+	buf := new(bytes.Buffer)
+	zipWriter := zip.NewWriter(buf)
+
+	// Add config.json
+	if configData, err := os.ReadFile("config.json"); err == nil {
+		if f, err := zipWriter.Create("config.json"); err == nil {
+			f.Write(configData)
+		}
+	}
+
+	// Add pisowifi.db
+	if dbData, err := os.ReadFile("pisowifi.db"); err == nil {
+		if f, err := zipWriter.Create("pisowifi.db"); err == nil {
+			f.Write(dbData)
+		}
+	}
+
+	zipWriter.Close()
+
+	logger.AuditLog("SYSTEM_BACKUP", clientIP, infrastructure.GetMACFromIP(clientIP), "Downloaded system database backup")
+
+	c.Set("Content-Type", "application/zip")
+	c.Set("Content-Disposition", fmt.Sprintf("attachment; filename=pisowifi_backup_%s.zip", time.Now().Format("20060102_150405")))
+	return c.Send(buf.Bytes())
+}
+
+func restoreBackup(c *fiber.Ctx) error {
+	clientIP := c.IP()
+	
+	file, err := c.FormFile("backup_file")
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "No file uploaded"})
+	}
+
+	// Save the uploaded file to a temporary location
+	tmpPath := "uploaded_backup.zip"
+	if err := c.SaveFile(file, tmpPath); err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Failed to save uploaded file"})
+	}
+	defer os.Remove(tmpPath)
+
+	// Open the zip file
+	r, err := zip.OpenReader(tmpPath)
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "Invalid zip file"})
+	}
+	defer r.Close()
+
+	var hasConfig, hasDB bool
+
+	for _, f := range r.File {
+		if f.Name == "config.json" {
+			rc, err := f.Open()
+			if err == nil {
+				data, _ := io.ReadAll(rc)
+				os.WriteFile("config.json", data, 0644)
+				rc.Close()
+				hasConfig = true
+			}
+		} else if f.Name == "pisowifi.db" {
+			rc, err := f.Open()
+			if err == nil {
+				data, _ := io.ReadAll(rc)
+				os.WriteFile("pisowifi.db", data, 0644)
+				rc.Close()
+				hasDB = true
+			}
+		}
+	}
+
+	if !hasConfig && !hasDB {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "Zip file does not contain valid backup files"})
+	}
+
+	logger.AuditLog("SYSTEM_RESTORE", clientIP, infrastructure.GetMACFromIP(clientIP), "Restored system database backup. Rebooting...")
+
+	// Schedule a reboot
+	go func() {
+		time.Sleep(2 * time.Second)
+		infrastructure.RebootDevice()
+	}()
+
+	return c.JSON(fiber.Map{"status": "success", "message": "Backup restored successfully. Rebooting system..."})
 }
 
 // ---------------------------------------------------------------------------

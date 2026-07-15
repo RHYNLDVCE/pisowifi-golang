@@ -125,6 +125,14 @@ func InitFirewall() {
 	// Hardware offload disable
 	exec.Command("ethtool", "-K", lan, "tso", "off", "gso", "off", "gro", "off", "sg", "off").Run()
 
+	// Manage UPnP (miniupnpd) for Open NAT
+	if cfg.OpenNATEnabled {
+		logger.SystemLog("Open NAT (Gaming Mode) Enabled. Starting miniupnpd...")
+		runCmdStr("systemctl restart miniupnpd")
+	} else {
+		runCmdStr("systemctl stop miniupnpd")
+	}
+
 	// IPSet
 	runCmdStr(fmt.Sprintf("ipset create %s hash:mac hashsize 1024 maxelem 65535 counters -exist", ipsetName))
 	runCmdStr(fmt.Sprintf("ipset flush %s", ipsetName))
@@ -164,9 +172,13 @@ func InitFirewall() {
 		// Drop 443 for authorized users (they use real HTTPS via WAN)
 		fmt.Sprintf("iptables -A FORWARD -i %s -m set ! --match-set %s src -p tcp --dport 443 -j DROP", lan, ipsetName),
 		"iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1300",
-		fmt.Sprintf("iptables -t mangle -A POSTROUTING -o %s -j TTL --ttl-set 1", lan),
 		fmt.Sprintf("iptables -t nat -A POSTROUTING -o %s -j MASQUERADE", wan),
 	}
+
+	if cfg.CustomTTL > 0 {
+		cmds = append(cmds, fmt.Sprintf("iptables -t mangle -A POSTROUTING -o %s -j TTL --ttl-set %d", lan, cfg.CustomTTL))
+	}
+
 	for _, c := range cmds {
 		runCmdStr(c)
 	}

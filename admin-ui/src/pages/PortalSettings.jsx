@@ -37,6 +37,8 @@ export default function PortalSettings() {
     // Pass existing values to prevent overwriting with null
     payload.speed_limit_toggle = data.speed_limit_enabled ? 'on' : '';
     payload.gaming_mode = data.gaming_mode_enabled ? 'on' : '';
+    payload.open_nat = data.open_nat_enabled ? 'on' : '';
+    payload.custom_ttl = data.custom_ttl ?? 1;
     payload.free_time_toggle = data.free_time_enabled ? 'on' : '';
     payload.auto_pause = data.auto_pause_enabled ? 'on' : '';
     payload.coin_rates = data.coin_rates || '';

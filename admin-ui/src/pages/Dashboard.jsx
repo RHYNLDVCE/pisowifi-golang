@@ -45,7 +45,7 @@ export default function Dashboard() {
           { label: 'Yesterday', value: stats.yesterday, color: 'text-gray-900 dark:text-white', icon: <Clock className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-purple-50 text-purple-500 dark:bg-purple-500/10' },
           { label: 'Today', value: stats.daily, color: 'text-gray-900 dark:text-white', icon: <Sun className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-green-50 text-green-500 dark:bg-green-500/10', compareTo: stats.yesterday },
           { label: 'This Week', value: stats.weekly, color: 'text-gray-900 dark:text-white', icon: <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10' },
-          { label: 'This Month', value: stats.monthly, color: 'text-gray-900 dark:text-white', icon: <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-red-50 text-red-500 dark:bg-red-500/10' },
+          { label: 'This Month', value: stats.monthly, color: 'text-gray-900 dark:text-white', icon: <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-red-50 text-red-500 dark:bg-red-500/10', secondaryLabel: 'Last Month', secondaryValue: stats.last_month },
           { label: 'This Year', value: stats.yearly, color: 'text-gray-900 dark:text-white', icon: <Landmark className="w-4 h-4 sm:w-5 sm:h-5" />, iconBg: 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10' },
         ].map((kpi, idx) => {
           let trend = null;
@@ -68,9 +68,24 @@ export default function Dashboard() {
                  {kpi.icon}
                </div>
             </div>
-            <div>
-              <div className={`text-xl sm:text-3xl font-black sm:font-bold ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
-              {trend}
+            <div className="flex flex-col flex-1 justify-end">
+              {kpi.secondaryLabel ? (
+                <div className="flex items-center">
+                  <div className="flex-1">
+                    <div className={`text-xl sm:text-2xl font-black sm:font-bold ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
+                  </div>
+                  <div className="w-px h-8 bg-gray-200 dark:bg-zinc-800 mx-3 sm:mx-4"></div>
+                  <div className="flex-1">
+                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">{kpi.secondaryLabel}</div>
+                    <div className={`text-sm sm:text-lg font-bold text-gray-500 dark:text-gray-400`}>₱{kpi.secondaryValue ? kpi.secondaryValue.toFixed(2) : "0.00"}</div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className={`text-xl sm:text-3xl font-black sm:font-bold ${kpi.color}`}>₱{kpi.value ? kpi.value.toFixed(2) : "0.00"}</div>
+                  {trend}
+                </>
+              )}
             </div>
           </div>
         )})}

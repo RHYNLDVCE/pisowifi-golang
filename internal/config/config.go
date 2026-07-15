@@ -89,6 +89,8 @@ type AppConfig struct {
 	PulseValue             int                `json:"pulse_value"`
 	RestartSchedule        RestartSchedule    `json:"restart_schedule"`
 	PointsEnabled          bool               `json:"points_enabled"`
+	OpenNATEnabled         bool               `json:"open_nat_enabled"`
+	CustomTTL              int                `json:"custom_ttl"`
 	CoinPointMap           map[string]float64 `json:"coin_point_map"`
 	PointPromos            []PromoItem        `json:"point_promos"`
 	InactiveBytesThreshold int                `json:"inactive_bytes_threshold"`
@@ -118,6 +120,8 @@ var defaultConfig = AppConfig{
 	PulseValue:              1,
 	RestartSchedule:         RestartSchedule{Enabled: false, Time: "03:00"},
 	PointsEnabled:           true,
+	OpenNATEnabled:          false,
+	CustomTTL:               1,
 	CoinPointMap:            map[string]float64{"1": 0.5, "5": 1, "10": 3, "20": 5},
 	PointPromos:             []PromoItem{{ID: 1, Name: "3 Hours Free", Cost: 20, Minutes: 180}},
 	InactiveBytesThreshold:  500,
@@ -176,6 +180,14 @@ func Load() {
 		current.CustomDeviceNames = map[string]string{}
 	}
 	fmt.Println("[Config] Loaded from config.json.")
+}
+
+// ResetToDefaults resets the current configuration in memory to the defaults and saves it to disk.
+func ResetToDefaults() error {
+	mu.Lock()
+	current = defaultConfig
+	mu.Unlock()
+	return Save()
 }
 
 // Save atomically writes the current config to config.json.

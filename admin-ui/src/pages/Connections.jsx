@@ -149,7 +149,7 @@ export default function Connections() {
                         <div className="text-xs text-gray-400 font-mono mt-0.5">{mac}</div>
                       </td>
                       <td className="px-4 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           u.status === 'connected' ? 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400' :
                           u.status === 'paused' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' :
                           'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
