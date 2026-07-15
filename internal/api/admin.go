@@ -146,7 +146,6 @@ func getDashboardData(c *fiber.Ctx) error {
 		if customNames[mac] != "" {
 			name = customNames[mac]
 		}
-		u.IP = u.IP // already set
 		users = append(users, enriched{MAC: mac, Data: u, Name: name})
 	})
 
