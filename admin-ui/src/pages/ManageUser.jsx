@@ -216,7 +216,6 @@ export default function ManageUser() {
                     <tr>
                       <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
                       <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Time Added</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/50">
@@ -224,7 +223,6 @@ export default function ManageUser() {
                       <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-zinc-900/50 transition-colors">
                         <td className="px-6 py-3.5 text-sm text-gray-600 dark:text-gray-300 font-medium">{h.DateStr}</td>
                         <td className="px-6 py-3.5 text-sm font-bold text-green-600 dark:text-green-500">₱{h.Amount.toLocaleString()}</td>
-                        <td className="px-6 py-3.5 text-sm text-gray-600 dark:text-gray-300 font-medium">{h.TimeAdded} mins</td>
                       </tr>
                     ))}
                   </tbody>

@@ -753,7 +753,7 @@
     var mac = "{{ mac }}";
     var ratesStr = "{{ coin_rates }}";
     var pointMap = JSON.parse('{{ coin_point_map_json | safe }}');
-    var pointsEnabled = {{ points_enabled_json }};
+    var pointsEnabled = "{{ points_enabled_json }}";
 
     // --- UI SETUP ---
     var badChar = String.fromCharCode(123);
