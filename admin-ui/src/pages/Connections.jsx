@@ -5,6 +5,7 @@ export default function Connections() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('time');
 
   useEffect(() => {
     fetch('/admin/api/dashboard_data')
@@ -40,6 +41,13 @@ export default function Connections() {
     return mac.toLowerCase().includes(term) || 
            (u.ip && u.ip.toLowerCase().includes(term)) || 
            (u.device_name && u.device_name.toLowerCase().includes(term));
+  }).sort((a, b) => {
+    const ua = users[a];
+    const ub = users[b];
+    if (sortBy === 'points') {
+      return (ub.points || 0) - (ua.points || 0);
+    }
+    return (ub.time || 0) - (ua.time || 0);
   });
 
   return (
@@ -59,15 +67,25 @@ export default function Connections() {
                {data.active_users} Active
             </span>
           </div>
-          <div className="relative w-full sm:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input 
-              type="text" 
-              placeholder="Search MAC, IP, or Name..." 
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800/50 rounded-xl outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-zinc-700 w-full sm:w-64 transition-all" 
-            />
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="px-4 py-2 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800/50 rounded-xl outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-zinc-700 w-full sm:w-auto transition-all cursor-pointer font-medium"
+            >
+              <option value="time">Order by Time</option>
+              <option value="points">Order by Points</option>
+            </select>
+            <div className="relative w-full sm:w-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input 
+                type="text" 
+                placeholder="Search MAC, IP, or Name..." 
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-2 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800/50 rounded-xl outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-zinc-700 w-full sm:w-64 transition-all" 
+              />
+            </div>
           </div>
         </div>
         
@@ -94,7 +112,11 @@ export default function Connections() {
                 filteredMacs.map((mac, idx) => {
                   const u = users[mac];
                   return (
-                    <tr key={mac} className="hover:bg-gray-50/50 dark:hover:bg-zinc-900/20 transition-colors group cursor-pointer" onClick={() => window.location.href = `/admin/user/${mac}`}>
+                    <tr key={mac} className={`transition-colors group cursor-pointer ${
+                      u.status === 'connected' ? 'bg-green-50/50 dark:bg-green-500/5 hover:bg-green-100/50 dark:hover:bg-green-500/10' :
+                      u.status === 'paused' ? 'bg-amber-50/50 dark:bg-amber-500/5 hover:bg-amber-100/50 dark:hover:bg-amber-500/10' :
+                      'hover:bg-gray-50/50 dark:hover:bg-zinc-900/20'
+                    }`} onClick={() => window.location.href = `/admin/user/${mac}`}>
                       <td className="pr-4 py-4 text-sm font-medium text-gray-400">
                         {idx + 1}
                       </td>
@@ -142,7 +164,11 @@ export default function Connections() {
             filteredMacs.map((mac, idx) => {
               const u = users[mac];
               return (
-                <div key={mac} onClick={() => window.location.href = `/admin/user/${mac}`} className="flex flex-col py-3 px-6 border-b border-gray-100 dark:border-zinc-800/50 active:bg-gray-50 dark:active:bg-zinc-900 transition-colors cursor-pointer">
+                <div key={mac} onClick={() => window.location.href = `/admin/user/${mac}`} className={`flex flex-col py-3 px-6 border-b border-gray-100 dark:border-zinc-800/50 transition-colors cursor-pointer ${
+                  u.status === 'connected' ? 'bg-green-50/50 dark:bg-green-500/5 active:bg-green-100/50 dark:active:bg-green-500/10' :
+                  u.status === 'paused' ? 'bg-amber-50/50 dark:bg-amber-500/5 active:bg-amber-100/50 dark:active:bg-amber-500/10' :
+                  'active:bg-gray-50 dark:active:bg-zinc-900'
+                }`}>
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
                       <div className="text-gray-400 font-medium text-xs">{idx + 1}.</div>
