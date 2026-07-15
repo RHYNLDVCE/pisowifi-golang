@@ -77,10 +77,10 @@ export default function NetworkSettings() {
                  <p className="text-xs text-gray-500">Enforce global bandwidth cap</p>
                </div>
              </div>
-             <div className="relative flex items-center shrink-0 ml-4">
+             <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
                <input type="checkbox" name="speed_limit_toggle" defaultChecked={data.speed_limit_enabled} className="peer sr-only" />
                <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-             </div>
+             </label>
           </div>
           <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
              <div className="space-y-2 max-w-sm">
@@ -107,10 +107,10 @@ export default function NetworkSettings() {
                  <p className="text-xs text-gray-500">Anti-Bufferbloat QoS optimization</p>
                </div>
              </div>
-             <div className="relative flex items-center shrink-0 ml-4">
+             <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
                <input type="checkbox" name="gaming_mode" defaultChecked={data.gaming_mode_enabled} className="peer sr-only" />
                <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-             </div>
+             </label>
           </div>
         </div>
 
