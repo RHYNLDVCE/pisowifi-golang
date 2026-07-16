@@ -151,6 +151,9 @@ func InitFirewall() {
 	// Hardware offload disable
 	exec.Command("ethtool", "-K", lan, "tso", "off", "gso", "off", "gro", "off", "sg", "off").Run()
 
+	// Wipe all old iptables and nftables garbage for a clean slate
+	runCmdStr("nft flush ruleset")
+
 	// Manage UPnP (miniupnpd) for Open NAT
 	if cfg.OpenNATEnabled {
 		logger.SystemLog("Open NAT (Gaming Mode) Enabled. Starting miniupnpd...")
@@ -161,6 +164,10 @@ func InitFirewall() {
 
 	// Native nftables ruleset template
 	const nftablesTmpl = `
+# Fix miniupnpd's aggressive drop policy on the forward chain
+add table inet filter
+add chain inet filter forward { type filter hook forward priority filter; policy accept; }
+
 add table ip pisowifi
 flush table ip pisowifi
 table ip pisowifi {
