@@ -225,7 +225,11 @@ func getDashboardData(c *fiber.Ctx) error {
 	}
 
 	activeMacs := map[string]bool{}
-	state.Users.Range(func(mac string, _ *state.UserRecord) { activeMacs[mac] = true })
+	state.Users.Range(func(mac string, u *state.UserRecord) { 
+		if u.Status != "new" {
+			activeMacs[mac] = true 
+		}
+	})
 	devices := infrastructure.ScanInfrastructure(activeMacs, customNames)
 	bannerFiles := infrastructure.GetBanners(cfg.BannerOrder)
 	soundFiles := infrastructure.GetSounds()
@@ -339,7 +343,11 @@ func wsLogs(c *websocket.Conn) {
 func getInfrastructureDevices(c *fiber.Ctx) error {
 	cfg := config.Get()
 	activeMacs := map[string]bool{}
-	state.Users.Range(func(mac string, _ *state.UserRecord) { activeMacs[mac] = true })
+	state.Users.Range(func(mac string, u *state.UserRecord) { 
+		if u.Status != "new" {
+			activeMacs[mac] = true 
+		}
+	})
 	devices := infrastructure.ScanInfrastructure(activeMacs, cfg.CustomDeviceNames)
 	return c.JSON(fiber.Map{"devices": devices})
 }
