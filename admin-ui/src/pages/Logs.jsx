@@ -73,7 +73,7 @@ export default function Logs() {
     if (t.includes('COIN')) return 'Coin';
     if (t.includes('PORTAL')) return 'Portal';
     if (t.includes('ADMIN') || t.includes('LOGIN') || t.includes('LOGOUT') || t.includes('CONFIG') || t.includes('USER') || t.includes('DEVICE') || t.includes('UPDATE')) return 'Admin';
-    if (t.includes('SECURITY') || t.includes('FIREWALL') || t.includes('ERROR')) return 'Security';
+    if (t.includes('SECURITY') || t.includes('ERROR')) return 'Security';
     return 'System';
   };
 
