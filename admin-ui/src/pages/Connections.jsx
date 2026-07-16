@@ -226,7 +226,10 @@ export default function Connections() {
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
                       <div className="text-gray-400 font-medium text-xs">{absoluteIdx}.</div>
-                      <div className="font-bold text-gray-900 dark:text-white text-[15px] leading-tight truncate max-w-[160px]">{u.device_name || 'Unknown Device'}</div>
+                      <div className="flex flex-col">
+                        <div className="font-bold text-gray-900 dark:text-white text-[15px] leading-tight truncate max-w-[160px]">{u.device_name || 'Unknown Device'}</div>
+                        <div className="text-[9px] text-gray-400 font-mono mt-0.5">{mac}</div>
+                      </div>
                     </div>
                     <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider shrink-0 ${
                       u.status === 'connected' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10' :
