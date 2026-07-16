@@ -380,14 +380,14 @@
                     <div class="promo-name">{{ p.Name }}</div>
                     <div class="promo-cost">
                         <i data-lucide="arrow-right-circle" style="width: 14px; height: 14px;"></i>
-                        {{ p.Cost }} Points
+                        {{ p.Cost|floatformat:2 }} Points
                     </div>
                 </div>
                 
                 <button class="btn-redeem" 
                     data-id="{{ p.ID }}" 
                     data-name="{{ p.Name }}" 
-                    data-cost="{{ p.Cost }}"
+                    data-cost="{{ p.Cost|floatformat:2 }}"
                     onclick="openConfirmModal(this)"
                     {% if points < p.Cost %}disabled{% endif %}>
                     {% if points < p.Cost %}
