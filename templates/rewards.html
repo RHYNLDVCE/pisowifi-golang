@@ -340,7 +340,7 @@
                 <div class="points-label">Balance</div>
                 <div class="points-val">
                     <i data-lucide="credit-card" style="width: 24px; height: 24px; color: #94a3b8;"></i>
-                    {{ points }}
+                    {{ points|floatformat:2 }}
                 </div>
             </div>
 
@@ -377,20 +377,20 @@
             {% for p in promos %}
             <div class="promo-card">
                 <div class="promo-info">
-                    <div class="promo-name">{{ p.name }}</div>
+                    <div class="promo-name">{{ p.Name }}</div>
                     <div class="promo-cost">
                         <i data-lucide="arrow-right-circle" style="width: 14px; height: 14px;"></i>
-                        {{ p.cost }} Points
+                        {{ p.Cost }} Points
                     </div>
                 </div>
                 
                 <button class="btn-redeem" 
-                    data-id="{{ p.id }}" 
-                    data-name="{{ p.name }}" 
-                    data-cost="{{ p.cost }}"
+                    data-id="{{ p.ID }}" 
+                    data-name="{{ p.Name }}" 
+                    data-cost="{{ p.Cost }}"
                     onclick="openConfirmModal(this)"
-                    {% if points < p.cost %}disabled{% endif %}>
-                    {% if points < p.cost %}
+                    {% if points < p.Cost %}disabled{% endif %}>
+                    {% if points < p.Cost %}
                         Locked
                     {% else %}
                         Redeem
