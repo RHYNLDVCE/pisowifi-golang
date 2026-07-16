@@ -46,6 +46,10 @@ func runCmd(args []string) {
 		if ctx.Err() != nil {
 			logger.SystemLog(fmt.Sprintf("[Firewall Timeout] %s", strings.Join(args, " ")))
 		} else {
+			// conntrack -D returns exit status 1 if no connections were found. This is harmless.
+			if strings.Contains(args[0], "conntrack") && len(args) > 1 && args[1] == "-D" && strings.Contains(err.Error(), "exit status 1") {
+				return
+			}
 			logger.SystemLog(fmt.Sprintf("[Firewall Error] %s: %v", strings.Join(args, " "), err))
 		}
 	}
