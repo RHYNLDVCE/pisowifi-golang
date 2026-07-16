@@ -75,7 +75,9 @@ func RegisterAdminRoutes(app *fiber.App) {
 // ---------------------------------------------------------------------------
 
 func loginPage(c *fiber.Ctx) error {
-	return c.Render("login", fiber.Map{})
+	return c.Render("login", fiber.Map{
+		"Error": c.Query("error"),
+	})
 }
 
 func loginAction(c *fiber.Ctx) error {
