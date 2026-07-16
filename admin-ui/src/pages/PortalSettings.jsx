@@ -95,6 +95,21 @@ export default function PortalSettings() {
     }
   };
 
+  const deleteSound = async (filename) => {
+    if (!window.confirm('Delete this sound?')) return;
+    try {
+      await fetch('/admin/delete_sound', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `filename=${encodeURIComponent(filename)}`
+      });
+      toast.success('Sound deleted');
+      fetchData();
+    } catch (err) {
+      toast.error('Failed to delete sound');
+    }
+  };
+
   const moveBanner = (index, direction) => {
     const newBanners = [...banners];
     if (direction === -1 && index > 0) {
@@ -252,15 +267,27 @@ export default function PortalSettings() {
                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
                     <td className="pl-5 sm:px-6 py-3 sm:py-4 font-mono text-[10px] sm:text-sm whitespace-nowrap">{file}</td>
                     <td className="pr-5 sm:px-6 py-3 sm:py-4 text-right whitespace-nowrap">
-                      <button 
-                        className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shadow-sm"
-                        onClick={() => {
-                          const audio = new Audio(`/static/sounds/${file}`);
-                          audio.play();
-                        }}
-                      >
-                        Play Sound
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        <button 
+                          className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shadow-sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const audio = new Audio(`/static/sounds/${file}`);
+                            audio.play();
+                          }}
+                        >
+                          Play Sound
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            deleteSound(file);
+                          }}
+                          className="inline-flex items-center justify-center p-1.5 sm:p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-500/20"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -240,52 +240,13 @@ func pauseUser(c *fiber.Ctx) error {
 
 func enableSlot(c *fiber.Ctx) error {
 	mac := c.Query("mac")
-	cfg := config.Get()
-
-	user, ok := state.Users.Get(mac)
-	if ok && user.Status == "blocked" {
-		return c.JSON(fiber.Map{"result": "blocked"})
-	}
-
-	slotUser := state.GetSlotUser()
-	if slotUser == "" || slotUser == mac {
-		state.SetSlotUser(mac)
-		hardware.TurnSlotOn()
-		config.Update(func(cfg *config.AppConfig) {
-			cfg.SlotExpiryTimestamp = float64(time.Now().Unix()) + float64(cfg.SlotTimeout)
-		})
-		logger.SystemLog(fmt.Sprintf("[PORTAL_EVENT] SLOT OPENED by Device: %s", mac))
-
-		bal := 0
-		pts := 0.0
-		trem := 0
-		if user != nil {
-			bal = user.Balance
-			pts = user.Points
-			trem = user.Time
-		}
-
-		state.Manager.Send(mac, fiber.Map{
-			"type":           "slot_opened",
-			"slot_seconds":   cfg.SlotTimeout,
-			"balance":        bal,
-			"points":         pts,
-			"coin_rates":     cfg.CoinRates,
-			"time_remaining": trem,
-		})
-		return c.JSON(fiber.Map{"result": "success"})
-	}
-	return c.JSON(fiber.Map{"result": "busy"})
+	result, _, _, _, _ := services.EnableSlot(mac)
+	return c.JSON(fiber.Map{"result": result})
 }
 
 func cancelSlot(c *fiber.Ctx) error {
 	mac := c.Query("mac")
-	if state.GetSlotUser() == mac {
-		hardware.TurnSlotOff()
-		state.SetSlotUser("")
-		config.Update(func(cfg *config.AppConfig) {
-			cfg.SlotExpiryTimestamp = 0
-		})
+	if services.CancelSlot(mac) {
 		return c.JSON(fiber.Map{"result": "success"})
 	}
 	return c.JSON(fiber.Map{"result": "fail"})
@@ -297,49 +258,8 @@ func cancelSlot(c *fiber.Ctx) error {
 
 func claimFreeTime(c *fiber.Ctx) error {
 	mac := c.Query("mac")
-	cfg := config.Get()
-
-	if !cfg.FreeTimeEnabled {
-		return c.JSON(fiber.Map{"result": "disabled"})
-	}
-
-	user, ok := state.Users.Get(mac)
-	if !ok {
-		return c.JSON(fiber.Map{"result": "error"})
-	}
-	if user.FreeClaimed == 1 {
-		return c.JSON(fiber.Map{"result": "already_claimed"})
-	}
-
-	duration := cfg.FreeTimeDuration
-	now := float64(time.Now().UnixNano()) / 1e9
-
-	state.Users.UpdateField(mac, func(u *state.UserRecord) {
-		u.Time += duration * 60
-		u.FreeClaimed = 1
-		u.Status = "connected"
-		u.LastActive = now
-		u.ExpiresAt = now + float64(u.Time)
-	})
-
-	network.AllowUser(mac, user.IP)
-	if state.GetSlotUser() == mac {
-		hardware.TurnSlotOff()
-		state.SetSlotUser("")
-	}
-
-	if fresh, ok := state.Users.Get(mac); ok {
-		db.SyncUser(db.UserRecord{
-			MAC: mac, IP: fresh.IP, Time: fresh.Time, Status: fresh.Status,
-			Balance: fresh.Balance, FreeClaimed: fresh.FreeClaimed, Points: fresh.Points,
-		})
-		logger.SystemLog(fmt.Sprintf("[%s | %s] Claimed %d mins of Free Time.", user.IP, mac, duration))
-		state.Manager.Send(mac, fiber.Map{
-			"type": "sync", "status": "connected", "time_remaining": fresh.Time,
-			"balance": 0, "points": fresh.Points,
-		})
-	}
-	return c.JSON(fiber.Map{"result": "success"})
+	result := services.ClaimFreeTime(mac)
+	return c.JSON(fiber.Map{"result": result})
 }
 
 // ---------------------------------------------------------------------------
@@ -382,58 +302,9 @@ func redeemPoints(c *fiber.Ctx) error {
 
 	clientIP := c.IP()
 	mac := infrastructure.GetMACFromIP(clientIP)
-	cfg := config.Get()
-
-	if mac == "" {
-		return c.JSON(fiber.Map{"status": "error", "message": "User not found"})
-	}
-	if !cfg.PointsEnabled {
-		return c.JSON(fiber.Map{"status": "error", "message": "Rewards disabled."})
-	}
-
-	user, ok := state.Users.Get(mac)
-	if !ok {
-		return c.JSON(fiber.Map{"status": "error", "message": "User not found"})
-	}
-
-	var promo *config.PromoItem
-	for _, p := range cfg.PointPromos {
-		if p.ID == body.PromoID {
-			pp := p
-			promo = &pp
-			break
-		}
-	}
-	if promo == nil {
-		return c.JSON(fiber.Map{"status": "error", "message": "Invalid Promo"})
-	}
-	if user.Points < promo.Cost {
-		return c.JSON(fiber.Map{"status": "error", "message": "Not enough points"})
-	}
-
-	now := float64(time.Now().UnixNano()) / 1e9
-	state.Users.UpdateField(mac, func(u *state.UserRecord) {
-		u.Points = services.RoundFloat(u.Points-promo.Cost, 2)
-		u.Time += promo.Minutes * 60
-		u.Status = "connected"
-		u.LastActive = now
-		u.ExpiresAt = now + float64(u.Time)
-	})
-
-	network.AllowUser(mac, user.IP)
-
-	if fresh, ok := state.Users.Get(mac); ok {
-		db.SyncUser(db.UserRecord{
-			MAC: mac, IP: fresh.IP, Time: fresh.Time, Status: fresh.Status,
-			Balance: fresh.Balance, FreeClaimed: fresh.FreeClaimed, Points: fresh.Points,
-		})
-		logger.SystemLog(fmt.Sprintf("[%s | %s] Redeemed '%s' for %.1f points.", clientIP, mac, promo.Name, promo.Cost))
-		state.Manager.Send(mac, fiber.Map{
-			"type": "sync", "status": "connected",
-			"time_remaining": fresh.Time, "points": fresh.Points,
-		})
-	}
-	return c.JSON(fiber.Map{"status": "success", "message": fmt.Sprintf("Successfully redeemed: %s", promo.Name)})
+	
+	status, msg := services.RedeemPoints(mac, clientIP, body.PromoID)
+	return c.JSON(fiber.Map{"status": status, "message": msg})
 }
 
 // ---------------------------------------------------------------------------

@@ -50,6 +50,7 @@ func RegisterAdminRoutes(app *fiber.App) {
 	admin.Post("/save_banner_order", saveBannerOrder)
 	admin.Post("/delete_banner", deleteBanner)
 	admin.Post("/upload_sound", uploadSound)
+	admin.Post("/delete_sound", deleteSound)
 	admin.Get("/backup", downloadBackup)
 	admin.Post("/restore", restoreBackup)
 	admin.Post("/reset_settings", resetSettings)
@@ -131,143 +132,33 @@ func getDashboardData(c *fiber.Ctx) error {
 	sortBy := c.Query("sort", "status")
 
 	cfg := config.Get()
-	stats := services.GetDashboardStats()
-	leases := infrastructure.GetDhcpLeases()
-	customNames := cfg.CustomDeviceNames
-
-	type enriched struct {
-		MAC  string
-		Data *state.UserRecord
-		Name string
-	}
-
-	var users []enriched
-	state.Users.Range(func(mac string, u *state.UserRecord) {
-		name, _ := infrastructure.GetVendorInfo(mac, u.IP, leases)
-		if customNames[mac] != "" {
-			name = customNames[mac]
-		}
-		users = append(users, enriched{MAC: mac, Data: u, Name: name})
-	})
-
-	if search != "" {
-		lower := strings.ToLower(search)
-		var filtered []enriched
-		for _, u := range users {
-			if strings.Contains(strings.ToLower(u.MAC), lower) {
-				filtered = append(filtered, u)
-			}
-		}
-		users = filtered
-	}
-
-	sort.Slice(users, func(i, j int) bool {
-		if sortBy == "time" {
-			return users[i].Data.Time > users[j].Data.Time
-		}
-		if sortBy == "points" {
-			return users[i].Data.Points > users[j].Data.Points
-		}
-
-		rank := func(s string) int {
-			s = strings.ToLower(s)
-			if s == "connected" {
-				return 1
-			} else if s == "paused" {
-				return 2
-			} else if s == "expired" {
-				return 3
-			} else if s == "new" {
-				return 4
-			}
-			return 5
-		}
-		ri, rj := rank(users[i].Data.Status), rank(users[j].Data.Status)
-		if ri != rj {
-			return ri < rj
-		}
-		return users[i].Data.Time > users[j].Data.Time
-	})
-
-	totalFiltered := len(users)
-	totalPages := int(math.Ceil(float64(totalFiltered) / float64(itemsPerPage)))
-	if totalPages < 1 {
-		totalPages = 1
-	}
-	if page < 1 {
-		page = 1
-	}
-	if page > totalPages {
-		page = totalPages
-	}
-
-	start := (page - 1) * itemsPerPage
-	end := start + itemsPerPage
-	if end > totalFiltered {
-		end = totalFiltered
-	}
-	paginatedUsers := users[start:end]
-
-	// Build user map for template
-	usersMap := make(map[string]fiber.Map)
-	for _, u := range paginatedUsers {
-		shortStatus := ""
-		if len(u.Data.Status) > 0 {
-			shortStatus = string(u.Data.Status[0])
-		}
-		usersMap[u.MAC] = fiber.Map{
-			"ip": u.Data.IP, "time": u.Data.Time, "status": u.Data.Status,
-			"balance": u.Data.Balance, "points": u.Data.Points,
-			"free_claimed": u.Data.FreeClaimed, "device_name": u.Name,
-			"time_formatted": services.FormatHumanTime(u.Data.Time),
-			"status_short":   shortStatus,
-		}
-	}
-
-	activeMacs := map[string]bool{}
-	state.Users.Range(func(mac string, u *state.UserRecord) { 
-		if u.Status != "new" {
-			activeMacs[mac] = true 
-		}
-	})
-	devices := infrastructure.ScanInfrastructure(activeMacs, customNames)
 	bannerFiles := infrastructure.GetBanners(cfg.BannerOrder)
 	soundFiles := infrastructure.GetSounds()
 	logResult := infrastructure.GetSystemLogs(200, 0, "")
 
-	activeCount := 0
-	state.Users.Range(func(_ string, u *state.UserRecord) {
-		if u.Status == "connected" {
-			activeCount++
-		}
-	})
+	data := services.GetPaginatedUsers(search, page, sortBy, itemsPerPage)
 
-	return c.JSON(fiber.Map{
-		"users": usersMap, "devices": devices,
-		"current_page": page, "total_pages": totalPages,
-		"search_query": search, "active_users": activeCount,
-		"total_users":          state.Users.Count(),
-		"total_filtered":       totalFiltered,
-		"stats":                stats,
-		"slot_timeout":         cfg.SlotTimeout,
-		"inactive_timeout":     cfg.InactiveTimeout,
-		"auto_pause_enabled":   cfg.AutoPauseEnabled,
-		"speed_limit_enabled":  cfg.SpeedLimitEnabled,
-		"global_speed_limit":   cfg.GlobalSpeedLimit,
-		"gaming_mode_enabled":  cfg.GamingModeEnabled,
-		"coin_rates":           cfg.CoinRates,
-		"banner_text":          cfg.BannerText,
-		"banner_link":          cfg.BannerLink,
-		"open_nat_enabled":     cfg.OpenNATEnabled,
-		"custom_ttl":           cfg.CustomTTL,
-		"banner_files":         bannerFiles,
-		"free_time_enabled":    cfg.FreeTimeEnabled,
-		"free_time_duration":   cfg.FreeTimeDuration,
-		"sound_files":          soundFiles,
-		"sound_insert_selected": cfg.SoundInsert,
-		"sound_coin_selected":   cfg.SoundCoin,
-		"system_logs":          logResult.Logs,
-	})
+	// Merge settings into the data map
+	data["slot_timeout"] = cfg.SlotTimeout
+	data["inactive_timeout"] = cfg.InactiveTimeout
+	data["auto_pause_enabled"] = cfg.AutoPauseEnabled
+	data["speed_limit_enabled"] = cfg.SpeedLimitEnabled
+	data["global_speed_limit"] = cfg.GlobalSpeedLimit
+	data["gaming_mode_enabled"] = cfg.GamingModeEnabled
+	data["coin_rates"] = cfg.CoinRates
+	data["banner_text"] = cfg.BannerText
+	data["banner_link"] = cfg.BannerLink
+	data["open_nat_enabled"] = cfg.OpenNATEnabled
+	data["custom_ttl"] = cfg.CustomTTL
+	data["banner_files"] = bannerFiles
+	data["free_time_enabled"] = cfg.FreeTimeEnabled
+	data["free_time_duration"] = cfg.FreeTimeDuration
+	data["sound_files"] = soundFiles
+	data["sound_insert_selected"] = cfg.SoundInsert
+	data["sound_coin_selected"] = cfg.SoundCoin
+	data["system_logs"] = logResult.Logs
+
+	return c.JSON(data)
 }
 
 // ---------------------------------------------------------------------------
@@ -695,6 +586,15 @@ func uploadSound(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "success"})
 }
 
+func deleteSound(c *fiber.Ctx) error {
+	filename := c.FormValue("filename", "")
+	if filename != "" {
+		os.Remove(filepath.Join("static/sounds", filename))
+		// Optional: we don't strictly need to update config here, but it's safe
+	}
+	return c.JSON(fiber.Map{"status": "success"})
+}
+
 // ---------------------------------------------------------------------------
 // User management
 // ---------------------------------------------------------------------------
@@ -890,6 +790,3 @@ func tailLines(f *os.File, n int) ([]string, error) {
 	}
 	return strings.Split(string(collected), "\n"), nil
 }
-
-
-

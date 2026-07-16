@@ -1,9 +1,14 @@
 package services
 
 import (
+	"math"
+	"sort"
+	"strings"
 	"time"
 
+	"pisowifi/internal/config"
 	"pisowifi/internal/db"
+	"pisowifi/internal/infrastructure"
 	"pisowifi/internal/network"
 	"pisowifi/internal/state"
 )
@@ -121,4 +126,127 @@ func DeleteUser(mac string) {
 	}
 	state.Users.Delete(mac)
 	db.DeleteUser(mac)
+}
+
+// GetPaginatedUsers retrieves and formats users for the dashboard
+func GetPaginatedUsers(search string, page int, sortBy string, itemsPerPage int) map[string]interface{} {
+	cfg := config.Get()
+	stats := GetDashboardStats()
+	leases := infrastructure.GetDhcpLeases()
+	customNames := cfg.CustomDeviceNames
+
+	type enriched struct {
+		MAC  string
+		Data *state.UserRecord
+		Name string
+	}
+
+	var users []enriched
+	state.Users.Range(func(mac string, u *state.UserRecord) {
+		name, _ := infrastructure.GetVendorInfo(mac, u.IP, leases)
+		if customNames[mac] != "" {
+			name = customNames[mac]
+		}
+		users = append(users, enriched{MAC: mac, Data: u, Name: name})
+	})
+
+	if search != "" {
+		lower := strings.ToLower(search)
+		var filtered []enriched
+		for _, u := range users {
+			if strings.Contains(strings.ToLower(u.MAC), lower) {
+				filtered = append(filtered, u)
+			}
+		}
+		users = filtered
+	}
+
+	sort.Slice(users, func(i, j int) bool {
+		if sortBy == "time" {
+			return users[i].Data.Time > users[j].Data.Time
+		}
+		if sortBy == "points" {
+			return users[i].Data.Points > users[j].Data.Points
+		}
+
+		rank := func(s string) int {
+			s = strings.ToLower(s)
+			if s == "connected" {
+				return 1
+			} else if s == "paused" {
+				return 2
+			} else if s == "expired" {
+				return 3
+			} else if s == "new" {
+				return 4
+			}
+			return 5
+		}
+		ri, rj := rank(users[i].Data.Status), rank(users[j].Data.Status)
+		if ri != rj {
+			return ri < rj
+		}
+		return users[i].Data.Time > users[j].Data.Time
+	})
+
+	totalFiltered := len(users)
+	totalPages := int(math.Ceil(float64(totalFiltered) / float64(itemsPerPage)))
+	if totalPages < 1 {
+		totalPages = 1
+	}
+	if page < 1 {
+		page = 1
+	}
+	if page > totalPages {
+		page = totalPages
+	}
+
+	start := (page - 1) * itemsPerPage
+	end := start + itemsPerPage
+	if end > totalFiltered {
+		end = totalFiltered
+	}
+	paginatedUsers := users[start:end]
+
+	usersMap := make(map[string]interface{})
+	for _, u := range paginatedUsers {
+		shortStatus := ""
+		if len(u.Data.Status) > 0 {
+			shortStatus = string(u.Data.Status[0])
+		}
+		usersMap[u.MAC] = map[string]interface{}{
+			"ip": u.Data.IP, "time": u.Data.Time, "status": u.Data.Status,
+			"balance": u.Data.Balance, "points": u.Data.Points,
+			"free_claimed": u.Data.FreeClaimed, "device_name": u.Name,
+			"time_formatted": FormatHumanTime(u.Data.Time),
+			"status_short":   shortStatus,
+		}
+	}
+
+	activeMacs := map[string]bool{}
+	state.Users.Range(func(mac string, u *state.UserRecord) {
+		if u.Status != "new" {
+			activeMacs[mac] = true
+		}
+	})
+	devices := infrastructure.ScanInfrastructure(activeMacs, customNames)
+
+	activeCount := 0
+	state.Users.Range(func(_ string, u *state.UserRecord) {
+		if u.Status == "connected" {
+			activeCount++
+		}
+	})
+
+	return map[string]interface{}{
+		"users":          usersMap,
+		"devices":        devices,
+		"current_page":   page,
+		"total_pages":    totalPages,
+		"search_query":   search,
+		"active_users":   activeCount,
+		"total_users":    state.Users.Count(),
+		"total_filtered": totalFiltered,
+		"stats":          stats,
+	}
 }
