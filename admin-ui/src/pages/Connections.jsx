@@ -142,15 +142,15 @@ export default function Connections() {
         </div>
         
         {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)] -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="hidden md:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           <table className="w-full text-left border-collapse relative">
             <thead className="sticky top-0 bg-white dark:bg-zinc-950 z-10 shadow-[0_1px_0_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)]">
               <tr>
-                <th className="pr-4 py-3 text-xs font-medium text-gray-400 dark:text-gray-500 w-8">#</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-400 dark:text-gray-500">Device</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-400 dark:text-gray-500">IP / MAC</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-400 dark:text-gray-500">Status</th>
-                <th className="pl-4 py-3 text-xs font-medium text-gray-400 dark:text-gray-500 text-right">Time Left</th>
+                <th className="pl-6 pr-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500 w-12">#</th>
+                <th className="px-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500">Device</th>
+                <th className="px-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500">IP / MAC</th>
+                <th className="px-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500">Status</th>
+                <th className="pl-4 pr-6 py-2 text-xs font-medium text-gray-400 dark:text-gray-500 text-right">Time Left</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-zinc-900/50">
@@ -170,17 +170,17 @@ export default function Connections() {
                       u.status === 'paused' ? 'bg-amber-50/50 dark:bg-amber-500/5 hover:bg-amber-100/50 dark:hover:bg-amber-500/10' :
                       'hover:bg-gray-50/50 dark:hover:bg-zinc-900/20'
                     }`} onClick={() => navigate(`/admin/user/${mac}`)}>
-                      <td className="pr-4 py-4 text-sm font-medium text-gray-400">
+                      <td className="pl-6 pr-4 py-2.5 text-sm font-medium text-gray-400">
                         {absoluteIdx}
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-2.5">
                         <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">{u.device_name || 'Unknown Device'}</div>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-2.5">
                         <div className="text-sm font-medium text-gray-700 dark:text-gray-300">{u.ip}</div>
                         <div className="text-xs text-gray-400 font-mono mt-0.5">{mac}</div>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-2.5">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           u.status === 'connected' ? 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400' :
                           u.status === 'paused' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' :
@@ -189,14 +189,14 @@ export default function Connections() {
                           {u.status}
                         </span>
                       </td>
-                      <td className="pl-4 py-4 text-right">
+                      <td className="pl-4 pr-6 py-2.5 text-right">
                         <div className="flex flex-wrap items-center justify-end gap-2">
-                           <div className="font-semibold text-sm text-gray-900 dark:text-gray-100">{u.time > 0 ? u.time_formatted : '0s'}</div>
                            {u.points > 0 && (
                              <span className="bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 px-2 py-1 rounded-md text-xs font-bold">
                                ★ {u.points}
                              </span>
                            )}
+                           <div className="font-semibold text-sm text-gray-900 dark:text-gray-100">{u.time > 0 ? u.time_formatted : '0s'}</div>
                         </div>
                       </td>
                     </tr>
