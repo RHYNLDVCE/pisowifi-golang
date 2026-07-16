@@ -1,13 +1,15 @@
 package network
 
 import (
+	"bytes"
 	"context"
-	"encoding/xml"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+	"text/template"
 	"time"
 
 	"pisowifi/internal/config"
@@ -157,54 +159,92 @@ func InitFirewall() {
 		runCmdStr("systemctl stop miniupnpd")
 	}
 
-	// IPSet
-	runCmdStr(fmt.Sprintf("ipset create %s hash:mac hashsize 1024 maxelem 65535 counters -exist", ipsetName))
-	runCmdStr(fmt.Sprintf("ipset flush %s", ipsetName))
-
-	// iptables rules
-	cmds := []string{
-		"iptables -F",
-		"iptables -t nat -F",
-		"iptables -t mangle -F",
-		"iptables -I INPUT 1 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT",
-		"iptables -I FORWARD 1 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT",
-		"iptables -t mangle -A PREROUTING -p udp -m multiport --sports 5000:5500,7074:7750,10000:10009,30000:30300 -j MARK --set-mark 99",
-		"iptables -t mangle -A PREROUTING -p udp -m multiport --dports 5000:5500,7074:7750,10000:10009,30000:30300 -j MARK --set-mark 99",
-		"iptables -t mangle -A PREROUTING -p udp -m multiport --dports 3478,3479,5349,19302 -j DSCP --set-dscp-class EF",
-		"iptables -t mangle -A PREROUTING -p tcp -m multiport --dports 3478,3479,5349 -j DSCP --set-dscp-class EF",
-		"iptables -t mangle -A PREROUTING -m mark --mark 99 -j DSCP --set-dscp-class CS4",
-		"iptables -t mangle -A PREROUTING -p tcp -m multiport --dports 6881:6889 -j DSCP --set-dscp-class CS1",
-		"iptables -t mangle -A PREROUTING -p udp -m multiport --dports 6881:6889 -j DSCP --set-dscp-class CS1",
-		"iptables -P FORWARD DROP",
-		"iptables -P INPUT ACCEPT",
-		fmt.Sprintf("iptables -A INPUT -i %s -p udp --dport 67:68 --sport 67:68 -j ACCEPT", lan),
-		fmt.Sprintf("iptables -A FORWARD -i %s -m set --match-set %s src -j ACCEPT", lan, ipsetName),
-		fmt.Sprintf("iptables -A FORWARD -o %s -m set --match-set %s dst -j ACCEPT", lan, ipsetName),
-		"iptables -A INPUT -i lo -j ACCEPT",
-		fmt.Sprintf("iptables -A FORWARD -i %s -p udp --dport 53 -j ACCEPT", lan),
-		fmt.Sprintf("iptables -A FORWARD -i %s -p tcp --dport 53 -j ACCEPT", lan),
-		fmt.Sprintf("iptables -t nat -A PREROUTING -m set --match-set %s src -p udp --dport 53 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 1.1.1.1:53", ipsetName),
-		fmt.Sprintf("iptables -t nat -A PREROUTING -m set --match-set %s src -p udp --dport 53 -j DNAT --to-destination 1.0.0.1:53", ipsetName),
-		fmt.Sprintf("iptables -t nat -A PREROUTING -m set --match-set %s src -p tcp --dport 53 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 1.1.1.1:53", ipsetName),
-		fmt.Sprintf("iptables -t nat -A PREROUTING -m set --match-set %s src -p tcp --dport 53 -j DNAT --to-destination 1.0.0.1:53", ipsetName),
-		fmt.Sprintf("iptables -t nat -A PREROUTING -i %s -m set ! --match-set %s src -p udp --dport 53 -j DNAT --to-destination 10.0.0.1:53", lan, ipsetName),
-		fmt.Sprintf("iptables -t nat -A PREROUTING -i %s -m set ! --match-set %s src -p tcp --dport 53 -j DNAT --to-destination 10.0.0.1:53", lan, ipsetName),
-		// Redirect unauthorized TCP port 80 traffic to captive portal
-		fmt.Sprintf("iptables -t nat -A PREROUTING -i %s -m set ! --match-set %s src -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80", lan, ipsetName),
-		// Redirect unauthorized TCP port 443 (HTTPS) to captive portal HTTP — triggers captive portal notification on iOS/Android
-		fmt.Sprintf("iptables -t nat -A PREROUTING -i %s -m set ! --match-set %s src -p tcp --dport 443 -j DNAT --to-destination 10.0.0.1:80", lan, ipsetName),
-		// Drop 443 for authorized users (they use real HTTPS via WAN)
-		fmt.Sprintf("iptables -A FORWARD -i %s -m set ! --match-set %s src -p tcp --dport 443 -j DROP", lan, ipsetName),
-		"iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1300",
-		fmt.Sprintf("iptables -t nat -A POSTROUTING -o %s -j MASQUERADE", wan),
+	// Native nftables ruleset template
+	const nftablesTmpl = `
+add table ip pisowifi
+flush table ip pisowifi
+table ip pisowifi {
+	set authorized_users {
+		type ether_addr
+		size 65535
+		flags dynamic
+		counter
 	}
 
-	if cfg.CustomTTL > 0 {
-		cmds = append(cmds, fmt.Sprintf("iptables -t mangle -A POSTROUTING -o %s -j TTL --ttl-set %d", lan, cfg.CustomTTL))
+	chain prerouting {
+		type filter hook prerouting priority mangle; policy accept;
+		udp sport { 5000-5500, 7074-7750, 10000-10009, 30000-30300 } meta mark set 0x63
+		udp dport { 5000-5500, 7074-7750, 10000-10009, 30000-30300 } meta mark set 0x63
+		meta mark 0x63 ip dscp set cs4
+		udp dport { 3478, 3479, 5349, 19302 } ip dscp set ef
+		tcp dport { 3478, 3479, 5349 } ip dscp set ef
+		tcp dport 6881-6889 ip dscp set cs1
+		udp dport 6881-6889 ip dscp set cs1
 	}
 
-	for _, c := range cmds {
-		runCmdStr(c)
+	chain forward_mangle {
+		type filter hook forward priority mangle; policy accept;
+		tcp flags syn / syn,rst tcp option maxseg size set 1300
+	}
+
+	chain postrouting_mangle {
+		type filter hook postrouting priority mangle; policy accept;
+		{{if .CustomTTL}}
+		oifname "{{.LAN}}" ip ttl set {{.CustomTTL}}
+		{{end}}
+	}
+
+	chain filter_input {
+		type filter hook input priority filter; policy accept;
+		ct state related,established accept
+		iifname "{{.LAN}}" udp sport 67-68 udp dport 67-68 accept
+		iifname "lo" accept
+	}
+
+	chain filter_forward {
+		type filter hook forward priority filter; policy drop;
+		ct state related,established accept
+		iifname "{{.LAN}}" ether saddr @authorized_users accept
+		oifname "{{.LAN}}" ether daddr @authorized_users accept
+		iifname "{{.LAN}}" udp dport 53 accept
+		iifname "{{.LAN}}" tcp dport 53 accept
+		iifname "{{.LAN}}" ether saddr != @authorized_users tcp dport 443 drop
+	}
+
+	chain nat_prerouting {
+		type nat hook prerouting priority dstnat; policy accept;
+		iifname "{{.LAN}}" ether saddr @authorized_users udp dport 53 dnat to 1.1.1.1:53
+		iifname "{{.LAN}}" ether saddr @authorized_users tcp dport 53 dnat to 1.1.1.1:53
+		iifname "{{.LAN}}" ether saddr != @authorized_users udp dport 53 dnat to 10.0.0.1:53
+		iifname "{{.LAN}}" ether saddr != @authorized_users tcp dport 53 dnat to 10.0.0.1:53
+		iifname "{{.LAN}}" ether saddr != @authorized_users tcp dport 80 dnat to 10.0.0.1:80
+		iifname "{{.LAN}}" ether saddr != @authorized_users tcp dport 443 dnat to 10.0.0.1:80
+	}
+
+	chain nat_postrouting {
+		type nat hook postrouting priority srcnat; policy accept;
+		oifname "{{.WAN}}" masquerade
+	}
+}
+`
+	tmpl, err := template.New("nft").Parse(nftablesTmpl)
+	if err != nil {
+		logger.SystemLog(fmt.Sprintf("[FIREWALL] Template parse error: %v", err))
+	} else {
+		var buf bytes.Buffer
+		tmpl.Execute(&buf, map[string]interface{}{
+			"LAN":       lan,
+			"WAN":       wan,
+			"CustomTTL": cfg.CustomTTL,
+		})
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		cmd := exec.CommandContext(ctx, "nft", "-f", "-")
+		cmd.Stdin = &buf
+		if err := cmd.Run(); err != nil {
+			logger.SystemLog(fmt.Sprintf("[FIREWALL] nft apply error: %v", err))
+		}
 	}
 
 	// TC
@@ -285,7 +325,8 @@ func RefreshAllLimits() {
 // ---------------------------------------------------------------------------
 
 func BlockUser(mac, ip string) {
-	runCmd([]string{"ipset", "del", ipsetName, mac, "-exist"})
+	// Equivalent to: ipset del authorized_users <mac> -exist
+	runCmd([]string{"nft", "delete", "element", "ip", "pisowifi", "authorized_users", "{", mac, "}"})
 
 	resolvedIP := ip
 	if resolvedIP == "" {
@@ -306,7 +347,8 @@ func BlockUser(mac, ip string) {
 }
 
 func AllowUser(mac, ip string) {
-	runCmd([]string{"ipset", "add", ipsetName, mac, "-exist"})
+	// Equivalent to: ipset add authorized_users <mac> -exist
+	runCmd([]string{"nft", "add", "element", "ip", "pisowifi", "authorized_users", "{", mac, "}"})
 	if ip != "" {
 		ApplySpeedLimit(ip)
 	}
@@ -318,35 +360,40 @@ func AllowUser(mac, ip string) {
 
 var trafficLineRe = regexp.MustCompile(`packets\s+(\d+)\s+bytes\s+(\d+)`)
 
-type ipsetXMLData struct {
-	XMLName xml.Name `xml:"ips"`
-	IPSets  []struct {
-		Name    string `xml:"name,attr"`
-		Members []struct {
-			Elem    string `xml:"elem"`
-			Packets int64  `xml:"packets"`
-			Bytes   int64  `xml:"bytes"`
-		} `xml:"members>member"`
-	} `xml:"ipset"`
+type nftJSONData struct {
+	Nftables []map[string]interface{} `json:"nftables"`
 }
 
 func GetAllTraffic() map[string][2]int64 {
-	out, err := exec.Command("ipset", "list", ipsetName, "-o", "xml").Output()
+	out, err := exec.Command("nft", "-j", "list", "set", "ip", "pisowifi", "authorized_users").Output()
 	if err != nil {
 		return nil
 	}
-	
-	var data ipsetXMLData
-	if err := xml.Unmarshal(out, &data); err != nil {
+
+	var data nftJSONData
+	if err := json.Unmarshal(out, &data); err != nil {
 		return nil
 	}
 
 	result := make(map[string][2]int64)
-	for _, set := range data.IPSets {
-		if set.Name == ipsetName {
-			for _, m := range set.Members {
-				mac := strings.ToLower(m.Elem)
-				result[mac] = [2]int64{m.Bytes, m.Packets}
+	for _, item := range data.Nftables {
+		if setWrap, ok := item["set"].(map[string]interface{}); ok {
+			if name, _ := setWrap["name"].(string); name == "authorized_users" {
+				if elems, ok := setWrap["elem"].([]interface{}); ok {
+					for _, e := range elems {
+						if elemMap, ok := e.(map[string]interface{}); ok {
+							if elemWrap, ok := elemMap["elem"].(map[string]interface{}); ok {
+								val, _ := elemWrap["val"].(string)
+								counter, ok := elemWrap["counter"].(map[string]interface{})
+								if ok && val != "" {
+									pkts, _ := counter["packets"].(float64)
+									bytes, _ := counter["bytes"].(float64)
+									result[strings.ToLower(val)] = [2]int64{int64(bytes), int64(pkts)}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
