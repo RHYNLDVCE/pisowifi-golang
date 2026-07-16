@@ -76,11 +76,6 @@ func GetSystemStats() SystemStats {
 	// Network interfaces from /proc/net/dev
 	ifaces := getNetStats()
 	wan := config.WANInterface
-	if _, ok := ifaces[wan]; !ok {
-		if _, ok2 := ifaces["end0"]; ok2 {
-			wan = "end0"
-		}
-	}
 	s.WANIface = wan
 	if ws, ok := ifaces[wan]; ok {
 		s.WANRXTotal = ws.RXBytes
@@ -88,18 +83,6 @@ func GetSystemStats() SystemStats {
 	}
 
 	lan := config.LANInterface
-	if _, ok := ifaces[lan]; !ok {
-		if _, ok2 := ifaces["enx00e04c68042c"]; ok2 {
-			lan = "enx00e04c68042c"
-		} else {
-			for name := range ifaces {
-				if strings.HasPrefix(name, "enx") {
-					lan = name
-					break
-				}
-			}
-		}
-	}
 	s.LANIface = lan
 	if ls, ok := ifaces[lan]; ok {
 		s.LANRXTotal = ls.RXBytes
