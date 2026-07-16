@@ -9,11 +9,7 @@ import (
 	"time"
 
 	"pisowifi/internal/config"
-	"pisowifi/internal/db"
-	"pisowifi/internal/hardware"
 	"pisowifi/internal/infrastructure"
-	"pisowifi/internal/logger"
-	"pisowifi/internal/network"
 	"pisowifi/internal/services"
 	"pisowifi/internal/state"
 
