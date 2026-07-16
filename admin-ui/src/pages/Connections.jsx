@@ -10,11 +10,11 @@ export default function Connections() {
   const navigate = useNavigate();
   const searchQuery = searchParams.get('q') || '';
   const sortBy = searchParams.get('sort') || 'status';
-  const [currentPage, setCurrentPage] = useState(1);
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
   const setSearchQuery = (val) => {
-    setCurrentPage(1);
     setSearchParams(prev => {
+      prev.set('page', '1');
       if (val) prev.set('q', val);
       else prev.delete('q');
       return prev;
@@ -22,28 +22,44 @@ export default function Connections() {
   };
 
   const setSortBy = (val) => {
-    setCurrentPage(1);
     setSearchParams(prev => {
+      prev.set('page', '1');
       if (val !== 'status') prev.set('sort', val);
       else prev.delete('sort');
       return prev;
     }, { replace: true });
   };
 
-  useEffect(() => {
-    fetch('/admin/api/dashboard_data')
-      .then(res => res.json())
-      .then(json => {
-        setData(json);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch dashboard data", err);
-        setLoading(false);
-      });
-  }, []);
+  const setCurrentPage = (val) => {
+    setSearchParams(prev => {
+      prev.set('page', val.toString());
+      return prev;
+    }, { replace: true });
+  };
 
-  if (loading) {
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (searchQuery) params.set('search', searchQuery);
+      params.set('page', currentPage);
+      params.set('sort', sortBy);
+      
+      fetch(`/admin/api/dashboard_data?${params.toString()}`)
+        .then(res => res.json())
+        .then(json => {
+          setData(json);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Failed to fetch dashboard data", err);
+          setLoading(false);
+        });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, sortBy, currentPage]);
+
+  if (loading && !data) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
         <Activity className="animate-spin w-8 h-8 mr-3" />
@@ -56,18 +72,14 @@ export default function Connections() {
     return <div className="text-red-500">Error loading data.</div>;
   }
 
-  const { users } = data;
+  const { users, total_pages, current_page, total_filtered, total_users, active_users } = data;
 
   const statusOrder = { connected: 1, paused: 2, expired: 3, new: 4 };
   const getStatusWeight = (status) => statusOrder[status?.toLowerCase()] || 5;
 
-  const filteredMacs = Object.keys(users).filter(mac => {
-    const u = users[mac];
-    const term = searchQuery.toLowerCase();
-    return mac.toLowerCase().includes(term) || 
-           (u.ip && u.ip.toLowerCase().includes(term)) || 
-           (u.device_name && u.device_name.toLowerCase().includes(term));
-  }).sort((a, b) => {
+  // The backend already filtered and paginated the data, so we only have ~10 users here.
+  // We still need to sort them because JS objects (users map) don't guarantee key order.
+  const displayMacs = Object.keys(users).sort((a, b) => {
     const ua = users[a];
     const ub = users[b];
     if (sortBy === 'status') {
@@ -83,8 +95,10 @@ export default function Connections() {
   });
 
   const ITEMS_PER_PAGE = 10;
-  const totalPages = Math.max(1, Math.ceil(filteredMacs.length / ITEMS_PER_PAGE));
-  const paginatedMacs = filteredMacs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  // Ensure total_filtered falls back safely
+  const totalItems = total_filtered !== undefined ? total_filtered : total_users;
+  const safeTotalPages = total_pages || 1;
+  const safeCurrentPage = current_page || 1;
 
   return (
     <div className="space-y-6">
@@ -100,7 +114,7 @@ export default function Connections() {
             </div>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400 ml-2 shrink-0 whitespace-nowrap">
                <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></span>
-               {data.active_users} Active
+               {active_users} Active
             </span>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
@@ -140,16 +154,16 @@ export default function Connections() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-zinc-900/50">
-              {paginatedMacs.length === 0 ? (
+              {displayMacs.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="py-12 text-center text-gray-500">
                     {searchQuery ? "No matching devices found." : "No active devices connected."}
                   </td>
                 </tr>
               ) : (
-                paginatedMacs.map((mac, idx) => {
+                displayMacs.map((mac, idx) => {
                   const u = users[mac];
-                  const absoluteIdx = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
+                  const absoluteIdx = (safeCurrentPage - 1) * ITEMS_PER_PAGE + idx + 1;
                   return (
                     <tr key={mac} className={`transition-colors group cursor-pointer ${
                       u.status === 'connected' ? 'bg-green-50/50 dark:bg-green-500/5 hover:bg-green-100/50 dark:hover:bg-green-500/10' :
@@ -195,14 +209,14 @@ export default function Connections() {
 
         {/* Mobile List View (Flat, Edge-to-Edge) */}
         <div className="md:hidden flex flex-col -mx-4 mt-4 border-t border-gray-100 dark:border-zinc-800">
-          {paginatedMacs.length === 0 ? (
+          {displayMacs.length === 0 ? (
             <div className="py-12 text-center text-gray-500">
                {searchQuery ? "No matching devices found." : "No active devices connected."}
             </div>
           ) : (
-            paginatedMacs.map((mac, idx) => {
+            displayMacs.map((mac, idx) => {
               const u = users[mac];
-              const absoluteIdx = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
+              const absoluteIdx = (safeCurrentPage - 1) * ITEMS_PER_PAGE + idx + 1;
               return (
                 <div key={mac} onClick={() => navigate(`/admin/user/${mac}`)} className={`flex flex-col py-3 px-6 border-b border-gray-100 dark:border-zinc-800/50 transition-colors cursor-pointer ${
                   u.status === 'connected' ? 'bg-green-50/50 dark:bg-green-500/5 active:bg-green-100/50 dark:active:bg-green-500/10' :
@@ -240,22 +254,22 @@ export default function Connections() {
         {/* Pagination Controls */}
         <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 dark:border-zinc-800/50 pt-4 mt-4 gap-4">
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            Showing <span className="font-medium text-gray-900 dark:text-white">{filteredMacs.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="font-medium text-gray-900 dark:text-white">{Math.min(currentPage * ITEMS_PER_PAGE, filteredMacs.length)}</span> of <span className="font-medium text-gray-900 dark:text-white">{filteredMacs.length}</span> entries
+            Showing <span className="font-medium text-gray-900 dark:text-white">{totalItems > 0 ? (safeCurrentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="font-medium text-gray-900 dark:text-white">{Math.min(safeCurrentPage * ITEMS_PER_PAGE, totalItems)}</span> of <span className="font-medium text-gray-900 dark:text-white">{totalItems}</span> entries
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(Math.max(1, safeCurrentPage - 1))}
+              disabled={safeCurrentPage <= 1}
               className="p-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <div className="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">
-              Page {currentPage} of {totalPages}
+              Page {safeCurrentPage} of {safeTotalPages}
             </div>
             <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(Math.min(safeTotalPages, safeCurrentPage + 1))}
+              disabled={safeCurrentPage >= safeTotalPages}
               className="p-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="w-5 h-5" />

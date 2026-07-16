@@ -10,11 +10,13 @@ export default function SystemStats() {
     ips: 'Loading...',
     interfaces: null,
     wan_rx_total: 0,
-    wan_tx_total: 0
+    wan_tx_total: 0,
+    lan_rx_total: 0,
+    lan_tx_total: 0
   });
 
-  const [speeds, setSpeeds] = useState({ rx: 0, tx: 0 });
-  const lastState = useRef({ rx: 0, tx: 0, time: Date.now() });
+  const [speeds, setSpeeds] = useState({ rx: 0, tx: 0, lan_rx: 0, lan_tx: 0 });
+  const lastState = useRef({ rx: 0, tx: 0, lan_rx: 0, lan_tx: 0, time: Date.now() });
 
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -34,13 +36,17 @@ export default function SystemStats() {
           if (lastState.current.rx > 0 && data.wan_rx_total !== undefined) {
              const rxSpeed = Math.max(0, (data.wan_rx_total - lastState.current.rx) / timeDiff);
              const txSpeed = Math.max(0, (data.wan_tx_total - lastState.current.tx) / timeDiff);
-             setSpeeds({ rx: rxSpeed, tx: txSpeed });
+             const lanRxSpeed = Math.max(0, ((data.lan_rx_total || 0) - lastState.current.lan_rx) / timeDiff);
+             const lanTxSpeed = Math.max(0, ((data.lan_tx_total || 0) - lastState.current.lan_tx) / timeDiff);
+             setSpeeds({ rx: rxSpeed, tx: txSpeed, lan_rx: lanRxSpeed, lan_tx: lanTxSpeed });
           }
         }
         
         lastState.current = {
            rx: data.wan_rx_total || lastState.current.rx,
            tx: data.wan_tx_total || lastState.current.tx,
+           lan_rx: data.lan_rx_total || lastState.current.lan_rx,
+           lan_tx: data.lan_tx_total || lastState.current.lan_tx,
            time: now
         };
       } catch (err) {
@@ -99,7 +105,14 @@ export default function SystemStats() {
              </div>
              <div>
                <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">LAN Router</div>
-               <div className="text-xs text-gray-500 font-medium">Traffic distributed to users</div>
+               <div className="flex flex-col sm:flex-row sm:gap-4 gap-1.5">
+                 <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-mono text-[13px] font-bold">
+                   <ArrowDownToLine size={14} /> {formatSpeed(speeds.lan_tx)}
+                 </div>
+                 <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-mono text-[13px] font-bold">
+                   <ArrowUpToLine size={14} /> {formatSpeed(speeds.lan_rx)}
+                 </div>
+               </div>
              </div>
            </div>
         </div>

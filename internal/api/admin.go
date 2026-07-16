@@ -128,6 +128,7 @@ const itemsPerPage = 10
 func getDashboardData(c *fiber.Ctx) error {
 	search := c.Query("search", "")
 	page := c.QueryInt("page", 1)
+	sortBy := c.Query("sort", "status")
 
 	cfg := config.Get()
 	stats := services.GetDashboardStats()
@@ -161,13 +162,25 @@ func getDashboardData(c *fiber.Ctx) error {
 	}
 
 	sort.Slice(users, func(i, j int) bool {
+		if sortBy == "time" {
+			return users[i].Data.Time > users[j].Data.Time
+		}
+		if sortBy == "points" {
+			return users[i].Data.Points > users[j].Data.Points
+		}
+
 		rank := func(s string) int {
+			s = strings.ToLower(s)
 			if s == "connected" {
 				return 1
+			} else if s == "paused" {
+				return 2
 			} else if s == "expired" {
 				return 3
+			} else if s == "new" {
+				return 4
 			}
-			return 2
+			return 5
 		}
 		ri, rj := rank(users[i].Data.Status), rank(users[j].Data.Status)
 		if ri != rj {
@@ -230,6 +243,7 @@ func getDashboardData(c *fiber.Ctx) error {
 		"current_page": page, "total_pages": totalPages,
 		"search_query": search, "active_users": activeCount,
 		"total_users":          state.Users.Count(),
+		"total_filtered":       totalFiltered,
 		"stats":                stats,
 		"slot_timeout":         cfg.SlotTimeout,
 		"inactive_timeout":     cfg.InactiveTimeout,

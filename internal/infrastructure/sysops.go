@@ -34,6 +34,9 @@ type SystemStats struct {
 	WANIface   string             `json:"wan_iface"`
 	WANRXTotal uint64             `json:"wan_rx_total"`
 	WANTXTotal uint64             `json:"wan_tx_total"`
+	LANIface   string             `json:"lan_iface"`
+	LANRXTotal uint64             `json:"lan_rx_total"`
+	LANTXTotal uint64             `json:"lan_tx_total"`
 	Interfaces map[string]ifStats `json:"interfaces"`
 }
 
@@ -82,6 +85,25 @@ func GetSystemStats() SystemStats {
 	if ws, ok := ifaces[wan]; ok {
 		s.WANRXTotal = ws.RXBytes
 		s.WANTXTotal = ws.TXBytes
+	}
+
+	lan := config.LANInterface
+	if _, ok := ifaces[lan]; !ok {
+		if _, ok2 := ifaces["enx00e04c68042c"]; ok2 {
+			lan = "enx00e04c68042c"
+		} else {
+			for name := range ifaces {
+				if strings.HasPrefix(name, "enx") {
+					lan = name
+					break
+				}
+			}
+		}
+	}
+	s.LANIface = lan
+	if ls, ok := ifaces[lan]; ok {
+		s.LANRXTotal = ls.RXBytes
+		s.LANTXTotal = ls.TXBytes
 	}
 	for name, stats := range ifaces {
 		if name == "lo" || strings.HasPrefix(name, "br") || strings.HasPrefix(name, "wlan") {
