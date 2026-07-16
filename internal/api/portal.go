@@ -127,6 +127,8 @@ func portalHome(c *fiber.Ctx) error {
 		"banners":               banners,
 		"banner_text":           cfg.BannerText,
 		"banner_link":           cfg.BannerLink,
+		"portal_title":          cfg.PortalTitle,
+		"portal_subtitle":       cfg.PortalSubtitle,
 		"coin_rates":            cfg.CoinRates,
 		"points_enabled":        cfg.PointsEnabled,
 		"points_enabled_json":   pointsEnabledJSON,

@@ -148,6 +148,8 @@ func getDashboardData(c *fiber.Ctx) error {
 	data["coin_rates"] = cfg.CoinRates
 	data["banner_text"] = cfg.BannerText
 	data["banner_link"] = cfg.BannerLink
+	data["portal_title"] = cfg.PortalTitle
+	data["portal_subtitle"] = cfg.PortalSubtitle
 	data["open_nat_enabled"] = cfg.OpenNATEnabled
 	data["custom_ttl"] = cfg.CustomTTL
 	data["banner_files"] = bannerFiles
@@ -324,6 +326,8 @@ func updateSettings(c *fiber.Ctx) error {
 		CoinRates        string
 		BannerText       string
 		BannerLink       string
+		PortalTitle      string
+		PortalSubtitle   string
 		FreeTimeToggle   string
 		FreeTimeDuration string
 		SoundInsert      string
@@ -340,6 +344,8 @@ func updateSettings(c *fiber.Ctx) error {
 		CoinRates:        getString("coin_rates"),
 		BannerText:       getString("banner_text"),
 		BannerLink:       getString("banner_link"),
+		PortalTitle:      getString("portal_title"),
+		PortalSubtitle:   getString("portal_subtitle"),
 		FreeTimeToggle:   getString("free_time_toggle"),
 		FreeTimeDuration: getString("free_time_duration"),
 		SoundInsert:      getString("sound_insert"),
@@ -374,6 +380,8 @@ func updateSettings(c *fiber.Ctx) error {
 		cfg.CoinRates = body.CoinRates
 		cfg.BannerText = body.BannerText
 		cfg.BannerLink = body.BannerLink
+		cfg.PortalTitle = body.PortalTitle
+		cfg.PortalSubtitle = body.PortalSubtitle
 		cfg.FreeTimeEnabled = newFreeEnabled
 		cfg.FreeTimeDuration = parseInt(body.FreeTimeDuration, 5)
 		cfg.SoundInsert = body.SoundInsert

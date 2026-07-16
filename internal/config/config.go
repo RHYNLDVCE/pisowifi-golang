@@ -97,6 +97,8 @@ type AppConfig struct {
 	BannerText             string             `json:"banner_text"`
 	BannerLink             string             `json:"banner_link"`
 	BannerOrder            []string           `json:"banner_order"`
+	PortalTitle            string             `json:"portal_title"`
+	PortalSubtitle         string             `json:"portal_subtitle"`
 	FreeTimeEnabled        bool               `json:"free_time_enabled"`
 	FreeTimeDuration       int                `json:"free_time_duration"`
 	SoundInsert            string             `json:"sound_insert"`
@@ -128,6 +130,8 @@ var defaultConfig = AppConfig{
 	BannerText:              "",
 	BannerLink:              "",
 	BannerOrder:             []string{},
+	PortalTitle:             "PISOWIFI",
+	PortalSubtitle:          "Premium internet connectevity",
 	FreeTimeEnabled:         false,
 	FreeTimeDuration:        5,
 	SoundInsert:             "insert_coin_sound.mp3",

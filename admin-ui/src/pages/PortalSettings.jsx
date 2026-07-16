@@ -369,6 +369,16 @@ export default function PortalSettings() {
              </div>
           </div>
           <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Portal Title</label>
+                <input type="text" name="portal_title" defaultValue={data.portal_title} placeholder="e.g. PISOWIFI" className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none shadow-sm" />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Portal Subtitle</label>
+                <input type="text" name="portal_subtitle" defaultValue={data.portal_subtitle} placeholder="e.g. Premium internet connectivity" className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none shadow-sm" />
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Banner Button Text</label>
