@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Activity, Award, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function LoyaltySettings() {
   const [pointsConfig, setPointsConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [savingPoints, setSavingPoints] = useState(false);
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, type: 'danger' });
+
+  const confirmAction = (title, message, onConfirm, type = 'danger') => {
+    setModalConfig({ isOpen: true, title, message, onConfirm, type });
+  };
+  const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false });
 
   useEffect(() => {
     fetch('/admin/get_points_config')
@@ -67,7 +74,15 @@ export default function LoyaltySettings() {
   if (!pointsConfig) return <div className="text-red-500">Error loading settings.</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      <ConfirmModal 
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        onConfirm={modalConfig.onConfirm}
+        onClose={closeModal}
+      />
       
       <form onSubmit={handlePointsSubmit} className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
         <h3 className="flex items-center gap-2 text-base font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">

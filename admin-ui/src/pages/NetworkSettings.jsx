@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Activity, Clock, Timer, PauseCircle, Gift, Gauge } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function NetworkSettings() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, type: 'danger' });
+
+  const confirmAction = (title, message, onConfirm, type = 'danger') => {
+    setModalConfig({ isOpen: true, title, message, onConfirm, type });
+  };
+  const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false });
 
   useEffect(() => {
     fetch('/admin/api/dashboard_data')
@@ -62,7 +69,15 @@ export default function NetworkSettings() {
   if (!data) return <div className="text-red-500">Error loading settings.</div>;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 relative">
+      <ConfirmModal 
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        onConfirm={modalConfig.onConfirm}
+        onClose={closeModal}
+      />
       
       <form onSubmit={handleSubmit} className="space-y-6">
         

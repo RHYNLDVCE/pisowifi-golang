@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Activity, PauseCircle, Gift } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function SessionSettings() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, type: 'danger' });
+
+  const confirmAction = (title, message, onConfirm, type = 'danger') => {
+    setModalConfig({ isOpen: true, title, message, onConfirm, type });
+  };
+  const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false });
 
   useEffect(() => {
     fetch('/admin/api/dashboard_data')
@@ -35,7 +42,6 @@ export default function SessionSettings() {
     payload.gaming_mode = data.gaming_mode_enabled ? 'on' : '';
     payload.open_nat = data.open_nat_enabled ? 'on' : '';
     payload.custom_ttl = data.custom_ttl ?? 1;
-    payload.free_time_toggle = formData.get('free_time_toggle') ? 'on' : '';
     payload.speed_limit_val = data.global_speed_limit || 0;
     payload.coin_rates = data.coin_rates || '';
     payload.banner_text = data.banner_text || '';
@@ -66,7 +72,15 @@ export default function SessionSettings() {
   if (!data) return <div className="text-red-500">Error loading settings.</div>;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 relative">
+      <ConfirmModal 
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        onConfirm={modalConfig.onConfirm}
+        onClose={closeModal}
+      />
       
       <form onSubmit={handleSubmit} className="space-y-6">
         

@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Save, Activity, Coins } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function CoinSettings() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [coinRates, setCoinRates] = useState({ 1: '', 5: '', 10: '', 20: '' });
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, type: 'danger' });
+
+  const confirmAction = (title, message, onConfirm, type = 'danger') => {
+    setModalConfig({ isOpen: true, title, message, onConfirm, type });
+  };
+  const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false });
 
   useEffect(() => {
     fetch('/admin/api/dashboard_data')
@@ -87,7 +94,15 @@ export default function CoinSettings() {
   if (!data) return <div className="text-red-500">Error loading settings.</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      <ConfirmModal 
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        onConfirm={modalConfig.onConfirm}
+        onClose={closeModal}
+      />
       <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
         <h3 className="flex items-center gap-2 text-base font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
           <Coins size={20} /> Pricing Structure

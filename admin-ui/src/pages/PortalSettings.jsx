@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Save, Activity, MonitorSmartphone, Volume2, Timer, Image, Trash2, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Save, Activity, MonitorSmartphone, Volume2, Timer, Image, Trash2, Upload, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function PortalSettings() {
   const [data, setData] = useState(null);
@@ -8,6 +9,12 @@ export default function PortalSettings() {
   const [loading, setLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, type: 'danger' });
+
+  const confirmAction = (title, message, onConfirm, type = 'danger') => {
+    setModalConfig({ isOpen: true, title, message, onConfirm, type });
+  };
+  const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false });
 
   const fetchData = () => {
     fetch('/admin/api/dashboard_data')
@@ -30,7 +37,6 @@ export default function PortalSettings() {
   const handleSaveSettings = async (e) => {
     e.preventDefault();
     setSavingSettings(true);
-    
     const formData = new FormData(e.target);
     const payload = Object.fromEntries(formData.entries());
     
@@ -80,34 +86,44 @@ export default function PortalSettings() {
     e.target.reset();
   };
 
-  const deleteBanner = async (filename) => {
-    if (!window.confirm('Delete this banner?')) return;
-    try {
-      await fetch('/admin/delete_banner', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `filename=${encodeURIComponent(filename)}`
-      });
-      toast.success('Banner deleted');
-      fetchData();
-    } catch (err) {
-      toast.error('Failed to delete banner');
-    }
+  const deleteBanner = (filename) => {
+    confirmAction(
+      'Delete Banner',
+      'Are you sure you want to delete this promotional banner? This action cannot be undone.',
+      async () => {
+        try {
+          await fetch('/admin/delete_banner', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `filename=${encodeURIComponent(filename)}`
+          });
+          toast.success('Banner deleted');
+          fetchData();
+        } catch (err) {
+          toast.error('Failed to delete banner');
+        }
+      }
+    );
   };
 
-  const deleteSound = async (filename) => {
-    if (!window.confirm('Delete this sound?')) return;
-    try {
-      await fetch('/admin/delete_sound', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `filename=${encodeURIComponent(filename)}`
-      });
-      toast.success('Sound deleted');
-      fetchData();
-    } catch (err) {
-      toast.error('Failed to delete sound');
-    }
+  const deleteSound = (filename) => {
+    confirmAction(
+      'Delete Sound',
+      'Are you sure you want to delete this custom audio file? Make sure it is not currently selected in the settings.',
+      async () => {
+        try {
+          await fetch('/admin/delete_sound', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `filename=${encodeURIComponent(filename)}`
+          });
+          toast.success('Sound deleted');
+          fetchData();
+        } catch (err) {
+          toast.error('Failed to delete sound');
+        }
+      }
+    );
   };
 
   const moveBanner = (index, direction) => {
@@ -151,7 +167,15 @@ export default function PortalSettings() {
   if (!data) return <div className="text-red-500">Error loading settings.</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      <ConfirmModal 
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        onConfirm={modalConfig.onConfirm}
+        onClose={closeModal}
+      />
       
       {/* --- MEDIA UPLOADS --- */}
 

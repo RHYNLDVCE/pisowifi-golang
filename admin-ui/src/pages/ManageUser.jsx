@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, ShieldBan, Trash2, Check, Activity, Star, ChevronDown, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '../components/CustomSelect';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function ManageUser() {
   const { mac } = useParams();
@@ -72,37 +73,14 @@ export default function ManageUser() {
   return (
     <div className="space-y-6 w-full relative">
 
-      {/* Custom Confirm Modal */}
-      {modalConfig.isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center gap-4 mb-4">
-              <div className={`p-3 rounded-2xl ${modalConfig.type === 'danger' ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-500' : 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-500'}`}>
-                <AlertTriangle size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{modalConfig.title}</h3>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">{modalConfig.message}</p>
-            <div className="flex gap-3">
-              <button 
-                onClick={closeModal} 
-                className="flex-1 px-4 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={() => {
-                  modalConfig.onConfirm();
-                  closeModal();
-                }} 
-                className={`flex-1 px-4 py-3 font-bold rounded-xl text-white transition-colors shadow-sm ${modalConfig.type === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal 
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        onConfirm={modalConfig.onConfirm}
+        onClose={closeModal}
+      />
 
       <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
         <ArrowLeft size={16} /> Back
