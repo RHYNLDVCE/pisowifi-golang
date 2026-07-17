@@ -175,7 +175,7 @@ export default function NetworkSettings() {
 
         {/* UDP Priority Optimization */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-start sm:items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-zinc-800">
+          <div className="flex items-start sm:items-center justify-between gap-4">
              <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
                <span>UDP Priority Optimization</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
@@ -194,7 +194,7 @@ export default function NetworkSettings() {
 
         {/* Gaming Mode */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-start sm:items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-zinc-800">
+          <div className="flex items-start sm:items-center justify-between gap-4">
              <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
                <span>Gaming Mode</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
@@ -213,7 +213,7 @@ export default function NetworkSettings() {
 
         {/* Open NAT */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-start sm:items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-zinc-800">
+          <div className="flex items-start sm:items-center justify-between gap-4">
              <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
                <span>Open NAT (Gaming)</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
