@@ -100,97 +100,104 @@ func ReadPin() int {
 func WaitForPulse(onDetected func()) int {
 	pin := config.CoinGPIONum
 
-	// Ensure edge is falling for reliable start-of-pulse detection
-	_ = os.WriteFile(gpioPath(pin, "edge"), []byte("falling"), 0644)
-
 	valuePath := gpioPath(pin, "value")
-	fd, err := syscall.Open(valuePath, syscall.O_RDONLY|syscall.O_NONBLOCK, 0)
+	fd, err := os.Open(valuePath)
 	if err != nil {
 		logger.SystemLog(fmt.Sprintf("[HW] Error opening GPIO value for poll: %v", err))
 		time.Sleep(time.Second) // fallback sleep
 		return 0
 	}
-	defer syscall.Close(fd)
+	defer fd.Close()
 
-	epfd, err := syscall.EpollCreate1(0)
-	if err != nil {
-		logger.SystemLog(fmt.Sprintf("[HW] Error creating epoll: %v", err))
-		time.Sleep(time.Second)
-		return 0
-	}
-	defer syscall.Close(epfd)
-
-	event := syscall.EpollEvent{
-		Events: syscall.EPOLLPRI | syscall.EPOLLERR,
-		Fd:     int32(fd),
-	}
-	if err := syscall.EpollCtl(epfd, syscall.EPOLL_CTL_ADD, fd, &event); err != nil {
-		logger.SystemLog(fmt.Sprintf("[HW] Error in epoll ctl: %v", err))
-		time.Sleep(time.Second)
-		return 0
-	}
-
-	events := make([]syscall.EpollEvent, 1)
-
-	// Initial read to clear any pending interrupt
-	buf := make([]byte, 2)
-	syscall.Seek(fd, 0, 0)
-	syscall.Read(fd, buf)
-
-	waitForEdge := func(timeoutMs int) bool {
-		n, err := syscall.EpollWait(epfd, events, timeoutMs)
-		if err != nil && err != syscall.EINTR {
-			return false
+	buf := make([]byte, 1)
+	readPinFast := func() int {
+		_, err := fd.Seek(0, 0)
+		if err != nil {
+			return 1
 		}
-		if n > 0 {
-			// Acknowledge the interrupt so it can trigger again
-			syscall.Seek(fd, 0, 0)
-			syscall.Read(fd, buf)
-			return true
+		n, err := fd.Read(buf)
+		if err != nil || n == 0 {
+			return 1
 		}
-		return false
+		if buf[0] == '0' {
+			return 0
+		}
+		return 1
 	}
 
-	// PHASE 1 — Wait for first pulse (falling edge)
+	// SAFETY: If pin is stuck LOW (0), wait for it to clear.
+	if readPinFast() == 0 {
+		logger.SystemLog("   [Warning] Signal Stuck LOW. Waiting for clear...")
+		timeout := time.Now()
+		for readPinFast() == 0 {
+			if time.Since(timeout) > 2*time.Second {
+				logger.SystemLog("   [Error] Signal permanently stuck LOW. Resetting...")
+				return 0
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+		logger.SystemLog("   [OK] Signal Cleared. Ready.")
+	}
+
+	lastState := 1
+
+	// PHASE 1: Wait for coin
 	for {
 		if state.IsShuttingDown.Load() {
 			return 0
 		}
-		if waitForEdge(1000) {
-			if ReadPin() == 0 {
-				break
+		pinState := readPinFast()
+		if pinState == 0 && lastState == 1 {
+			// FIRST PULSE DETECTED!
+			if onDetected != nil {
+				func() {
+					defer func() {
+						if r := recover(); r != nil {
+							logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
+						}
+					}()
+					onDetected()
+				}()
 			}
-		}
-	}
-
-	// First pulse detected
-	if onDetected != nil {
-		func() {
-			defer func() { recover() }()
-			onDetected()
-		}()
-	}
-
-	// PHASE 2 — Count remaining pulses within 0.6 s silence window
-	totalPulses := 1
-	lastPulseTime := time.Now()
-
-	// Keep counting until 0.6 s of silence
-	for {
-		timeRemaining := int(600 - time.Since(lastPulseTime).Milliseconds())
-		if timeRemaining <= 0 {
 			break
 		}
-		
-		if waitForEdge(timeRemaining) {
-			// Debounce: ignore glitches within 50ms of the last pulse start
-			if time.Since(lastPulseTime) > 50*time.Millisecond {
-				if ReadPin() == 0 {
-					totalPulses++
-					lastPulseTime = time.Now()
-				}
-			}
+		lastState = pinState
+		time.Sleep(1 * time.Millisecond)
+	}
+
+	// PHASE 2: Count pulses
+	totalPulses := 1
+	lastPulseTime := time.Now()
+	lastState = 0
+
+	// Wait for the pulse to finish (go back HIGH) with Timeout
+	timeout := time.Now()
+	for readPinFast() == 0 {
+		if time.Since(timeout) > 500*time.Millisecond {
+			break
 		}
+		time.Sleep(1 * time.Millisecond)
+	}
+	lastState = 1
+
+	// Keep listening until silence
+	for time.Since(lastPulseTime) < 600*time.Millisecond {
+		pinState := readPinFast()
+		if pinState == 0 && lastState == 1 {
+			totalPulses++
+			lastPulseTime = time.Now()
+
+			timeout := time.Now()
+			for readPinFast() == 0 {
+				if time.Since(timeout) > 500*time.Millisecond {
+					break
+				}
+				time.Sleep(1 * time.Millisecond)
+			}
+			pinState = 1
+		}
+		lastState = pinState
+		time.Sleep(1 * time.Millisecond)
 	}
 
 	return totalPulses
