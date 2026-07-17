@@ -14,7 +14,7 @@ echo "    PisoWifi System Dependency Installer  "
 echo "=========================================="
 
 echo "[1/3] Updating system package list..."
-apt-get update -y
+apt update -y
 
 echo "[2/3] Installing Core Linux Networking & Utilities..."
 # nftables: Firewall & NAT
