@@ -137,12 +137,13 @@
     .promo-card {
         background: var(--surface); 
         border-radius: 12px; 
-        padding: 1.25rem; 
+        padding: 1rem; 
         margin-bottom: 1rem;
         border: 1px solid var(--border-color);
         display: flex; 
         justify-content: space-between; 
         align-items: center;
+        gap: 0.5rem;
         transition: border-color 0.2s ease;
     }
 
@@ -178,14 +179,15 @@
         background: var(--surface); 
         color: var(--accent); 
         border: 1px solid var(--accent); 
-        padding: 0.6rem 1.25rem;
+        padding: 0.5rem 1rem;
         border-radius: 6px; 
         font-weight: 600; 
-        font-size: 0.875rem; 
+        font-size: 0.85rem; 
         cursor: pointer;
         transition: all 0.2s ease;
-        min-width: 110px;
+        min-width: 90px;
         text-align: center;
+        flex-shrink: 0;
         font-family: inherit;
     }
     
