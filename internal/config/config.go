@@ -75,10 +75,11 @@ type PromoItem struct {
 }
 
 type AppConfig struct {
-	WANUploadMbps          int                `json:"wan_upload_mbps"`
-	WANSpeedMbps           int                `json:"wan_speed_mbps"`
 	SlotTimeout            int                `json:"slot_timeout"`
 	SlotExpiryTimestamp    float64            `json:"slot_expiry_timestamp"`
+	SQMEnabled             bool               `json:"sqm_enabled"`
+	SQMUploadMbps          int                `json:"sqm_upload_mbps"`
+	SQMDownloadMbps        int                `json:"sqm_download_mbps"`
 	InactiveTimeout        int                `json:"inactive_timeout"`
 	AutoPauseEnabled       bool               `json:"auto_pause_enabled"`
 	SpeedLimitEnabled      bool               `json:"speed_limit_enabled"`
@@ -108,10 +109,11 @@ type AppConfig struct {
 
 // Defaults mirror state.py defaults
 var defaultConfig = AppConfig{
-	WANUploadMbps:           70,
-	WANSpeedMbps:            100,
 	SlotTimeout:             30,
 	SlotExpiryTimestamp:     0,
+	SQMEnabled:              false,
+	SQMUploadMbps:           70,
+	SQMDownloadMbps:         100,
 	InactiveTimeout:         900,
 	AutoPauseEnabled:        true,
 	SpeedLimitEnabled:       false,

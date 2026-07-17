@@ -260,8 +260,26 @@ table ip pisowifi {
 	runTcStr(fmt.Sprintf("tc qdisc add dev %s root handle 1: htb default 10", lan))
 	runTcStr(fmt.Sprintf("tc class add dev %s parent 1: classid 1:ffff htb rate 1000mbit", lan))
 	runTcStr(fmt.Sprintf("tc qdisc add dev %s ingress", lan))
-	runTcStr(fmt.Sprintf("tc qdisc del dev %s root", wan))
-	runTcStr(fmt.Sprintf("tc qdisc add dev %s root cake bandwidth %dmbit diffserv4 nat wash", wan, cfg.WANUploadMbps))
+	
+	// SQM
+	runTcStr(fmt.Sprintf("tc qdisc del dev %s root", wan)) // Clear any existing WAN SQM
+	runTcStr("ip link del ifb0") // Clear any existing IFB
+	
+	if cfg.SQMEnabled {
+		// Upload (WAN Egress)
+		runTcStr(fmt.Sprintf("tc qdisc add dev %s root cake bandwidth %dmbit diffserv4 nat wash", wan, cfg.SQMUploadMbps))
+		
+		// Download (WAN Ingress -> IFB0 Egress)
+		runCmdStr("ip link add name ifb0 type ifb")
+		runCmdStr("ip link set dev ifb0 up")
+		runTcStr(fmt.Sprintf("tc qdisc del dev %s ingress", wan)) // clear existing ingress
+		runTcStr(fmt.Sprintf("tc qdisc add dev %s handle ffff: ingress", wan))
+		runTcStr(fmt.Sprintf("tc filter add dev %s parent ffff: protocol all u32 match u32 0 0 action mirred egress redirect dev ifb0", wan))
+		runTcStr(fmt.Sprintf("tc qdisc add dev ifb0 root cake bandwidth %dmbit diffserv4 nat wash", cfg.SQMDownloadMbps))
+		logger.SystemLog(fmt.Sprintf("SQM Enabled: Upload %d Mbps, Download %d Mbps", cfg.SQMUploadMbps, cfg.SQMDownloadMbps))
+	} else {
+		logger.SystemLog("SQM Disabled.")
+	}
 
 	logger.SystemLog("Firewall Initialized.")
 }

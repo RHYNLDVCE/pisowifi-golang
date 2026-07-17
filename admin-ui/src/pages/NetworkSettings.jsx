@@ -113,6 +113,49 @@ export default function NetworkSettings() {
           </div>
         </div>
 
+        {/* Smart Queue Management (SQM) */}
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
+          <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center justify-between">
+             <div className="flex items-center gap-3">
+               <div className="p-2 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
+                  <Gauge size={20} />
+               </div>
+               <div>
+                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Smart Queue Management (SQM)</h3>
+                 <p className="text-xs text-gray-500 dark:text-gray-400">Prevent bufferbloat on WAN</p>
+               </div>
+             </div>
+             <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
+               <input type="checkbox" name="sqm_enabled" defaultChecked={data.sqm_enabled} className="peer sr-only" />
+               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+             </label>
+          </div>
+          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="space-y-2">
+                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">ISP Download Speed (Mbps)</label>
+                 <input 
+                   type="number" 
+                   name="sqm_download_mbps" 
+                   defaultValue={data.sqm_download_mbps} 
+                   className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400 outline-none shadow-sm"
+                 />
+                 <p className="text-[10px] text-gray-500 mt-1">Set to 95% of your true maximum ISP download speed.</p>
+               </div>
+               <div className="space-y-2">
+                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">ISP Upload Speed (Mbps)</label>
+                 <input 
+                   type="number" 
+                   name="sqm_upload_mbps" 
+                   defaultValue={data.sqm_upload_mbps} 
+                   className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400 outline-none shadow-sm"
+                 />
+                 <p className="text-[10px] text-gray-500 mt-1">Set to 95% of your true maximum ISP upload speed.</p>
+               </div>
+             </div>
+          </div>
+        </div>
+
         {/* Gaming Mode */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
           <div className="p-5 sm:p-6 flex items-center justify-between">

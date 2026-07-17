@@ -140,6 +140,9 @@ func getDashboardData(c *fiber.Ctx) error {
 
 	// Merge settings into the data map
 	data["slot_timeout"] = cfg.SlotTimeout
+	data["sqm_enabled"] = cfg.SQMEnabled
+	data["sqm_upload_mbps"] = cfg.SQMUploadMbps
+	data["sqm_download_mbps"] = cfg.SQMDownloadMbps
 	data["inactive_timeout"] = cfg.InactiveTimeout
 	data["auto_pause_enabled"] = cfg.AutoPauseEnabled
 	data["speed_limit_enabled"] = cfg.SpeedLimitEnabled
@@ -318,6 +321,9 @@ func updateSettings(c *fiber.Ctx) error {
 
 	body := struct {
 		Timeout          string
+		SQMEnabled       string
+		SQMUpload        string
+		SQMDownload      string
 		InactiveTimeout  string
 		AutoPause        string
 		SpeedLimitVal    string
@@ -336,6 +342,9 @@ func updateSettings(c *fiber.Ctx) error {
 		CustomTTL        string
 	}{
 		Timeout:          getString("timeout"),
+		SQMEnabled:       getString("sqm_enabled"),
+		SQMUpload:        getString("sqm_upload_mbps"),
+		SQMDownload:      getString("sqm_download_mbps"),
 		InactiveTimeout:  getString("inactive_timeout"),
 		AutoPause:        getString("auto_pause"),
 		SpeedLimitVal:    getString("speed_limit_val"),
@@ -372,6 +381,9 @@ func updateSettings(c *fiber.Ctx) error {
 			return v
 		}
 		cfg.SlotTimeout = parseInt(body.Timeout, 30)
+		cfg.SQMEnabled = body.SQMEnabled == "on"
+		cfg.SQMUploadMbps = parseInt(body.SQMUpload, 70)
+		cfg.SQMDownloadMbps = parseInt(body.SQMDownload, 100)
 		cfg.InactiveTimeout = parseInt(body.InactiveTimeout, 900)
 		cfg.AutoPauseEnabled = body.AutoPause == "on"
 		cfg.GlobalSpeedLimit = parseInt(body.SpeedLimitVal, 5)
