@@ -102,20 +102,22 @@ export default function Connections() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm flex flex-col p-6">
-        <div className="flex flex-wrap gap-4 justify-between items-center mb-6">
+      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm flex flex-col overflow-hidden">
+        <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex flex-wrap gap-4 justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-500/10 hidden sm:flex">
+            <div className="p-2 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 hidden sm:flex">
                <Users size={20} />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">Active Connections</h3>
-              <div className="text-sm font-medium text-gray-500">Managing live user sessions on the network</div>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+                 Active Connections
+                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400 ml-3 tracking-widest uppercase">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></span>
+                    {active_users} Active
+                 </span>
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Managing live user sessions on the network</p>
             </div>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400 ml-2 shrink-0 whitespace-nowrap">
-               <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></span>
-               {active_users} Active
-            </span>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <CustomSelect
@@ -135,14 +137,14 @@ export default function Connections() {
                 placeholder="Search MAC, IP, or Name..." 
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800/50 rounded-xl outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-zinc-700 w-full sm:w-64 transition-all" 
+                className="pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 w-full sm:w-64 transition-all shadow-sm" 
               />
             </div>
           </div>
         </div>
         
         {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse relative">
             <thead className="sticky top-0 bg-white dark:bg-zinc-950 z-10 shadow-[0_1px_0_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)]">
               <tr>
@@ -255,7 +257,7 @@ export default function Connections() {
         </div>
 
         {/* Pagination Controls */}
-        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 dark:border-zinc-800/50 pt-4 mt-4 gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 dark:border-zinc-800/50 p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 gap-4">
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Showing <span className="font-medium text-gray-900 dark:text-white">{totalItems > 0 ? (safeCurrentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="font-medium text-gray-900 dark:text-white">{Math.min(safeCurrentPage * ITEMS_PER_PAGE, totalItems)}</span> of <span className="font-medium text-gray-900 dark:text-white">{totalItems}</span> entries
           </div>

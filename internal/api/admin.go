@@ -148,6 +148,7 @@ func getDashboardData(c *fiber.Ctx) error {
 	data["speed_limit_enabled"] = cfg.SpeedLimitEnabled
 	data["global_speed_limit"] = cfg.GlobalSpeedLimit
 	data["gaming_mode_enabled"] = cfg.GamingModeEnabled
+	data["udp_priority_enabled"] = cfg.UDPPriorityEnabled
 	data["coin_rates"] = cfg.CoinRates
 	data["banner_text"] = cfg.BannerText
 	data["banner_link"] = cfg.BannerLink
@@ -329,6 +330,7 @@ func updateSettings(c *fiber.Ctx) error {
 		SpeedLimitVal    string
 		SpeedLimitToggle string
 		GamingMode       string
+		UDPPriority      string
 		CoinRates        string
 		BannerText       string
 		BannerLink       string
@@ -350,6 +352,7 @@ func updateSettings(c *fiber.Ctx) error {
 		SpeedLimitVal:    getString("speed_limit_val"),
 		SpeedLimitToggle: getString("speed_limit_toggle"),
 		GamingMode:       getString("gaming_mode"),
+		UDPPriority:      getString("udp_priority"),
 		CoinRates:        getString("coin_rates"),
 		BannerText:       getString("banner_text"),
 		BannerLink:       getString("banner_link"),
@@ -389,6 +392,7 @@ func updateSettings(c *fiber.Ctx) error {
 		cfg.GlobalSpeedLimit = parseInt(body.SpeedLimitVal, 5)
 		cfg.SpeedLimitEnabled = body.SpeedLimitToggle == "on"
 		cfg.GamingModeEnabled = body.GamingMode == "on"
+		cfg.UDPPriorityEnabled = body.UDPPriority == "on"
 		cfg.CoinRates = body.CoinRates
 		cfg.BannerText = body.BannerText
 		cfg.BannerLink = body.BannerLink

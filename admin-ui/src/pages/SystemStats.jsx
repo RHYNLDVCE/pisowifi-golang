@@ -124,9 +124,7 @@ export default function SystemStats() {
         <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col justify-between">
           <div className="flex justify-between items-start mb-3">
              <div className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">CPU Load</div>
-             <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-blue-50 text-blue-500 dark:bg-blue-500/10">
-               <Cpu size={16} />
-             </div>
+             <Cpu size={16} className="text-gray-400 dark:text-zinc-600" />
           </div>
           <div>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.cpu}%</div>
@@ -137,9 +135,7 @@ export default function SystemStats() {
         <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col justify-between">
           <div className="flex justify-between items-start mb-3">
              <div className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Memory</div>
-             <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-purple-50 text-purple-500 dark:bg-purple-500/10">
-               <MemoryStick size={16} />
-             </div>
+             <MemoryStick size={16} className="text-gray-400 dark:text-zinc-600" />
           </div>
           <div>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.ram}%</div>
@@ -150,9 +146,7 @@ export default function SystemStats() {
         <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col justify-between">
           <div className="flex justify-between items-start mb-3">
              <div className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Storage</div>
-             <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-amber-50 text-amber-500 dark:bg-amber-500/10">
-               <HardDrive size={16} />
-             </div>
+             <HardDrive size={16} className="text-gray-400 dark:text-zinc-600" />
           </div>
           <div>
             <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.disk}%</div>
@@ -163,9 +157,7 @@ export default function SystemStats() {
         <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col justify-between col-span-2 lg:col-span-2">
           <div className="flex justify-between items-start mb-3">
              <div className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">IP Addresses</div>
-             <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10">
-               <Network size={16} />
-             </div>
+             <Network size={16} className="text-gray-400 dark:text-zinc-600" />
           </div>
           <div>
             <div className="text-sm sm:text-base font-mono font-bold text-gray-900 dark:text-white break-all leading-relaxed">{stats.ips}</div>
@@ -176,9 +168,7 @@ export default function SystemStats() {
         <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col justify-between col-span-2 lg:col-span-1">
           <div className="flex justify-between items-start mb-3">
              <div className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Uptime</div>
-             <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-cyan-50 text-cyan-500 dark:bg-cyan-500/10">
-               <Timer size={16} />
-             </div>
+             <Timer size={16} className="text-gray-400 dark:text-zinc-600" />
           </div>
           <div>
             <div className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">{stats.uptime}</div>

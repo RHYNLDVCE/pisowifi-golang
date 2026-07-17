@@ -1,13 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { Save, Activity, Clock, Timer, PauseCircle, Gift, Gauge } from 'lucide-react';
+import { Save, Activity, Info, Gauge } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
+
+const InfoTooltip = ({ text }) => (
+  <div className="group relative ml-2 flex items-center justify-center">
+    <Info size={16} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" />
+    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 shadow-xl pointer-events-none">
+      {text}
+      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
+    </div>
+  </div>
+);
 
 export default function NetworkSettings() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, type: 'danger' });
+  const [toggles, setToggles] = useState({});
 
   const confirmAction = (title, message, onConfirm, type = 'danger') => {
     setModalConfig({ isOpen: true, title, message, onConfirm, type });
@@ -19,6 +30,13 @@ export default function NetworkSettings() {
       .then(res => res.json())
       .then(json => {
         setData(json);
+        setToggles({
+          speedLimit: json.speed_limit_enabled,
+          sqm: json.sqm_enabled,
+          gamingMode: json.gaming_mode_enabled,
+          udpPriority: json.udp_priority_enabled,
+          openNat: json.open_nat_enabled
+        });
         setLoading(false);
       })
       .catch(err => {
@@ -34,9 +52,12 @@ export default function NetworkSettings() {
     const formData = new FormData(e.target);
     const payload = Object.fromEntries(formData.entries());
     
-    payload.speed_limit_toggle = formData.get('speed_limit_toggle') ? 'on' : '';
-    payload.gaming_mode = formData.get('gaming_mode') ? 'on' : '';
-    payload.open_nat = formData.get('open_nat') ? 'on' : '';
+    payload.speed_limit_toggle = toggles.speedLimit ? 'on' : '';
+    payload.sqm_enabled = toggles.sqm ? 'on' : '';
+    payload.gaming_mode = toggles.gamingMode ? 'on' : '';
+    payload.udp_priority = toggles.udpPriority ? 'on' : '';
+    payload.open_nat = toggles.openNat ? 'on' : '';
+
     payload.free_time_toggle = formData.get('free_time_toggle') ? 'on' : '';
     payload.auto_pause = formData.get('auto_pause') ? 'on' : '';
     payload.custom_ttl = formData.get('custom_ttl') || (data.custom_ttl ?? 1);
@@ -57,6 +78,10 @@ export default function NetworkSettings() {
       toast.error('Error saving settings.');
     }
     setSaving(false);
+  };
+
+  const handleToggle = (key) => {
+    setToggles(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   if (loading) return (
@@ -81,8 +106,6 @@ export default function NetworkSettings() {
       
       <form onSubmit={handleSubmit} className="space-y-6">
         
-
-
         {/* Speed Limit */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
           <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center justify-between">
@@ -91,16 +114,19 @@ export default function NetworkSettings() {
                   <Gauge size={20} />
                </div>
                <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Global Speed Limit</h3>
+                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+                    Global Speed Limit
+                    <InfoTooltip text="Limits the maximum total internet bandwidth allowed for an individual user's device. Prevents a single user from hogging the connection." />
+                 </h3>
                  <p className="text-xs text-gray-500 dark:text-gray-400">Enforce global bandwidth cap</p>
                </div>
              </div>
              <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
-               <input type="checkbox" name="speed_limit_toggle" defaultChecked={data.speed_limit_enabled} className="peer sr-only" />
+               <input type="checkbox" checked={toggles.speedLimit} onChange={() => handleToggle('speedLimit')} className="peer sr-only" />
                <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
              </label>
           </div>
-          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
+          <div className={`p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 transition-opacity duration-200 ${!toggles.speedLimit ? 'opacity-50 pointer-events-none' : ''}`}>
              <div className="space-y-2 max-w-sm">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Speed Limit (Mbps)</label>
                 <input 
@@ -121,16 +147,19 @@ export default function NetworkSettings() {
                   <Gauge size={20} />
                </div>
                <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Smart Queue Management (SQM)</h3>
+                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+                    Smart Queue Management (SQM)
+                    <InfoTooltip text="Prevents bufferbloat by smoothly managing your overall WAN hardware traffic. Keeps your network ping low even when overall usage is high." />
+                 </h3>
                  <p className="text-xs text-gray-500 dark:text-gray-400">Prevent bufferbloat on WAN</p>
                </div>
              </div>
              <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
-               <input type="checkbox" name="sqm_enabled" defaultChecked={data.sqm_enabled} className="peer sr-only" />
+               <input type="checkbox" checked={toggles.sqm} onChange={() => handleToggle('sqm')} className="peer sr-only" />
                <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
              </label>
           </div>
-          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
+          <div className={`p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 transition-opacity duration-200 ${!toggles.sqm ? 'opacity-50 pointer-events-none' : ''}`}>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div className="space-y-2">
                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">ISP Download Speed (Mbps)</label>
@@ -164,13 +193,38 @@ export default function NetworkSettings() {
                   <Activity size={20} />
                </div>
                <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Gaming Mode</h3>
-                 <p className="text-xs text-gray-500 dark:text-gray-400">Anti-Bufferbloat QoS optimization</p>
+                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+                    Gaming Mode
+                    <InfoTooltip text="Creates priority lanes for each individual user's internet connection. Ensures that gaming traffic skips ahead of downloads inside their own speed limit." />
+                 </h3>
+                 <p className="text-xs text-gray-500 dark:text-gray-400">Individual Anti-Bufferbloat optimization</p>
                </div>
              </div>
              <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
-               <input type="checkbox" name="gaming_mode" defaultChecked={data.gaming_mode_enabled} className="peer sr-only" />
+               <input type="checkbox" checked={toggles.gamingMode} onChange={() => handleToggle('gamingMode')} className="peer sr-only" />
                <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+             </label>
+          </div>
+        </div>
+
+        {/* UDP Priority */}
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
+          <div className="p-5 sm:p-6 flex items-center justify-between">
+             <div className="flex items-center gap-3">
+               <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
+                  <Activity size={20} />
+               </div>
+               <div>
+                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+                    UDP Priority Optimization
+                    <InfoTooltip text="Automatically tags real-time UDP traffic (like Voice Calls and Games) with VIP priority labels, while tagging Torrent traffic with lowest priority labels. Highly recommended." />
+                 </h3>
+                 <p className="text-xs text-gray-500 dark:text-gray-400">Tag Real-time UDP packets (Gaming/Voice)</p>
+               </div>
+             </div>
+             <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
+               <input type="checkbox" checked={toggles.udpPriority} onChange={() => handleToggle('udpPriority')} className="peer sr-only" />
+               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
              </label>
           </div>
         </div>
@@ -183,12 +237,15 @@ export default function NetworkSettings() {
                   <Activity size={20} />
                </div>
                <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Open NAT (Gaming)</h3>
+                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+                    Open NAT (Gaming)
+                    <InfoTooltip text="Opens up UPnP routing to allow Console gaming (Playstation, Xbox) to connect more freely without Strict NAT type issues." />
+                 </h3>
                  <p className="text-xs text-gray-500 dark:text-gray-400">Enable UPnP for consoles</p>
                </div>
              </div>
              <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
-               <input type="checkbox" name="open_nat" defaultChecked={data.open_nat_enabled} className="peer sr-only" />
+               <input type="checkbox" checked={toggles.openNat} onChange={() => handleToggle('openNat')} className="peer sr-only" />
                <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
              </label>
           </div>
@@ -202,7 +259,10 @@ export default function NetworkSettings() {
                   <Activity size={20} />
                </div>
                <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Tethering Override (TTL)</h3>
+                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+                    Tethering Override (TTL)
+                    <InfoTooltip text="Modifies the TTL (Time To Live) of packets leaving the router. Set to 1 to attempt blocking users from tethering/hotspotting their connection to other devices." />
+                 </h3>
                  <p className="text-xs text-gray-500 dark:text-gray-400">Set to 1 to block tethering, 0 to disable</p>
                </div>
              </div>

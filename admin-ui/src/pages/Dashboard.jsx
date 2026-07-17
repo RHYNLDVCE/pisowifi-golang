@@ -89,17 +89,17 @@ export default function Dashboard() {
       </div>
 
       {/* Revenue Graph */}
-      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm flex flex-col p-4 sm:p-6 mt-6 sm:mt-8">
-        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-          <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-            <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5" />
+      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm flex flex-col overflow-hidden mt-6 sm:mt-8">
+        <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center gap-3">
+          <div className="p-2 sm:p-2.5 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+            <BarChart2 className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-bold text-gray-900 dark:text-white">Revenue Overview</h3>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Income over the last 7 days</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Income over the last 7 days</p>
           </div>
         </div>
-        <div className="h-[300px] w-full">
+        <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={stats.chart_data || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>

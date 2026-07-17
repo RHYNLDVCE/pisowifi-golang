@@ -180,6 +180,7 @@ table ip pisowifi {
 
 	chain prerouting {
 		type filter hook prerouting priority mangle; policy accept;
+		{{if .UDPPriorityEnabled}}
 		udp sport { 5000-5500, 7074-7750, 10000-10009, 30000-30300 } meta mark set 0x63
 		udp dport { 5000-5500, 7074-7750, 10000-10009, 30000-30300 } meta mark set 0x63
 		meta mark 0x63 ip dscp set cs4
@@ -187,6 +188,7 @@ table ip pisowifi {
 		tcp dport { 3478, 3479, 5349 } ip dscp set ef
 		tcp dport 6881-6889 ip dscp set cs1
 		udp dport 6881-6889 ip dscp set cs1
+		{{end}}
 	}
 
 	chain forward_mangle {
@@ -240,9 +242,10 @@ table ip pisowifi {
 	} else {
 		var buf bytes.Buffer
 		tmpl.Execute(&buf, map[string]interface{}{
-			"LAN":       lan,
-			"WAN":       wan,
-			"CustomTTL": cfg.CustomTTL,
+			"LAN":                lan,
+			"WAN":                wan,
+			"CustomTTL":          cfg.CustomTTL,
+			"UDPPriorityEnabled": cfg.UDPPriorityEnabled,
 		})
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

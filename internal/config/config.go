@@ -85,6 +85,7 @@ type AppConfig struct {
 	SpeedLimitEnabled      bool               `json:"speed_limit_enabled"`
 	GlobalSpeedLimit       int                `json:"global_speed_limit"`
 	GamingModeEnabled      bool               `json:"gaming_mode_enabled"`
+	UDPPriorityEnabled     bool               `json:"udp_priority_enabled"`
 	InactivePacketThreshold int               `json:"inactive_packet_threshold"`
 	CoinRates              string             `json:"coin_rates"`
 	PulseValue             int                `json:"pulse_value"`
@@ -119,6 +120,7 @@ var defaultConfig = AppConfig{
 	SpeedLimitEnabled:       false,
 	GlobalSpeedLimit:        5,
 	GamingModeEnabled:       false,
+	UDPPriorityEnabled:      true,
 	InactivePacketThreshold: 5,
 	CoinRates:               "1:10,5:60,10:180,20:300",
 	PulseValue:              1,

@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Save, Activity, Coins } from 'lucide-react';
+import { Save, Activity, Coins, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
+
+const InfoTooltip = ({ text }) => (
+  <div className="group relative ml-2 flex items-center justify-center">
+    <Info size={16} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" />
+    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 shadow-xl pointer-events-none">
+      {text}
+      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
+    </div>
+  </div>
+);
 
 export default function CoinSettings() {
   const [data, setData] = useState(null);
@@ -47,6 +57,7 @@ export default function CoinSettings() {
     const payload = {};
     payload.speed_limit_toggle = data.speed_limit_enabled ? 'on' : '';
     payload.gaming_mode = data.gaming_mode_enabled ? 'on' : '';
+    payload.udp_priority = data.udp_priority_enabled ? 'on' : '';
     payload.open_nat = data.open_nat_enabled ? 'on' : '';
     payload.custom_ttl = data.custom_ttl ?? 1;
     payload.free_time_toggle = data.free_time_enabled ? 'on' : '';
@@ -94,7 +105,7 @@ export default function CoinSettings() {
   if (!data) return <div className="text-red-500">Error loading settings.</div>;
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-4 sm:space-y-6 relative">
       <ConfirmModal 
         isOpen={modalConfig.isOpen}
         title={modalConfig.title}
@@ -103,29 +114,44 @@ export default function CoinSettings() {
         onConfirm={modalConfig.onConfirm}
         onClose={closeModal}
       />
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-        <h3 className="flex items-center gap-2 text-base font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
-          <Coins size={20} /> Pricing Structure
-        </h3>
-        
-        <h4 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">Time Conversion (Coins to Minutes)</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {[1, 5, 10, 20].map(coin => (
-            <div key={coin} className="space-y-1">
-              <label className="text-xs font-bold text-gray-500 dark:text-gray-400">₱{coin} Coin → Minutes</label>
-              <input 
-                type="number" 
-                value={coinRates[coin]}
-                onChange={(e) => setCoinRates({...coinRates, [coin]: e.target.value})}
-                placeholder="0"
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white text-sm"
-              />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center justify-between">
+             <div className="flex items-center gap-3">
+               <div className="p-2 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
+                  <Coins size={20} />
+               </div>
+               <div>
+                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+                    Coin Machine Pricing
+                    <InfoTooltip text="Configure how many minutes of internet access are granted per coin denomination." />
+                 </h3>
+                 <p className="text-xs text-gray-500 dark:text-gray-400">Set time conversion rates</p>
+               </div>
+             </div>
+          </div>
+          
+          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
+            <h4 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">Time Conversion (Coins to Minutes)</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[1, 5, 10, 20].map(coin => (
+                <div key={coin} className="space-y-1 bg-white dark:bg-zinc-900 p-4 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-sm">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400">₱{coin} Coin → Minutes</label>
+                  <input 
+                    type="number" 
+                    value={coinRates[coin]}
+                    onChange={(e) => setCoinRates({...coinRates, [coin]: e.target.value})}
+                    placeholder="0"
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400 text-sm font-bold"
+                  />
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
         
-        <div className="mt-10 flex justify-end">
-          <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50">
+        <div className="pt-6 pb-10 flex justify-end">
+          <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 w-full sm:w-auto justify-center shadow-lg">
             <Save size={18} /> {saving ? 'Saving...' : 'Save Pricing'}
           </button>
         </div>
