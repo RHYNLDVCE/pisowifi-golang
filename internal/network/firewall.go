@@ -305,6 +305,18 @@ func RemoveSpeedLimit(ip string) {
 	runTcStr(fmt.Sprintf("tc filter del dev %s protocol ip parent ffff: prio %d", lan, uid))
 }
 
+func ensureTCRoot(lan string) {
+	out, err := exec.Command("tc", "class", "show", "dev", lan).Output()
+	if err != nil || !strings.Contains(string(out), "1:ffff") {
+		logger.SystemLog(fmt.Sprintf("[FIREWALL] TC root missing on %s (interface reset?). Re-initializing...", lan))
+		runTcStr(fmt.Sprintf("tc qdisc del dev %s root", lan))
+		runTcStr(fmt.Sprintf("tc qdisc del dev %s ingress", lan))
+		runTcStr(fmt.Sprintf("tc qdisc add dev %s root handle 1: htb default 10", lan))
+		runTcStr(fmt.Sprintf("tc class add dev %s parent 1: classid 1:ffff htb rate 1000mbit", lan))
+		runTcStr(fmt.Sprintf("tc qdisc add dev %s ingress", lan))
+	}
+}
+
 func ApplySpeedLimit(ip string) {
 	if ip == "" {
 		return
@@ -321,6 +333,10 @@ func ApplySpeedLimit(ip string) {
 		return
 	}
 	lan := config.LANInterface
+	
+	// Ensure the root TC structures exist before applying the limit
+	ensureTCRoot(lan)
+
 	speed := cfg.GlobalSpeedLimit
 	speedStr := fmt.Sprintf("%dmbit", speed)
 	uploadKbps := speed * 1024
