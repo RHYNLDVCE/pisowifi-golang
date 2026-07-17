@@ -196,7 +196,7 @@ func WaitForPulse(onDetected func()) int {
 	// PHASE 2: Count pulses
 	totalPulses := 1
 	lastPulseTime := time.Now()
-	lastState = 0
+	lastState := 0
 
 	// Wait for the pulse to finish (go back HIGH) with Timeout
 	timeout := time.Now()
