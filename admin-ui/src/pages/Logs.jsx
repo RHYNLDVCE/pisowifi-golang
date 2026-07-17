@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Terminal, Search } from 'lucide-react';
+import { Terminal, Search, X } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 
 export default function Logs() {
@@ -159,8 +159,16 @@ export default function Logs() {
             placeholder="Search logs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-full text-sm outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all shadow-sm"
+            className="w-full pl-9 pr-10 py-2 bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-full text-sm outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all shadow-sm"
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, Search, Users, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Activity, Search, Users, ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import CustomSelect from '../components/CustomSelect';
 
@@ -134,8 +134,16 @@ export default function Connections() {
                 placeholder="Search MAC, IP, or Name..." 
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white w-full sm:w-64 transition-all" 
+                className="pl-9 pr-10 py-2 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white w-full sm:w-64 transition-all" 
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>
