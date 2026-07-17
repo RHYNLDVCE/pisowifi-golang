@@ -15,10 +15,10 @@ window.fetch = async function (...args) {
   try {
     const response = await originalFetch.apply(this, args);
     // If the server redirected to the login page (token expired or unauthorized)
-    if (response.url && response.url.endsWith('/admin/login')) {
+    if (response.url && response.url.endsWith('/login')) {
       toast.error('Session expired. Please log in again.');
       setTimeout(() => {
-        window.location.href = '/admin/login';
+        window.location.href = '/login';
       }, 1500);
       // Return a pending promise so the calling component stays in loading state
       return new Promise(() => {});
