@@ -85,12 +85,11 @@ export default function LoyaltySettings() {
       />
       
       <form onSubmit={handlePointsSubmit} className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-        <h3 className="flex items-center gap-2 text-base font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
-          <Award size={20} /> Rewards System
-        </h3>
-        
-        <label className="flex items-center gap-3 p-4 border border-gray-200 dark:border-zinc-800 rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors mb-8">
-          <div className="relative flex items-center">
+        <h3 className="flex items-center justify-between gap-2 text-base font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+          <div className="flex items-center gap-2">
+            <Award size={20} /> Rewards System
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
             <input 
               type="checkbox" 
               checked={pointsConfig.enabled} 
@@ -98,9 +97,8 @@ export default function LoyaltySettings() {
               className="peer sr-only" 
             />
             <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-black/20 dark:peer-focus:ring-blue-600/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black dark:peer-checked:bg-blue-600"></div>
-          </div>
-          <span className="text-sm font-semibold">Enable Rewards System</span>
-        </label>
+          </label>
+        </h3>
 
         <div className={!pointsConfig.enabled ? 'opacity-50 pointer-events-none transition-opacity duration-300' : 'transition-opacity duration-300'}>
           <h4 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">Points Conversion (Coins to Points)</h4>

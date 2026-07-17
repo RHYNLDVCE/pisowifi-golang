@@ -84,26 +84,18 @@ export default function Vouchers() {
       
       {/* Settings Form */}
       <form onSubmit={handleSaveSettings} className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-        <h3 className="flex items-center gap-2 text-base font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
-          <Ticket size={20} /> Voucher Limits Settings
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-          Enable or disable the voucher feature, set minimum time limits, and configure point-to-voucher promotions.
-        </p>
-
-        <div className="mb-6 flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg">
-          <div>
-            <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Zap size={18} className={data.voucher_enabled ? "text-amber-500" : "text-gray-400"} />
-              Voucher System
-            </h4>
-            <p className="text-xs text-gray-500 mt-1">Allow users to generate and redeem shareable time vouchers.</p>
+        <h3 className="flex items-center justify-between gap-2 text-base font-bold mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+          <div className="flex items-center gap-2">
+            <Ticket size={20} /> Voucher Limits Settings
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" className="sr-only peer" checked={data.voucher_enabled} onChange={e => setData({...data, voucher_enabled: e.target.checked})} />
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-black dark:peer-checked:bg-white"></div>
           </label>
-        </div>
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          Enable or disable the voucher feature, set minimum time limits, and configure point-to-voucher promotions.
+        </p>
 
         <div className="mb-8">
           <div className="space-y-1 w-full md:w-1/2">

@@ -336,10 +336,21 @@
     .btn-cancel:hover { background: #e2e8f0; }
     
     .btn-confirm { 
-        background: var(--accent); 
+        background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
         color: white; 
+        border: none;
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
     }
-    .btn-confirm:hover { background: var(--accent-hover); }
+    .btn-confirm:hover { 
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+    }
+    .btn-confirm:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    }
 
     .btn-full { width: 100%; }
 
@@ -539,6 +550,7 @@
     // --- TIMER LOGIC ---
     var mac = "{{ mac | default:'Unknown' }}"; 
     let localTime = 0;
+    let localStatus = "new";
 
     // 1. Instantly load cached time for a seamless UI experience
     const cachedTime = localStorage.getItem("piso_time_" + mac);
@@ -557,9 +569,10 @@
             
             if (data && data.time_remaining !== undefined) {
                 localTime = parseInt(data.time_remaining);
+                localStatus = data.status || "new";
                 updateTimerDisplay(localTime);
                 localStorage.setItem("piso_time_" + mac, localTime);
-                console.info('[Rewards] Timer synchronized with server:', localTime);
+                console.info('[Rewards] Timer synchronized with server:', localTime, 'Status:', localStatus);
             }
         } catch(e) {
             console.warn('[Rewards] Failed to sync time with server, falling back to local cache.');
@@ -569,16 +582,19 @@
     // Execute sync immediately on page load
     syncTimeWithServer();
 
+    // Periodically sync the status and time from the server every 5 seconds
+    setInterval(syncTimeWithServer, 5000);
+
     // 3. Tick down the time locally while the user browses the rewards
     setInterval(() => {
-        if (localTime > 0) {
+        if (localStatus === "connected" && localTime > 0) {
             localTime--;
             updateTimerDisplay(localTime);
             // Sync it back to local storage periodically
             if (localTime % 5 === 0) {
                 localStorage.setItem("piso_time_" + mac, localTime);
             }
-        } else {
+        } else if (localTime <= 0) {
             updateTimerDisplay(0);
         }
     }, 1000);
