@@ -416,3 +416,26 @@ func GetActiveVouchersByUser(mac string) []VoucherRecord {
 	}
 	return result
 }
+
+func GetAllVouchersByUser(mac string) []VoucherRecord {
+	rows, err := db.Query(
+		`SELECT code, type, value, status, created_by, used_by, created_at, used_at
+		 FROM vouchers WHERE created_by = ? ORDER BY created_at DESC`,
+		mac,
+	)
+	if err != nil {
+		logger.SystemLog(fmt.Sprintf("[DB ERROR] GetAllVouchersByUser: %v", err))
+		return []VoucherRecord{}
+	}
+	defer rows.Close()
+
+	var result []VoucherRecord
+	for rows.Next() {
+		var v VoucherRecord
+		err := rows.Scan(&v.Code, &v.Type, &v.Value, &v.Status, &v.CreatedBy, &v.UsedBy, &v.CreatedAt, &v.UsedAt)
+		if err == nil {
+			result = append(result, v)
+		}
+	}
+	return result
+}

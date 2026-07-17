@@ -719,6 +719,7 @@ func getSingleUser(c *fiber.Ctx) error {
 		"time_formatted": services.FormatHumanTime(user.Time),
 		"history":        salesHistory,
 		"device_name":    displayName,
+		"vouchers":       db.GetAllVouchersByUser(mac),
 	})
 }
 

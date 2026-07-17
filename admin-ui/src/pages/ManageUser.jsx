@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, ShieldBan, Trash2, Check, Activity, Star, ChevronDown, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Clock, ShieldBan, Trash2, Check, Activity, Star, ChevronDown, AlertTriangle, Ticket } from 'lucide-react';
 import toast from 'react-hot-toast';
 import CustomSelect from '../components/CustomSelect';
 import ConfirmModal from '../components/ConfirmModal';
@@ -209,6 +209,49 @@ export default function ManageUser() {
             ) : (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400 text-sm">
                 No sales history found for this device.
+              </div>
+            )}
+          </div>
+
+          {/* Vouchers Created Section */}
+          <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden flex flex-col h-full mt-6">
+            <div className="p-6 border-b border-gray-100 dark:border-zinc-800">
+              <h3 className="flex items-center gap-2 text-base font-bold text-gray-800 dark:text-gray-100">
+                <Ticket size={20} className="text-purple-500" /> Vouchers Created
+              </h3>
+            </div>
+            {data.vouchers && data.vouchers.length > 0 ? (
+              <div className="overflow-x-auto max-h-[300px] overflow-y-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse">
+                  <thead className="sticky top-0 bg-gray-50 dark:bg-zinc-900 shadow-[0_1px_0_0_rgba(229,231,235,1)] dark:shadow-[0_1px_0_0_rgba(39,39,42,1)] z-10">
+                    <tr>
+                      <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
+                      <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type / Value</th>
+                      <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/50">
+                    {data.vouchers.map((v, i) => (
+                      <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-zinc-900/50 transition-colors">
+                        <td className="px-6 py-3.5 text-sm font-mono font-bold text-gray-800 dark:text-gray-200">{v.code}</td>
+                        <td className="px-6 py-3.5 text-sm text-gray-600 dark:text-gray-300 capitalize">{v.type} ({v.value})</td>
+                        <td className="px-6 py-3.5 text-sm">
+                          <span className={`inline-flex px-2 py-1 text-xs font-bold rounded-full ${
+                            v.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                          }`}>
+                            {v.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3.5 text-sm text-gray-500 dark:text-gray-400">{new Date(v.created_at).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-8 text-center text-gray-500 dark:text-gray-400 text-sm">
+                No vouchers created by this device.
               </div>
             )}
           </div>

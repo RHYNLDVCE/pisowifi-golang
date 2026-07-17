@@ -7,6 +7,11 @@ export default function Vouchers() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState('created_at');
+  const [sortDirection, setSortDirection] = useState('desc');
+  const itemsPerPage = 15;
 
   const fetchData = async () => {
     try {
@@ -69,11 +74,41 @@ export default function Vouchers() {
     setSaving(false);
   };
 
-  const filteredVouchers = data.vouchers ? data.vouchers.filter(v => 
-    v.code.toLowerCase().includes(search.toLowerCase()) || 
-    v.created_by.toLowerCase().includes(search.toLowerCase()) || 
-    (v.used_by && v.used_by.toLowerCase().includes(search.toLowerCase()))
-  ) : [];
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection(field === 'status' ? 'asc' : 'desc');
+    }
+    setCurrentPage(1);
+  };
+
+  const sortedVouchers = [...(data.vouchers || [])]
+    .filter(v => 
+      v.code.toLowerCase().includes(search.toLowerCase()) || 
+      v.created_by.toLowerCase().includes(search.toLowerCase()) || 
+      (v.used_by && v.used_by.toLowerCase().includes(search.toLowerCase()))
+    )
+    .sort((a, b) => {
+      if (sortField === 'created_at') {
+        return sortDirection === 'asc' ? a.created_at - b.created_at : b.created_at - a.created_at;
+      } else if (sortField === 'status') {
+        const valA = a.status === 'active' ? 1 : 2;
+        const valB = b.status === 'active' ? 1 : 2;
+        if (valA !== valB) {
+          return sortDirection === 'asc' ? valA - valB : valB - valA;
+        }
+        return b.created_at - a.created_at; // secondary sort
+      }
+      return 0;
+    });
+
+  const totalPages = Math.ceil(sortedVouchers.length / itemsPerPage) || 1;
+  // Ensure current page is valid when filtering
+  if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages);
+  
+  const paginatedVouchers = sortedVouchers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   if (loading) {
     return <div className="p-8 text-center text-gray-500">Loading vouchers...</div>;
@@ -179,21 +214,31 @@ export default function Vouchers() {
               <tr className="bg-gray-50 dark:bg-zinc-900/50 border-b border-gray-200 dark:border-zinc-800">
                 <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Code</th>
                 <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Type / Value</th>
-                <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                <th 
+                  className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors"
+                  onClick={() => handleSort('status')}
+                >
+                  Status {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
                 <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Created By</th>
-                <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Created At</th>
+                <th 
+                  className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors"
+                  onClick={() => handleSort('created_at')}
+                >
+                  Created At {sortField === 'created_at' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
                 <th className="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Used By</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
-              {filteredVouchers.length === 0 ? (
+              {paginatedVouchers.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500">
                     No vouchers found.
                   </td>
                 </tr>
               ) : (
-                filteredVouchers.map((v) => (
+                paginatedVouchers.map((v) => (
                   <tr key={v.code} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
                     <td className="px-4 py-3 text-sm font-mono font-bold text-gray-900 dark:text-white">
                       {v.code}
@@ -231,6 +276,32 @@ export default function Vouchers() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-gray-200 dark:border-zinc-800 flex items-center justify-between">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedVouchers.length)} of {sortedVouchers.length} vouchers
+            </span>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-100 dark:bg-zinc-900 text-gray-600 dark:text-gray-300 rounded text-sm disabled:opacity-50 hover:bg-gray-200 dark:hover:bg-zinc-800"
+              >
+                Prev
+              </button>
+              <span className="text-sm font-bold">{currentPage} / {totalPages}</span>
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-100 dark:bg-zinc-900 text-gray-600 dark:text-gray-300 rounded text-sm disabled:opacity-50 hover:bg-gray-200 dark:hover:bg-zinc-800"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
