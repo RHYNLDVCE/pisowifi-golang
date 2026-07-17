@@ -184,8 +184,8 @@ table ip pisowifi {
 		udp sport { 5000-5500, 7074-7750, 10000-10009, 30000-30300 } meta mark set 0x63
 		udp dport { 5000-5500, 7074-7750, 10000-10009, 30000-30300 } meta mark set 0x63
 		meta mark 0x63 ip dscp set cs4
-		udp dport { 3478, 3479, 5349, 19302 } ip dscp set ef
-		tcp dport { 3478, 3479, 5349 } ip dscp set ef
+		udp length <= 256 meta mark set 0x63
+		udp length <= 256 ip dscp set ef
 		tcp dport 6881-6889 ip dscp set cs1
 		udp dport 6881-6889 ip dscp set cs1
 		{{end}}
