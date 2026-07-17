@@ -24,7 +24,7 @@ echo "[2/3] Installing Core Linux Networking & Utilities..."
 # miniupnpd: Open NAT/Gaming mode
 # ipset: Fallback block list for fail_safe.sh
 # coreutils, procps, iputils-ping, sudo: Core system commands
-apt-get install -y \
+apt install -y \
     nftables \
     iproute2 \
     conntrack \
@@ -40,7 +40,7 @@ echo "[3/4] Installing Build Tools (Go)..."
 # Install Go (golang) for compiling the backend.
 # Note: This uses the default distro repositories. If you need the absolute latest version,
 # you may need to install Go via the official golang.org tarball.
-apt-get install -y golang
+apt install -y golang
 
 
 echo "[5/5] Installing Systemd Service..."
