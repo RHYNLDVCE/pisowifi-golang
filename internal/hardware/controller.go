@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"pisowifi/internal/config"
@@ -139,94 +138,78 @@ func WaitForPulse(onDetected func()) int {
 		logger.SystemLog("   [OK] Signal Cleared. Ready.")
 	}
 
-	// PHASE 1: Wait for coin (Idle) - Use Epoll for 0% CPU
-	epfd, err := syscall.EpollCreate1(0)
-	if err == nil {
-		defer syscall.Close(epfd)
-		event := syscall.EpollEvent{
-			Events: syscall.EPOLLPRI | syscall.EPOLLERR,
-			Fd:     int32(fd.Fd()),
-		}
-		syscall.EpollCtl(epfd, syscall.EPOLL_CTL_ADD, int(fd.Fd()), &event)
-		events := make([]syscall.EpollEvent, 1)
+	lastState := 1
 
-		// Clear pending
-		readPinFast()
+	logger.SystemLog("[HW] Entering PHASE 1 (Idle wait)")
 
-		for {
-			if state.IsShuttingDown.Load() {
-				return 0
-			}
-			n, _ := syscall.EpollWait(epfd, events, 1000)
-			if n > 0 {
-				if readPinFast() == 0 {
-					break
-				}
-			} else {
-				if readPinFast() == 0 {
-					break
-				}
-			}
+	// PHASE 1: Wait for coin
+	for {
+		if state.IsShuttingDown.Load() {
+			return 0
 		}
-	} else {
-		// Fallback polling (10ms)
-		for {
-			if state.IsShuttingDown.Load() {
-				return 0
+		pinState := readPinFast()
+		if pinState == 0 && lastState == 1 {
+			logger.SystemLog("[HW] First pulse detected (HIGH->LOW)!")
+			// FIRST PULSE DETECTED!
+			if onDetected != nil {
+				func() {
+					defer func() {
+						if r := recover(); r != nil {
+							logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
+						}
+					}()
+					onDetected()
+				}()
 			}
-			if readPinFast() == 0 {
-				break
-			}
-			time.Sleep(10 * time.Millisecond)
+			break
 		}
+		lastState = pinState
+		// 5ms polling ensures fast detection while keeping CPU extremely low (~0.1%)
+		time.Sleep(5 * time.Millisecond)
 	}
 
-	// FIRST PULSE DETECTED!
-	if onDetected != nil {
-		func() {
-			defer func() {
-				if r := recover(); r != nil {
-					logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
-				}
-			}()
-			onDetected()
-		}()
-	}
-
+	logger.SystemLog("[HW] Entering PHASE 2 (Counting pulses)")
 	// PHASE 2: Count pulses
 	totalPulses := 1
 	lastPulseTime := time.Now()
-	lastState := 0
+	lastState = 0
 
 	// Wait for the pulse to finish (go back HIGH) with Timeout
 	timeout := time.Now()
 	for readPinFast() == 0 {
 		if time.Since(timeout) > 500*time.Millisecond {
+			logger.SystemLog("[HW] Pulse finish timeout (stuck LOW?)")
 			break
 		}
 		time.Sleep(1 * time.Millisecond)
 	}
 	lastState = 1
+	logger.SystemLog(fmt.Sprintf("[HW] Pulse 1 finished. Duration: %v", time.Since(timeout)))
 
 	// Keep listening until silence
 	for time.Since(lastPulseTime) < 600*time.Millisecond {
 		pinState := readPinFast()
 		if pinState == 0 && lastState == 1 {
 			totalPulses++
+			pulseGap := time.Since(lastPulseTime)
 			lastPulseTime = time.Now()
+			logger.SystemLog(fmt.Sprintf("[HW] Pulse %d started! Gap: %v", totalPulses, pulseGap))
 
 			timeout := time.Now()
 			for readPinFast() == 0 {
 				if time.Since(timeout) > 500*time.Millisecond {
+					logger.SystemLog(fmt.Sprintf("[HW] Pulse %d timeout (stuck LOW?)", totalPulses))
 					break
 				}
 				time.Sleep(1 * time.Millisecond)
 			}
 			pinState = 1
+			logger.SystemLog(fmt.Sprintf("[HW] Pulse %d finished. Duration: %v", totalPulses, time.Since(timeout)))
 		}
 		lastState = pinState
 		time.Sleep(1 * time.Millisecond)
 	}
 
+	logger.SystemLog(fmt.Sprintf("[HW] PHASE 2 Complete. Total Pulses: %d", totalPulses))
 	return totalPulses
 }
