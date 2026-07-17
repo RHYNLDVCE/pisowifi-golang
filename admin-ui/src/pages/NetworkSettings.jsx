@@ -100,13 +100,13 @@ export default function NetworkSettings() {
 
         {/* Global Speed Limit */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
-             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-               Global Speed Limit
-               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+          <div className="flex items-start sm:items-center justify-between gap-4 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
+               <span>Global Speed Limit</span>
+               <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
-                   Enforce global bandwidth cap
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
+                   Sets the maximum bandwidth allowed for EACH individual user. This does NOT limit the total speed of your ethernet port or USB LAN adapter.
                  </div>
                </div>
              </h3>
@@ -131,12 +131,12 @@ export default function NetworkSettings() {
 
         {/* Smart Queue Management (SQM) */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
-             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-               Smart Queue Management (SQM)
-               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+          <div className="flex items-start sm:items-center justify-between gap-4 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
+               <span>Smart Queue Management (SQM)</span>
+               <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
                    Prevents bufferbloat by smoothly managing your overall WAN hardware traffic. Keeps your network ping low even when overall usage is high.
                  </div>
                </div>
@@ -175,12 +175,12 @@ export default function NetworkSettings() {
 
         {/* UDP Priority Optimization */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-zinc-800">
-             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-               UDP Priority Optimization
-               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+          <div className="flex items-start sm:items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
+               <span>UDP Priority Optimization</span>
+               <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
                    Automatically tags real-time UDP traffic (like Voice Calls and Games) with VIP priority labels. Highly recommended.
                  </div>
                </div>
@@ -194,13 +194,13 @@ export default function NetworkSettings() {
 
         {/* Gaming Mode */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-zinc-800">
-             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-               Gaming Mode
-               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+          <div className="flex items-start sm:items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
+               <span>Gaming Mode</span>
+               <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
-                   Creates priority lanes for each individual user's internet connection. Ensures that gaming traffic skips ahead of downloads inside their own speed limit.
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
+                   Enables CAKE SQM specifically for each individual user. It creates priority lanes inside their personal speed limit, ensuring their gaming traffic skips ahead of their own downloads.
                  </div>
                </div>
              </h3>
@@ -213,12 +213,12 @@ export default function NetworkSettings() {
 
         {/* Open NAT */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-zinc-800">
-             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-               Open NAT (Gaming)
-               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+          <div className="flex items-start sm:items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
+               <span>Open NAT (Gaming)</span>
+               <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
                    Opens up UPnP routing to allow Console gaming (Playstation, Xbox) to connect more freely without Strict NAT type issues.
                  </div>
                </div>
@@ -232,12 +232,12 @@ export default function NetworkSettings() {
 
         {/* Tethering Override (TTL) */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
-             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-               Tethering Override (TTL)
-               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+          <div className="flex items-start sm:items-center justify-between gap-4 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
+               <span>Tethering Override (TTL)</span>
+               <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
                    Modifies the TTL (Time To Live) of packets leaving the router. Set to 1 to attempt blocking users from tethering/hotspotting their connection to other devices.
                  </div>
                </div>

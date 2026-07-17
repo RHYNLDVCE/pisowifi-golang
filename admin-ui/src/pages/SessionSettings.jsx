@@ -97,13 +97,13 @@ export default function SessionSettings() {
         
         {/* Session & Auto-Pause */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
-             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-               Session & Auto-Pause
-               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+          <div className="flex items-start sm:items-center justify-between gap-4 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
+               <span>Automatic Pause (Idle Timeout)</span>
+               <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
-                   Automatically pause a user's time when they disconnect from the network.
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
+                   Automatically pauses a user's time if they disconnect from the network or remain idle for the set duration.
                  </div>
                </div>
              </h3>
@@ -128,13 +128,13 @@ export default function SessionSettings() {
 
         {/* Free Time Trial */}
         <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
-             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-               Free Time Trial
-               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+          <div className="flex items-start sm:items-center justify-between gap-4 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center flex-wrap gap-x-2 gap-y-1">
+               <span>Free Time Access</span>
+               <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
-                   Offer free internet duration to brand new devices.
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
+                   Allows users to claim limited free internet access. Great for promotions or short-term use.
                  </div>
                </div>
              </h3>

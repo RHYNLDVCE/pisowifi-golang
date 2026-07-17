@@ -39,14 +39,14 @@ export default function Dashboard() {
     <div className="space-y-6">
       
       {/* 6 KPI Cards (Enterprise Style) */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {[
-          { label: 'Total All Time', value: stats.total, icon: <Coins className="w-5 h-5 text-gray-900 dark:text-white" /> },
-          { label: 'Yesterday', value: stats.yesterday, icon: <Clock className="w-5 h-5 text-gray-900 dark:text-white" /> },
-          { label: 'Today', value: stats.daily, icon: <Sun className="w-5 h-5 text-gray-900 dark:text-white" />, compareTo: stats.yesterday },
-          { label: 'This Week', value: stats.weekly, icon: <Calendar className="w-5 h-5 text-gray-900 dark:text-white" /> },
-          { label: 'This Month', value: stats.monthly, icon: <CalendarDays className="w-5 h-5 text-gray-900 dark:text-white" />, secondaryLabel: 'Last Month', secondaryValue: stats.last_month },
-          { label: 'This Year', value: stats.yearly, icon: <Landmark className="w-5 h-5 text-gray-900 dark:text-white" /> },
+          { label: 'Total All Time', value: stats.total, icon: <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 dark:text-white" /> },
+          { label: 'Yesterday', value: stats.yesterday, icon: <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 dark:text-white" /> },
+          { label: 'Today', value: stats.daily, icon: <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 dark:text-white" />, compareTo: stats.yesterday },
+          { label: 'This Week', value: stats.weekly, icon: <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 dark:text-white" /> },
+          { label: 'This Month', value: stats.monthly, icon: <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 dark:text-white" />, secondaryLabel: 'Last M', secondaryValue: stats.last_month },
+          { label: 'This Year', value: stats.yearly, icon: <Landmark className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 dark:text-white" /> },
         ].map((kpi, idx) => {
           let trend = null;
           if (kpi.compareTo !== undefined) {
@@ -54,32 +54,32 @@ export default function Dashboard() {
              const pct = kpi.compareTo > 0 ? (diff / kpi.compareTo) * 100 : ((kpi.value || 0) > 0 ? 100 : 0);
              const isUp = diff >= 0;
              trend = (
-               <div className={`flex items-center gap-1 text-xs font-bold mt-2 ${isUp ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
-                 {isUp ? <TrendingUp size={16}/> : <TrendingDown size={16}/>}
-                 <span>{Math.abs(pct).toFixed(1)}% vs yesterday</span>
+               <div className={`flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-bold mt-1.5 sm:mt-2 ${isUp ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
+                 {isUp ? <TrendingUp size={14} className="sm:w-4 sm:h-4" /> : <TrendingDown size={14} className="sm:w-4 sm:h-4" />}
+                 <span className="truncate">{Math.abs(pct).toFixed(1)}% vs ytd</span>
                </div>
              );
           }
           return (
-          <div key={idx} className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md p-6 shadow-sm flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-4">
-               <div className="text-sm font-bold text-gray-500 dark:text-gray-400">{kpi.label}</div>
-               <div>
+          <div key={idx} className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md p-3 sm:p-6 shadow-sm flex flex-col justify-between">
+            <div className="flex justify-between items-start mb-2 sm:mb-4 gap-1">
+               <div className="text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 leading-tight">{kpi.label}</div>
+               <div className="shrink-0">
                  {kpi.icon}
                </div>
             </div>
-            <div className="flex flex-col flex-1 justify-end mt-2">
+            <div className="flex flex-col flex-1 justify-end mt-1 sm:mt-2">
               {kpi.secondaryLabel ? (
                 <>
-                  <div className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">₱{kpi.value ? kpi.value.toLocaleString() : "0"}</div>
-                  <div className="flex items-center gap-2 mt-2 bg-gray-50 dark:bg-zinc-900 p-1.5 px-2 rounded self-start border border-gray-200 dark:border-zinc-800">
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{kpi.secondaryLabel}:</span>
-                    <span className="text-xs font-bold text-gray-900 dark:text-white">₱{kpi.secondaryValue ? kpi.secondaryValue.toLocaleString() : "0"}</span>
+                  <div className="text-xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">₱{kpi.value ? kpi.value.toLocaleString() : "0"}</div>
+                  <div className="flex items-center gap-1.5 mt-1.5 sm:mt-2 bg-gray-50 dark:bg-zinc-900 p-1 sm:p-1.5 px-1.5 sm:px-2 rounded self-start border border-gray-200 dark:border-zinc-800">
+                    <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-widest">{kpi.secondaryLabel}:</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-gray-900 dark:text-white">₱{kpi.secondaryValue ? kpi.secondaryValue.toLocaleString() : "0"}</span>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">₱{kpi.value ? kpi.value.toLocaleString() : "0"}</div>
+                  <div className="text-xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">₱{kpi.value ? kpi.value.toLocaleString() : "0"}</div>
                   {trend}
                 </>
               )}

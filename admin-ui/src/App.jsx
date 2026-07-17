@@ -222,7 +222,7 @@ function Layout({ children }) {
                to={item.path} 
                onClick={() => setSidebarOpen(false)}
                className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
-                 isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+                 isActive ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'
                }`}
              >
                {React.cloneElement(item.icon, { size: isActive ? 24 : 22 })}
@@ -233,7 +233,7 @@ function Layout({ children }) {
         <button 
           onClick={() => setSidebarOpen(true)} 
           className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
-            sidebarOpen ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'
+            sidebarOpen ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'
           }`}
         >
           <Menu size={sidebarOpen ? 24 : 22} />
