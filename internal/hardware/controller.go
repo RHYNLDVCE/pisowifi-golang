@@ -73,7 +73,7 @@ func Setup() {
 	_ = writeValue(relayPin, 0) // relay off by default
 
 	// Enable edge interrupts for the coin pin
-	_ = os.WriteFile(gpioPath(coinPin, "edge"), []byte("both"), 0644)
+	_ = os.WriteFile(gpioPath(coinPin, "edge"), []byte("falling"), 0644)
 
 	logger.SystemLog(fmt.Sprintf("[HW] Hardware ready (Coin GPIO: %d, Relay GPIO: %d)", coinPin, relayPin))
 }
@@ -100,27 +100,8 @@ func ReadPin() int {
 func WaitForPulse(onDetected func()) int {
 	pin := config.CoinGPIONum
 
-	var initialPulseDetected bool
-
-	// Safety: if pin is stuck LOW at the start, measure how long it takes to clear
-	if ReadPin() == 0 {
-		startLow := time.Now()
-		deadline := time.Now().Add(2 * time.Second)
-		for ReadPin() == 0 {
-			if time.Now().After(deadline) {
-				logger.SystemLog("[HW] Error: Signal permanently stuck LOW. Resetting...")
-				return 0
-			}
-			time.Sleep(5 * time.Millisecond)
-		}
-		
-		if time.Since(startLow) < 300*time.Millisecond {
-			// It was a fast pulse, we just caught it mid-LOW!
-			initialPulseDetected = true
-		} else {
-			logger.SystemLog("[HW] Warning: Signal was stuck LOW for too long, ignored.")
-		}
-	}
+	// Ensure edge is falling for reliable start-of-pulse detection
+	_ = os.WriteFile(gpioPath(pin, "edge"), []byte("falling"), 0644)
 
 	valuePath := gpioPath(pin, "value")
 	fd, err := syscall.Open(valuePath, syscall.O_RDONLY|syscall.O_NONBLOCK, 0)
@@ -170,16 +151,15 @@ func WaitForPulse(onDetected func()) int {
 		return false
 	}
 
-	// PHASE 1 — Wait for first pulse (HIGH → LOW edge)
-	if !initialPulseDetected {
-		for {
+	// PHASE 1 — Wait for first pulse (falling edge)
+	for {
+		if state.IsShuttingDown.Load() {
+			return 0
+		}
+		if waitForEdge(1000) {
 			if ReadPin() == 0 {
 				break
 			}
-			if state.IsShuttingDown.Load() {
-				return 0
-			}
-			waitForEdge(1000)
 		}
 	}
 
@@ -195,33 +175,19 @@ func WaitForPulse(onDetected func()) int {
 	totalPulses := 1
 	lastPulseTime := time.Now()
 
-	// Wait for the first pulse to finish (go back HIGH), timeout 0.5 s
-	timeout := time.Now()
-	for ReadPin() == 0 {
-		if time.Since(timeout) > 500*time.Millisecond {
-			break
-		}
-		waitForEdge(10)
-	}
-
 	// Keep counting until 0.6 s of silence
-	for time.Since(lastPulseTime) < 600*time.Millisecond {
+	for {
 		timeRemaining := int(600 - time.Since(lastPulseTime).Milliseconds())
 		if timeRemaining <= 0 {
 			break
 		}
 		
 		if waitForEdge(timeRemaining) {
-			if ReadPin() == 0 {
-				totalPulses++
-				lastPulseTime = time.Now()
-
-				timeout = time.Now()
-				for ReadPin() == 0 {
-					if time.Since(timeout) > 500*time.Millisecond {
-						break
-					}
-					waitForEdge(10)
+			// Debounce: ignore glitches within 50ms of the last pulse start
+			if time.Since(lastPulseTime) > 50*time.Millisecond {
+				if ReadPin() == 0 {
+					totalPulses++
+					lastPulseTime = time.Now()
 				}
 			}
 		}
