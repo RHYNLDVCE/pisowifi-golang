@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/sys/unix"
+
 	"pisowifi/internal/config"
 	"pisowifi/internal/logger"
 	"pisowifi/internal/state"
@@ -141,33 +143,86 @@ func WaitForPulse(onDetected func()) int {
 		logger.SystemLog("   [OK] Signal Cleared. Ready.")
 	}
 
-	logger.SystemLog("[HW] Entering PHASE 1 (Idle wait)")
-
 	lastState := 1
 
-	// PHASE 1: Wait for coin
-	for {
-		if state.IsShuttingDown.Load() {
-			return 0
+	logger.SystemLog("[HW] Entering PHASE 1 (Idle wait with unix.Epoll)")
+
+	// PHASE 1: Wait for coin (Idle) - Use Epoll for 0% CPU
+	epfd, err := unix.EpollCreate1(0)
+	if err == nil {
+		defer unix.Close(epfd)
+		event := unix.EpollEvent{
+			Events: unix.EPOLLPRI | unix.EPOLLERR,
+			Fd:     int32(fd.Fd()),
 		}
-		pinState := readPinFast()
-		if pinState == 0 && lastState == 1 {
-			logger.SystemLog("[HW] First pulse detected (HIGH->LOW)!")
-			if onDetected != nil {
-				func() {
-					defer func() {
-						if r := recover(); r != nil {
-							logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
-						}
-					}()
-					onDetected()
-				}()
+		unix.EpollCtl(epfd, unix.EPOLL_CTL_ADD, int(fd.Fd()), &event)
+		events := make([]unix.EpollEvent, 1)
+
+		// Clear pending
+		readPinFast()
+
+		for {
+			if state.IsShuttingDown.Load() {
+				return 0
 			}
-			break
+			n, _ := unix.EpollWait(epfd, events, 1000)
+			if n > 0 {
+				if readPinFast() == 0 {
+					logger.SystemLog("[HW] First pulse detected via EPOLL (HIGH->LOW)!")
+					if onDetected != nil {
+						func() {
+							defer func() {
+								if r := recover(); r != nil {
+									logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
+								}
+							}()
+							onDetected()
+						}()
+					}
+					break
+				}
+			} else {
+				if readPinFast() == 0 {
+					logger.SystemLog("[HW] First pulse detected via fallback check!")
+					if onDetected != nil {
+						func() {
+							defer func() {
+								if r := recover(); r != nil {
+									logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
+								}
+							}()
+							onDetected()
+						}()
+					}
+					break
+				}
+			}
 		}
-		lastState = pinState
-		// 10ms polling ensures fast detection while dropping CPU idle usage to virtually 0%
-		time.Sleep(10 * time.Millisecond)
+	} else {
+		logger.SystemLog(fmt.Sprintf("[HW] Fallback to 10ms polling. Epoll error: %v", err))
+		// Fallback polling (10ms)
+		for {
+			if state.IsShuttingDown.Load() {
+				return 0
+			}
+			pinState := readPinFast()
+			if pinState == 0 && lastState == 1 {
+				logger.SystemLog("[HW] First pulse detected (HIGH->LOW)!")
+				if onDetected != nil {
+					func() {
+						defer func() {
+							if r := recover(); r != nil {
+								logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
+							}
+						}()
+						onDetected()
+					}()
+				}
+				break
+			}
+			lastState = pinState
+			time.Sleep(10 * time.Millisecond)
+		}
 	}
 
 	logger.SystemLog("[HW] Entering PHASE 2 (Counting pulses)")
