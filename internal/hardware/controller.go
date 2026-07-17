@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"pisowifi/internal/config"
