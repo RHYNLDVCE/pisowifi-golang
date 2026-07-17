@@ -54,16 +54,10 @@ export default function NetworkSettings() {
     payload.speed_limit_toggle = formData.get('speed_limit_toggle') ? 'on' : '';
     payload.gaming_mode = formData.get('gaming_mode') ? 'on' : '';
     payload.open_nat = formData.get('open_nat') ? 'on' : '';
-    payload.free_time_toggle = formData.get('free_time_toggle') ? 'on' : '';
-    payload.auto_pause = formData.get('auto_pause') ? 'on' : '';
     payload.custom_ttl = formData.get('custom_ttl') || (data.custom_ttl ?? 1);
-    
-    payload.coin_rates = data.coin_rates || '';
-    payload.banner_text = data.banner_text || '';
-    payload.banner_link = data.banner_link || '';
 
     try {
-      const res = await fetch('/admin/update_settings', {
+      const res = await fetch('/admin/update_network_settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

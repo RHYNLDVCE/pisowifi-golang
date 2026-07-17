@@ -47,20 +47,9 @@ export default function SessionSettings() {
     
     payload.free_time_toggle = formData.get('free_time_toggle') ? 'on' : '';
     payload.auto_pause = formData.get('auto_pause') ? 'on' : '';
-    
-    // Pass existing values for omitted fields
-    payload.speed_limit_toggle = data.speed_limit_enabled ? 'on' : '';
-    payload.gaming_mode = data.gaming_mode_enabled ? 'on' : '';
-    payload.open_nat = data.open_nat_enabled ? 'on' : '';
-    payload.custom_ttl = data.custom_ttl ?? 1;
-    payload.speed_limit_val = data.global_speed_limit || 0;
-    payload.coin_rates = data.coin_rates || '';
-    payload.banner_text = data.banner_text || '';
-    payload.banner_link = data.banner_link || '';
-    payload.timeout = data.slot_timeout || 60;
 
     try {
-      const res = await fetch('/admin/update_settings', {
+      const res = await fetch('/admin/update_session_settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

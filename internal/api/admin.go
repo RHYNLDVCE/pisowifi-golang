@@ -41,7 +41,10 @@ func RegisterAdminRoutes(app *fiber.App) {
 	admin.Post("/set_restart_schedule", setRestartSchedule)
 	admin.Get("/get_points_config", getPointsConfig)
 	admin.Post("/save_points_config", savePointsConfig)
-	admin.Post("/update_settings", updateSettings)
+	admin.Post("/update_coin_settings", updateCoinSettings)
+	admin.Post("/update_network_settings", updateNetworkSettings)
+	admin.Post("/update_session_settings", updateSessionSettings)
+	admin.Post("/update_portal_settings", updatePortalSettings)
 	admin.Post("/reboot", rebootDevice)
 	admin.Post("/clear_banners", clearBanners)
 	admin.Post("/upload_banners", uploadBanners)
@@ -307,121 +310,148 @@ func savePointsConfig(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "success", "message": "Points configuration saved"})
 }
 
-func updateSettings(c *fiber.Ctx) error {
-	clientIP := c.IP()
-	clientMAC := infrastructure.GetMACFromIP(clientIP)
-
+func parseSettingsBody(c *fiber.Ctx) (map[string]interface{}, error) {
 	var rawBody map[string]interface{}
-	if err := c.BodyParser(&rawBody); err != nil {
-		return c.Status(400).JSON(fiber.Map{"status": "error", "message": err.Error()})
-	}
+	err := c.BodyParser(&rawBody)
+	return rawBody, err
+}
 
-	getString := func(key string) string {
-		if val, ok := rawBody[key]; ok {
-			return fmt.Sprintf("%v", val)
-		}
-		return ""
+func parseSettingInt(val interface{}, def int) int {
+	str := fmt.Sprintf("%v", val)
+	var v int
+	if _, err := fmt.Sscan(str, &v); err != nil {
+		return def
 	}
+	return v
+}
 
-	body := struct {
-		Timeout          string
-		SQMEnabled       string
-		SQMUpload        string
-		SQMDownload      string
-		InactiveTimeout  string
-		AutoPause        string
-		SpeedLimitVal    string
-		SpeedLimitToggle string
-		GamingMode       string
-		UDPPriority      string
-		CoinRates        string
-		BannerText       string
-		BannerLink       string
-		PortalTitle      string
-		PortalTitleColor string
-		PortalTitleSize  string
-		PortalSubtitle   string
-		PortalSubtitleSize string
-		FreeTimeToggle   string
-		FreeTimeDuration string
-		SoundInsert      string
-		SoundCoin        string
-		OpenNAT          string
-		CustomTTL        string
-	}{
-		Timeout:          getString("timeout"),
-		SQMEnabled:       getString("sqm_enabled"),
-		SQMUpload:        getString("sqm_upload_mbps"),
-		SQMDownload:      getString("sqm_download_mbps"),
-		InactiveTimeout:  getString("inactive_timeout"),
-		AutoPause:        getString("auto_pause"),
-		SpeedLimitVal:    getString("speed_limit_val"),
-		SpeedLimitToggle: getString("speed_limit_toggle"),
-		GamingMode:       getString("gaming_mode"),
-		UDPPriority:      getString("udp_priority"),
-		CoinRates:        getString("coin_rates"),
-		BannerText:       getString("banner_text"),
-		BannerLink:       getString("banner_link"),
-		PortalTitle:      getString("portal_title"),
-		PortalTitleColor: getString("portal_title_color"),
-		PortalTitleSize:  getString("portal_title_size"),
-		PortalSubtitle:   getString("portal_subtitle"),
-		PortalSubtitleSize: getString("portal_subtitle_size"),
-		FreeTimeToggle:   getString("free_time_toggle"),
-		FreeTimeDuration: getString("free_time_duration"),
-		SoundInsert:      getString("sound_insert"),
-		SoundCoin:        getString("sound_coin"),
-		OpenNAT:          getString("open_nat"),
-		CustomTTL:        getString("custom_ttl"),
-	}
-
-	newFreeEnabled := body.FreeTimeToggle == "on"
-	oldFreeEnabled := config.Get().FreeTimeEnabled
-	if newFreeEnabled != oldFreeEnabled {
-		db.ResetAllFreeClaimed()
-		state.Users.Range(func(mac string, u *state.UserRecord) {
-			state.Users.UpdateField(mac, func(u *state.UserRecord) { u.FreeClaimed = 0 })
-		})
-	}
+func updateCoinSettings(c *fiber.Ctx) error {
+	clientIP := c.IP()
+	rawBody, err := parseSettingsBody(c)
+	if err != nil { return c.Status(400).JSON(fiber.Map{"status": "error", "message": err.Error()}) }
 
 	config.Update(func(cfg *config.AppConfig) {
-		parseInt := func(s string, def int) int {
-			var v int
-			if _, err := fmt.Sscan(s, &v); err != nil {
-				return def
-			}
-			return v
+		if val, ok := rawBody["coin_rates"]; ok {
+			cfg.CoinRates = fmt.Sprintf("%v", val)
 		}
-		cfg.SlotTimeout = parseInt(body.Timeout, 30)
-		cfg.SQMEnabled = body.SQMEnabled == "on"
-		cfg.SQMUploadMbps = parseInt(body.SQMUpload, 70)
-		cfg.SQMDownloadMbps = parseInt(body.SQMDownload, 100)
-		cfg.InactiveTimeout = parseInt(body.InactiveTimeout, 900)
-		cfg.AutoPauseEnabled = body.AutoPause == "on"
-		cfg.GlobalSpeedLimit = parseInt(body.SpeedLimitVal, 5)
-		cfg.SpeedLimitEnabled = body.SpeedLimitToggle == "on"
-		cfg.GamingModeEnabled = body.GamingMode == "on"
-		cfg.UDPPriorityEnabled = body.UDPPriority == "on"
-		cfg.CoinRates = body.CoinRates
-		cfg.BannerText = body.BannerText
-		cfg.BannerLink = body.BannerLink
-		cfg.PortalTitle = body.PortalTitle
-		if body.PortalTitleColor != "" {
-			cfg.PortalTitleColor = body.PortalTitleColor
+	})
+	config.Save()
+	logger.AuditLog("CONFIG_UPDATE", clientIP, infrastructure.GetMACFromIP(clientIP), "Updated coin pricing settings")
+	return c.JSON(fiber.Map{"status": "success"})
+}
+
+func updateNetworkSettings(c *fiber.Ctx) error {
+	clientIP := c.IP()
+	rawBody, err := parseSettingsBody(c)
+	if err != nil { return c.Status(400).JSON(fiber.Map{"status": "error", "message": err.Error()}) }
+
+	config.Update(func(cfg *config.AppConfig) {
+		if val, ok := rawBody["sqm_enabled"]; ok {
+			cfg.SQMEnabled = fmt.Sprintf("%v", val) == "on"
 		}
-		cfg.PortalTitleSize = parseInt(body.PortalTitleSize, 27)
-		cfg.PortalSubtitle = body.PortalSubtitle
-		cfg.PortalSubtitleSize = parseInt(body.PortalSubtitleSize, 15)
-		cfg.FreeTimeEnabled = newFreeEnabled
-		cfg.FreeTimeDuration = parseInt(body.FreeTimeDuration, 5)
-		cfg.SoundInsert = body.SoundInsert
-		cfg.SoundCoin = body.SoundCoin
-		cfg.OpenNATEnabled = body.OpenNAT == "on"
-		cfg.CustomTTL = parseInt(body.CustomTTL, 1)
+		if val, ok := rawBody["sqm_upload_mbps"]; ok {
+			cfg.SQMUploadMbps = parseSettingInt(val, cfg.SQMUploadMbps)
+		}
+		if val, ok := rawBody["sqm_download_mbps"]; ok {
+			cfg.SQMDownloadMbps = parseSettingInt(val, cfg.SQMDownloadMbps)
+		}
+		if val, ok := rawBody["speed_limit_val"]; ok {
+			cfg.GlobalSpeedLimit = parseSettingInt(val, cfg.GlobalSpeedLimit)
+		}
+		if val, ok := rawBody["speed_limit_toggle"]; ok {
+			cfg.SpeedLimitEnabled = fmt.Sprintf("%v", val) == "on"
+		}
+		if val, ok := rawBody["gaming_mode"]; ok {
+			cfg.GamingModeEnabled = fmt.Sprintf("%v", val) == "on"
+		}
+		if val, ok := rawBody["udp_priority"]; ok {
+			cfg.UDPPriorityEnabled = fmt.Sprintf("%v", val) == "on"
+		}
+		if val, ok := rawBody["open_nat"]; ok {
+			cfg.OpenNATEnabled = fmt.Sprintf("%v", val) == "on"
+		}
+		if val, ok := rawBody["custom_ttl"]; ok {
+			cfg.CustomTTL = parseSettingInt(val, cfg.CustomTTL)
+		}
 	})
 	config.Save()
 	network.RefreshAllLimits()
-	logger.AuditLog("CONFIG_UPDATE", clientIP, clientMAC, "Updated core system settings")
+	logger.AuditLog("CONFIG_UPDATE", clientIP, infrastructure.GetMACFromIP(clientIP), "Updated network settings")
+	return c.JSON(fiber.Map{"status": "success"})
+}
+
+func updateSessionSettings(c *fiber.Ctx) error {
+	clientIP := c.IP()
+	rawBody, err := parseSettingsBody(c)
+	if err != nil { return c.Status(400).JSON(fiber.Map{"status": "error", "message": err.Error()}) }
+
+	config.Update(func(cfg *config.AppConfig) {
+		if val, ok := rawBody["inactive_timeout"]; ok {
+			cfg.InactiveTimeout = parseSettingInt(val, cfg.InactiveTimeout)
+		}
+		if val, ok := rawBody["auto_pause"]; ok {
+			cfg.AutoPauseEnabled = fmt.Sprintf("%v", val) == "on"
+		}
+		if val, ok := rawBody["free_time_toggle"]; ok {
+			newFreeEnabled := fmt.Sprintf("%v", val) == "on"
+			if newFreeEnabled != cfg.FreeTimeEnabled {
+				db.ResetAllFreeClaimed()
+				state.Users.Range(func(mac string, u *state.UserRecord) {
+					state.Users.UpdateField(mac, func(u *state.UserRecord) { u.FreeClaimed = 0 })
+				})
+			}
+			cfg.FreeTimeEnabled = newFreeEnabled
+		}
+		if val, ok := rawBody["free_time_duration"]; ok {
+			cfg.FreeTimeDuration = parseSettingInt(val, cfg.FreeTimeDuration)
+		}
+	})
+	config.Save()
+	logger.AuditLog("CONFIG_UPDATE", clientIP, infrastructure.GetMACFromIP(clientIP), "Updated session limits settings")
+	return c.JSON(fiber.Map{"status": "success"})
+}
+
+func updatePortalSettings(c *fiber.Ctx) error {
+	clientIP := c.IP()
+	rawBody, err := parseSettingsBody(c)
+	if err != nil { return c.Status(400).JSON(fiber.Map{"status": "error", "message": err.Error()}) }
+
+	config.Update(func(cfg *config.AppConfig) {
+		if val, ok := rawBody["timeout"]; ok {
+			cfg.SlotTimeout = parseSettingInt(val, cfg.SlotTimeout)
+		}
+		if val, ok := rawBody["banner_text"]; ok {
+			cfg.BannerText = fmt.Sprintf("%v", val)
+		}
+		if val, ok := rawBody["banner_link"]; ok {
+			cfg.BannerLink = fmt.Sprintf("%v", val)
+		}
+		if val, ok := rawBody["portal_title"]; ok {
+			cfg.PortalTitle = fmt.Sprintf("%v", val)
+		}
+		if val, ok := rawBody["portal_title_color"]; ok {
+			if color := fmt.Sprintf("%v", val); color != "" {
+				cfg.PortalTitleColor = color
+			}
+		}
+		if val, ok := rawBody["portal_title_size"]; ok {
+			cfg.PortalTitleSize = parseSettingInt(val, cfg.PortalTitleSize)
+		}
+		if val, ok := rawBody["portal_subtitle"]; ok {
+			cfg.PortalSubtitle = fmt.Sprintf("%v", val)
+		}
+		if val, ok := rawBody["portal_subtitle_size"]; ok {
+			cfg.PortalSubtitleSize = parseSettingInt(val, cfg.PortalSubtitleSize)
+		}
+		if val, ok := rawBody["sound_insert"]; ok {
+			cfg.SoundInsert = fmt.Sprintf("%v", val)
+		}
+		if val, ok := rawBody["sound_coin"]; ok {
+			cfg.SoundCoin = fmt.Sprintf("%v", val)
+		}
+	})
+	config.Save()
+	logger.AuditLog("CONFIG_UPDATE", clientIP, infrastructure.GetMACFromIP(clientIP), "Updated portal settings")
 	return c.JSON(fiber.Map{"status": "success"})
 }
 
