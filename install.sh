@@ -36,11 +36,27 @@ apt-get install -y \
     iputils-ping \
     procps
 
-echo "[3/3] Installing Build Tools (Go)..."
+echo "[3/4] Installing Build Tools (Go)..."
 # Install Go (golang) for compiling the backend.
 # Note: This uses the default distro repositories. If you need the absolute latest version,
 # you may need to install Go via the official golang.org tarball.
 apt-get install -y golang
+
+echo "[4/5] Initializing Go Modules..."
+if [ ! -f "go.mod" ]; then
+    go mod init pisowifi
+fi
+go mod tidy
+
+echo "[5/5] Installing Systemd Service..."
+if [ -f "pisowifi.service" ]; then
+    cp pisowifi.service /etc/systemd/system/
+    systemctl daemon-reload
+    systemctl enable pisowifi
+    echo "pisowifi.service installed and enabled to start on boot!"
+else
+    echo "Warning: pisowifi.service not found in the current directory. Skipping service install."
+fi
 
 echo "=========================================="
 echo " Installation Complete!"
@@ -48,5 +64,6 @@ echo "=========================================="
 echo ""
 echo "Next Steps:"
 echo "1. Backend: Run 'go build -o pisowifi-server cmd/server/main.go' to compile."
-echo "2. Frontend: Build your React app ('npm run build') on your PC and transfer the 'admin-ui/dist' folder."
+echo "2. Service: Run 'sudo systemctl start pisowifi' to start the backend."
+echo "3. Frontend: Build your React app ('npm run build') on your PC and transfer the 'admin-ui/dist' folder."
 echo ""
