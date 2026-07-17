@@ -395,9 +395,6 @@ func GetAllVouchers() []VoucherRecord {
 }
 
 func GetActiveVouchersByUser(mac string) []VoucherRecord {
-	mu.Lock()
-	defer mu.Unlock()
-
 	rows, err := db.Query(
 		`SELECT code, type, value, status, created_by, used_by, created_at, used_at
 		 FROM vouchers WHERE created_by = ? AND status = 'active' ORDER BY created_at DESC`,
