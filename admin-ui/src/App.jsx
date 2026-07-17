@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award, Server, LogOut, X, Clock, Settings } from 'lucide-react';
+import { Home, Users, Image, Activity, ShieldAlert, Sun, Moon, Menu, Wifi, MonitorSmartphone, Coins, Award, Server, LogOut, X, Clock, Settings, Ticket } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import Connections from './pages/Connections';
 import ManageUser from './pages/ManageUser';
@@ -14,6 +14,7 @@ import CoinSettings from './pages/CoinSettings';
 import LoyaltySettings from './pages/LoyaltySettings';
 import SystemStats from './pages/SystemStats';
 import SystemSettings from './pages/SystemSettings';
+import Vouchers from './pages/Vouchers';
 
 function Layout({ children }) {
   const location = useLocation();
@@ -55,6 +56,7 @@ function Layout({ children }) {
     { path: '/admin/portal', icon: <MonitorSmartphone size={20} />, label: 'Portal UI & Sounds' },
     { path: '/admin/coins', icon: <Coins size={20} />, label: 'Coin Configuration' },
     { path: '/admin/loyalty', icon: <Award size={20} />, label: 'Loyalty & Rewards' },
+    { path: '/admin/vouchers', icon: <Ticket size={20} />, label: 'Vouchers' },
     { path: '/admin/devices', icon: <Activity size={20} />, label: 'Infrastructure' },
     { path: '/admin/maintenance', icon: <Settings size={20} />, label: 'System Maintenance' },
     { path: '/admin/logs', icon: <ShieldAlert size={20} />, label: 'System Logs' },
@@ -266,6 +268,7 @@ export default function App() {
            <Route path="/admin/portal" element={<PortalSettings />} />
            <Route path="/admin/coins" element={<CoinSettings />} />
            <Route path="/admin/loyalty" element={<LoyaltySettings />} />
+           <Route path="/admin/vouchers" element={<Vouchers />} />
            <Route path="/admin/devices" element={<Devices />} />
            <Route path="/admin/maintenance" element={<SystemSettings />} />
            <Route path="/admin/logs" element={<Logs />} />

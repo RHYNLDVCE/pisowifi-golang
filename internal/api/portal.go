@@ -31,6 +31,8 @@ func RegisterPortalRoutes(app *fiber.App) {
 	app.Post("/cancel_slot", cancelSlot)
 	app.Post("/claim_free_time", claimFreeTime)
 	app.Post("/redeem_points", redeemPoints)
+	app.Post("/generate_voucher", generateVoucher)
+	app.Post("/redeem_voucher", redeemVoucher)
 
 	// --- WebSocket ---
 	app.Get("/ws/:mac", websocket.New(portalWS))
@@ -306,6 +308,47 @@ func redeemPoints(c *fiber.Ctx) error {
 	
 	status, msg := services.RedeemPoints(mac, clientIP, body.PromoID)
 	return c.JSON(fiber.Map{"status": status, "message": msg})
+}
+
+// ---------------------------------------------------------------------------
+// Vouchers
+// ---------------------------------------------------------------------------
+
+func generateVoucher(c *fiber.Ctx) error {
+	var body struct {
+		Type  string  `json:"type"`
+		Value float64 `json:"value"`
+	}
+	if err := c.BodyParser(&body); err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": "Invalid body"})
+	}
+
+	clientIP := c.IP()
+	mac := infrastructure.GetMACFromIP(clientIP)
+
+	code, err := services.GenerateVoucher(mac, body.Type, body.Value)
+	if err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
+	}
+	return c.JSON(fiber.Map{"status": "success", "code": code})
+}
+
+func redeemVoucher(c *fiber.Ctx) error {
+	var body struct {
+		Code string `json:"code"`
+	}
+	if err := c.BodyParser(&body); err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": "Invalid body"})
+	}
+
+	clientIP := c.IP()
+	mac := infrastructure.GetMACFromIP(clientIP)
+
+	err := services.RedeemVoucher(mac, body.Code)
+	if err != nil {
+		return c.JSON(fiber.Map{"status": "error", "message": err.Error()})
+	}
+	return c.JSON(fiber.Map{"status": "success", "message": "Voucher redeemed successfully!"})
 }
 
 // ---------------------------------------------------------------------------

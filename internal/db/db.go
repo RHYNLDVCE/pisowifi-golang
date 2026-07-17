@@ -39,6 +39,18 @@ type SaleRecord struct {
 	DateStr   string // filled by API layer
 }
 
+// VoucherRecord mirrors the vouchers table row.
+type VoucherRecord struct {
+	Code      string  `json:"code"`
+	Type      string  `json:"type"`
+	Value     float64 `json:"value"`
+	Status    string  `json:"status"`
+	CreatedBy string  `json:"created_by"`
+	UsedBy    string  `json:"used_by"`
+	CreatedAt int64   `json:"created_at"`
+	UsedAt    int64   `json:"used_at"`
+}
+
 // ---------------------------------------------------------------------------
 // Init
 // ---------------------------------------------------------------------------
@@ -77,6 +89,17 @@ func InitDB() {
 	mustExec(`CREATE TABLE IF NOT EXISTS admins (
 		username      TEXT PRIMARY KEY,
 		password_hash TEXT
+	)`)
+
+	mustExec(`CREATE TABLE IF NOT EXISTS vouchers (
+		code       TEXT PRIMARY KEY,
+		type       TEXT,
+		value      REAL,
+		status     TEXT,
+		created_by TEXT,
+		used_by    TEXT,
+		created_at INTEGER,
+		used_at    INTEGER
 	)`)
 
 	// Safe migrations — ignore errors if column already exists
@@ -307,4 +330,66 @@ func sumQuery(query string, args ...any) int {
 		return int(total.Int64)
 	}
 	return 0
+}
+
+// ---------------------------------------------------------------------------
+// Vouchers
+// ---------------------------------------------------------------------------
+
+func CreateVoucher(v *VoucherRecord) error {
+	_, err := db.Exec(
+		`INSERT INTO vouchers (code, type, value, status, created_by, used_by, created_at, used_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		v.Code, v.Type, v.Value, v.Status, v.CreatedBy, v.UsedBy, v.CreatedAt, v.UsedAt,
+	)
+	if err != nil {
+		logger.SystemLog(fmt.Sprintf("[DB ERROR] CreateVoucher: %v", err))
+	}
+	return err
+}
+
+func GetVoucher(code string) (*VoucherRecord, error) {
+	var v VoucherRecord
+	err := db.QueryRow(
+		`SELECT code, type, value, status, created_by, used_by, created_at, used_at
+		 FROM vouchers WHERE code = ?`, code,
+	).Scan(&v.Code, &v.Type, &v.Value, &v.Status, &v.CreatedBy, &v.UsedBy, &v.CreatedAt, &v.UsedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &v, nil
+}
+
+func MarkVoucherUsed(code, usedBy string) error {
+	now := time.Now().Unix()
+	_, err := db.Exec(
+		`UPDATE vouchers SET status = 'used', used_by = ?, used_at = ? WHERE code = ?`,
+		usedBy, now, code,
+	)
+	if err != nil {
+		logger.SystemLog(fmt.Sprintf("[DB ERROR] MarkVoucherUsed: %v", err))
+	}
+	return err
+}
+
+func GetAllVouchers() []VoucherRecord {
+	rows, err := db.Query(
+		`SELECT code, type, value, status, created_by, used_by, created_at, used_at
+		 FROM vouchers ORDER BY created_at DESC`,
+	)
+	if err != nil {
+		logger.SystemLog(fmt.Sprintf("[DB ERROR] GetAllVouchers: %v", err))
+		return []VoucherRecord{}
+	}
+	defer rows.Close()
+
+	var result []VoucherRecord
+	for rows.Next() {
+		var v VoucherRecord
+		err := rows.Scan(&v.Code, &v.Type, &v.Value, &v.Status, &v.CreatedBy, &v.UsedBy, &v.CreatedAt, &v.UsedAt)
+		if err == nil {
+			result = append(result, v)
+		}
+	}
+	return result
 }

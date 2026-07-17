@@ -62,6 +62,8 @@ func RegisterAdminRoutes(app *fiber.App) {
 	admin.Post("/unblock", adminUnblock)
 	admin.Post("/delete_user", adminDeleteUser)
 	admin.Post("/rename_device", renameDevice)
+	admin.Get("/api/vouchers", getVouchers)
+	admin.Post("/update_voucher_settings", updateVoucherSettings)
 
 	// WebSockets (not under the group middleware — Fiber WS upgrade is separate)
 	app.Get("/admin/ws/system_stats", websocket.New(wsSystemStats))
@@ -657,6 +659,38 @@ func deleteSound(c *fiber.Ctx) error {
 		os.Remove(filepath.Join("static/sounds", filename))
 		// Optional: we don't strictly need to update config here, but it's safe
 	}
+	return c.JSON(fiber.Map{"status": "success"})
+}
+
+// ---------------------------------------------------------------------------
+// Vouchers
+// ---------------------------------------------------------------------------
+
+func getVouchers(c *fiber.Ctx) error {
+	vouchers := db.GetAllVouchers()
+	cfg := config.Get()
+	return c.JSON(fiber.Map{
+		"vouchers": vouchers,
+		"voucher_min_time_minutes": cfg.VoucherMinTimeMinutes,
+		"voucher_min_points": cfg.VoucherMinPoints,
+	})
+}
+
+func updateVoucherSettings(c *fiber.Ctx) error {
+	var body struct {
+		MinTime   int     `json:"voucher_min_time_minutes"`
+		MinPoints float64 `json:"voucher_min_points"`
+	}
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid body"})
+	}
+
+	config.Update(func(cfg *config.AppConfig) {
+		cfg.VoucherMinTimeMinutes = body.MinTime
+		cfg.VoucherMinPoints = body.MinPoints
+	})
+	config.Save()
+
 	return c.JSON(fiber.Map{"status": "success"})
 }
 
