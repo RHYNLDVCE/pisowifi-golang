@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"pisowifi/internal/config"
@@ -142,56 +141,33 @@ func WaitForPulse(onDetected func()) int {
 		logger.SystemLog("   [OK] Signal Cleared. Ready.")
 	}
 
-	logger.SystemLog("[HW] Entering PHASE 1 (Idle wait with POLL)")
+	logger.SystemLog("[HW] Entering PHASE 1 (Idle wait)")
 
-	pfd := []syscall.PollFd{
-		{
-			Fd:     int32(fd.Fd()),
-			Events: syscall.POLLPRI | syscall.POLLERR,
-		},
-	}
+	lastState := 1
 
 	// PHASE 1: Wait for coin
 	for {
 		if state.IsShuttingDown.Load() {
 			return 0
 		}
-
-		// Wait up to 1000ms for an edge interrupt (0% CPU idle)
-		n, _ := syscall.Poll(pfd, 1000)
-		if n > 0 {
-			// Interrupt triggered! Verify it's LOW
-			if readPinFast() == 0 {
-				logger.SystemLog("[HW] First pulse detected via POLL (HIGH->LOW)!")
-				if onDetected != nil {
-					func() {
-						defer func() {
-							if r := recover(); r != nil {
-								logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
-							}
-						}()
-						onDetected()
+		pinState := readPinFast()
+		if pinState == 0 && lastState == 1 {
+			logger.SystemLog("[HW] First pulse detected (HIGH->LOW)!")
+			if onDetected != nil {
+				func() {
+					defer func() {
+						if r := recover(); r != nil {
+							logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
+						}
 					}()
-				}
-				break
+					onDetected()
+				}()
 			}
-		} else {
-			// Timeout (or error). Check manually just to be completely safe
-			if readPinFast() == 0 {
-				logger.SystemLog("[HW] First pulse detected via fallback check!")
-				if onDetected != nil {
-					func() {
-						defer func() {
-							if r := recover(); r != nil {
-								logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
-							}
-						}()
-						onDetected()
-					}()
-				}
-				break
-			}
+			break
 		}
+		lastState = pinState
+		// 10ms polling ensures fast detection while dropping CPU idle usage to virtually 0%
+		time.Sleep(10 * time.Millisecond)
 	}
 
 	logger.SystemLog("[HW] Entering PHASE 2 (Counting pulses)")
