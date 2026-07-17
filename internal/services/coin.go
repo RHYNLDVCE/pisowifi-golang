@@ -74,11 +74,11 @@ func ProcessCoin(pulses int, mac string) {
 	// Persist
 	db.SyncUser(db.UserRecord{
 		MAC: mac, IP: user.IP, Time: user.Time, Status: user.Status,
-		Balance: user.Balance + amount, FreeClaimed: user.FreeClaimed, Points: user.Points,
+		Balance: user.Balance, FreeClaimed: user.FreeClaimed, Points: user.Points,
 	})
 	db.AddSale(mac, amount)
 
-	logger.SystemLog(fmt.Sprintf("[COIN_SUCCESS] Credited %d to %s. Balance: %d", amount, mac, user.Balance+amount))
+	logger.SystemLog(fmt.Sprintf("[COIN_SUCCESS] Credited %d to %s. Balance: %d", amount, mac, user.Balance))
 
 	// Re-read updated balance for WS messages
 	updated, _ := state.Users.Get(mac)
