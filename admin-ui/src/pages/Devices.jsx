@@ -27,24 +27,35 @@ export default function Devices() {
     fetchDevices();
   }, []);
 
-  const handleRename = async (mac, currentName) => {
-    const newName = window.prompt(`Enter new name for device ${mac}:`, currentName);
-    if (newName !== null && newName !== currentName) {
-      try {
-        const res = await fetch('/admin/rename_device', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mac, name: newName })
-        });
-        if (res.ok) {
-          toast.success('Device renamed');
-          fetchDevices();
-        } else {
-          toast.error('Failed to rename device');
-        }
-      } catch (err) {
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [deviceToRename, setDeviceToRename] = useState(null);
+  const [newName, setNewName] = useState('');
+
+  const openRenameModal = (mac, currentName) => {
+    setDeviceToRename({ mac, currentName });
+    setNewName(currentName || '');
+    setRenameModalOpen(true);
+  };
+
+  const submitRename = async (e) => {
+    e.preventDefault();
+    if (!deviceToRename) return;
+
+    try {
+      const res = await fetch('/admin/rename_device', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mac: deviceToRename.mac, name: newName })
+      });
+      if (res.ok) {
+        toast.success('Device renamed');
+        fetchDevices();
+        setRenameModalOpen(false);
+      } else {
         toast.error('Failed to rename device');
       }
+    } catch (err) {
+      toast.error('Failed to rename device');
     }
   };
 
@@ -86,7 +97,7 @@ export default function Devices() {
               <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
                 {devices.map((dev, idx) => (
                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
-                    <td className="pl-4 sm:px-6 py-2 sm:py-4 font-bold text-[11px] sm:text-sm whitespace-nowrap">{dev.vendor || 'Unknown Device'}</td>
+                    <td className={`pl-4 sm:px-6 py-2 sm:py-4 font-bold text-[11px] sm:text-sm whitespace-nowrap ${dev.is_custom ? 'text-blue-600 dark:text-blue-400' : ''}`}>{dev.vendor || 'Unknown Device'}</td>
                     <td className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">{dev.mac}</td>
                     <td className="px-3 sm:px-6 py-2 sm:py-4 text-[11px] sm:text-sm font-medium whitespace-nowrap">
                       <a href={`http://${dev.ip}`} target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
@@ -96,7 +107,7 @@ export default function Devices() {
                     <td className="pr-4 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap">
                       <button 
                         className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                        onClick={() => handleRename(dev.mac, dev.vendor)}
+                        onClick={() => openRenameModal(dev.mac, dev.vendor)}
                       >
                         Rename
                       </button>
@@ -108,6 +119,45 @@ export default function Devices() {
           </div>
         )}
       </div>
+      {/* Rename Modal */}
+      {renameModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-gray-200 dark:border-zinc-800">
+            <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-zinc-800">
+              <h3 className="text-lg font-bold">Rename Device</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-mono">{deviceToRename?.mac}</p>
+            </div>
+            <form onSubmit={submitRename} className="p-4 sm:p-6">
+              <div className="mb-6">
+                <label className="block text-sm font-semibold mb-2">New Name</label>
+                <input
+                  type="text"
+                  autoFocus
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="e.g. Lobby Access Point"
+                />
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setRenameModalOpen(false)}
+                  className="px-4 py-2 font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 font-bold rounded-lg bg-black text-white dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
