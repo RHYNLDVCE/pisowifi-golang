@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"pisowifi/internal/config"
@@ -138,30 +139,58 @@ func WaitForPulse(onDetected func()) int {
 		logger.SystemLog("   [OK] Signal Cleared. Ready.")
 	}
 
-	lastState := 1
+	// PHASE 1: Wait for coin (Idle) - Use Epoll for 0% CPU
+	epfd, err := syscall.EpollCreate1(0)
+	if err == nil {
+		defer syscall.Close(epfd)
+		event := syscall.EpollEvent{
+			Events: syscall.EPOLLPRI | syscall.EPOLLERR,
+			Fd:     int32(fd.Fd()),
+		}
+		syscall.EpollCtl(epfd, syscall.EPOLL_CTL_ADD, int(fd.Fd()), &event)
+		events := make([]syscall.EpollEvent, 1)
 
-	// PHASE 1: Wait for coin
-	for {
-		if state.IsShuttingDown.Load() {
-			return 0
-		}
-		pinState := readPinFast()
-		if pinState == 0 && lastState == 1 {
-			// FIRST PULSE DETECTED!
-			if onDetected != nil {
-				func() {
-					defer func() {
-						if r := recover(); r != nil {
-							logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
-						}
-					}()
-					onDetected()
-				}()
+		// Clear pending
+		readPinFast()
+
+		for {
+			if state.IsShuttingDown.Load() {
+				return 0
 			}
-			break
+			n, _ := syscall.EpollWait(epfd, events, 1000)
+			if n > 0 {
+				if readPinFast() == 0 {
+					break
+				}
+			} else {
+				if readPinFast() == 0 {
+					break
+				}
+			}
 		}
-		lastState = pinState
-		time.Sleep(1 * time.Millisecond)
+	} else {
+		// Fallback polling (10ms)
+		for {
+			if state.IsShuttingDown.Load() {
+				return 0
+			}
+			if readPinFast() == 0 {
+				break
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+
+	// FIRST PULSE DETECTED!
+	if onDetected != nil {
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
+				}
+			}()
+			onDetected()
+		}()
 	}
 
 	// PHASE 2: Count pulses
