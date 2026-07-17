@@ -22,11 +22,14 @@ var (
 
 const (
 	// sysfs GPIO numbers for your Orange Pi board.
-	// Physical pin 3 on the 40-pin header = GPIO 122 on Orange Pi 3 LTS.
-	// Physical pin 5 on the 40-pin header = GPIO 121 on Orange Pi 3 LTS.
-	// Run `gpio readall` on your board to confirm the correct numbers.
 	CoinGPIONum  = 122 // coin signal input pin for orange pi 3 lts 122
 	RelayGPIONum = 121 // relay / slot power output pin for orange pi 3 lts 121
+
+	// Physical pin numbers for wiringPi / wiringOP
+	// Physical pin 3 on the 40-pin header = GPIO 122 on Orange Pi 3 LTS.
+	// Physical pin 5 on the 40-pin header = GPIO 121 on Orange Pi 3 LTS.
+	CoinPinPhys  = 3
+	RelayPinPhys = 5
 
 	PulseValue = 1 // coins credited per physical pulse
 )

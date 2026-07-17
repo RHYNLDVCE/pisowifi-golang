@@ -1,13 +1,14 @@
 package hardware
 
+/*
+#cgo LDFLAGS: -lwiringPi
+#include <wiringPi.h>
+*/
+import "C"
+
 import (
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
 	"time"
-
-	"golang.org/x/sys/unix"
 
 	"pisowifi/internal/config"
 	"pisowifi/internal/logger"
@@ -15,83 +16,43 @@ import (
 )
 
 // ---------------------------------------------------------------------------
-// sysfs GPIO helpers
-// Linux kernel exposes each GPIO as files under /sys/class/gpio/gpioN/
-// This replaces wiringPi — no external library, works on any Linux SBC.
+// Public API using WiringOP CGO wrapper
 // ---------------------------------------------------------------------------
 
-func gpioPath(pin int, file string) string {
-	return fmt.Sprintf("/sys/class/gpio/gpio%d/%s", pin, file)
-}
-
-// exportPin tells the kernel to expose a GPIO pin via sysfs.
-func exportPin(pin int) error {
-	exportPath := "/sys/class/gpio/export"
-	// Check if already exported
-	if _, err := os.Stat(gpioPath(pin, "value")); err == nil {
-		return nil
-	}
-	return os.WriteFile(exportPath, []byte(strconv.Itoa(pin)), 0644)
-}
-
-func setDirection(pin int, dir string) error {
-	return os.WriteFile(gpioPath(pin, "direction"), []byte(dir), 0644)
-}
-
-func writeValue(pin int, val int) error {
-	return os.WriteFile(gpioPath(pin, "value"), []byte(strconv.Itoa(val)), 0644)
-}
-
-func readValue(pin int) int {
-	data, err := os.ReadFile(gpioPath(pin, "value"))
-	if err != nil {
-		return 1 // default HIGH (safe for pull-up coin pin)
-	}
-	v, _ := strconv.Atoi(strings.TrimSpace(string(data)))
-	return v
-}
-
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
-// Setup initialises the coin input pin and the relay output pin.
+// Setup initialises the coin input pin and the relay output pin using wiringOP.
 func Setup() {
-	coinPin := config.CoinGPIONum
-	relayPin := config.RelayGPIONum
+	// Initialize wiringPi using physical pin numbers (1-40)
+	C.wiringPiSetupPhys()
 
-	if err := exportPin(coinPin); err != nil {
-		logger.SystemLog(fmt.Sprintf("[HW] Could not export coin GPIO %d: %v", coinPin, err))
-	}
-	time.Sleep(100 * time.Millisecond) // kernel needs a moment after export
-	_ = setDirection(coinPin, "in")
+	coinPin := C.int(config.CoinPinPhys)
+	relayPin := C.int(config.RelayPinPhys)
 
-	if err := exportPin(relayPin); err != nil {
-		logger.SystemLog(fmt.Sprintf("[HW] Could not export relay GPIO %d: %v", relayPin, err))
-	}
-	time.Sleep(100 * time.Millisecond)
-	_ = setDirection(relayPin, "out")
-	_ = writeValue(relayPin, 0) // relay off by default
+	// Setup Coin Pin (Input + Pull Up)
+	// 0 = INPUT, 2 = PUD_UP
+	C.pinMode(coinPin, 0)
+	C.pullUpDnControl(coinPin, 2)
 
-	// Enable edge interrupts for the coin pin
-	_ = os.WriteFile(gpioPath(coinPin, "edge"), []byte("falling"), 0644)
+	// Setup Relay Pin (Output + Default OFF)
+	// 1 = OUTPUT
+	C.pinMode(relayPin, 1)
+	C.digitalWrite(relayPin, 0)
 
-	logger.SystemLog(fmt.Sprintf("[HW] Hardware ready (Coin GPIO: %d, Relay GPIO: %d)", coinPin, relayPin))
+	logger.SystemLog(fmt.Sprintf("[HW] Hardware ready (Coin Pin: %d, Relay Pin: %d)", config.CoinPinPhys, config.RelayPinPhys))
 }
 
 // TurnSlotOn powers the coin slot relay HIGH.
 func TurnSlotOn() {
-	_ = writeValue(config.RelayGPIONum, 1)
+	C.digitalWrite(C.int(config.RelayPinPhys), 1)
 }
 
 // TurnSlotOff powers the relay LOW and clears the current slot user.
 func TurnSlotOff() {
-	_ = writeValue(config.RelayGPIONum, 0)
+	C.digitalWrite(C.int(config.RelayPinPhys), 0)
 }
 
 // ReadPin returns the current coin signal pin value (0 = coin pulse detected, 1 = idle).
 func ReadPin() int {
-	return readValue(config.CoinGPIONum)
+	return int(C.digitalRead(C.int(config.CoinPinPhys)))
 }
 
 // WaitForPulse blocks until one or more pulses are detected and counted.
@@ -99,34 +60,8 @@ func ReadPin() int {
 // to capture which user's slot is open at that exact moment.
 // Returns the total pulse count (0 if a stuck-LOW condition was detected).
 func WaitForPulse(onDetected func()) int {
-	pin := config.CoinGPIONum
-
-	// Ensure edge is falling so poll() triggers precisely on HIGH->LOW
-	_ = os.WriteFile(gpioPath(pin, "edge"), []byte("falling"), 0644)
-
-	valuePath := gpioPath(pin, "value")
-	fd, err := os.Open(valuePath)
-	if err != nil {
-		logger.SystemLog(fmt.Sprintf("[HW] Error opening GPIO value for poll: %v", err))
-		time.Sleep(time.Second) // fallback sleep
-		return 0
-	}
-	defer fd.Close()
-
-	buf := make([]byte, 1)
 	readPinFast := func() int {
-		_, err := fd.Seek(0, 0)
-		if err != nil {
-			return 1
-		}
-		n, err := fd.Read(buf)
-		if err != nil || n == 0 {
-			return 1
-		}
-		if buf[0] == '0' {
-			return 0
-		}
-		return 1
+		return int(C.digitalRead(C.int(config.CoinPinPhys)))
 	}
 
 	// SAFETY: If pin is stuck LOW (0), wait for it to clear.
@@ -143,86 +78,34 @@ func WaitForPulse(onDetected func()) int {
 		logger.SystemLog("   [OK] Signal Cleared. Ready.")
 	}
 
+	logger.SystemLog("[HW] Entering PHASE 1 (Idle wait)")
+
 	lastState := 1
 
-	logger.SystemLog("[HW] Entering PHASE 1 (Idle wait with unix.Epoll)")
-
-	// PHASE 1: Wait for coin (Idle) - Use Epoll for 0% CPU
-	epfd, err := unix.EpollCreate1(0)
-	if err == nil {
-		defer unix.Close(epfd)
-		event := unix.EpollEvent{
-			Events: unix.EPOLLPRI | unix.EPOLLERR,
-			Fd:     int32(fd.Fd()),
+	// PHASE 1: Wait for coin
+	for {
+		if state.IsShuttingDown.Load() {
+			return 0
 		}
-		unix.EpollCtl(epfd, unix.EPOLL_CTL_ADD, int(fd.Fd()), &event)
-		events := make([]unix.EpollEvent, 1)
-
-		// Clear pending
-		readPinFast()
-
-		for {
-			if state.IsShuttingDown.Load() {
-				return 0
-			}
-			n, _ := unix.EpollWait(epfd, events, 1000)
-			if n > 0 {
-				if readPinFast() == 0 {
-					logger.SystemLog("[HW] First pulse detected via EPOLL (HIGH->LOW)!")
-					if onDetected != nil {
-						func() {
-							defer func() {
-								if r := recover(); r != nil {
-									logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
-								}
-							}()
-							onDetected()
-						}()
-					}
-					break
-				}
-			} else {
-				if readPinFast() == 0 {
-					logger.SystemLog("[HW] First pulse detected via fallback check!")
-					if onDetected != nil {
-						func() {
-							defer func() {
-								if r := recover(); r != nil {
-									logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
-								}
-							}()
-							onDetected()
-						}()
-					}
-					break
-				}
-			}
-		}
-	} else {
-		logger.SystemLog(fmt.Sprintf("[HW] Fallback to 10ms polling. Epoll error: %v", err))
-		// Fallback polling (10ms)
-		for {
-			if state.IsShuttingDown.Load() {
-				return 0
-			}
-			pinState := readPinFast()
-			if pinState == 0 && lastState == 1 {
-				logger.SystemLog("[HW] First pulse detected (HIGH->LOW)!")
-				if onDetected != nil {
-					func() {
-						defer func() {
-							if r := recover(); r != nil {
-								logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
-							}
-						}()
-						onDetected()
+		pinState := readPinFast()
+		if pinState == 0 && lastState == 1 {
+			logger.SystemLog("[HW] First pulse detected (HIGH->LOW)!")
+			if onDetected != nil {
+				func() {
+					defer func() {
+						if r := recover(); r != nil {
+							logger.SystemLog(fmt.Sprintf("Callback Error: %v", r))
+						}
 					}()
-				}
-				break
+					onDetected()
+				}()
 			}
-			lastState = pinState
-			time.Sleep(10 * time.Millisecond)
+			break
 		}
+		lastState = pinState
+		
+		// 1ms polling is completely safe and uses ~0% CPU because wiringPi uses /dev/mem
+		time.Sleep(1 * time.Millisecond)
 	}
 
 	logger.SystemLog("[HW] Entering PHASE 2 (Counting pulses)")
