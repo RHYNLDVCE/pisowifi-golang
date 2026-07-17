@@ -1,29 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Save, Activity, Info, Gauge } from 'lucide-react';
+import { Save, Activity, Clock, Timer, PauseCircle, Gift, Gauge } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
-
-const InfoTooltip = ({ text }) => (
-  <div className="group relative ml-2 flex items-center justify-center">
-    <Info size={16} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" />
-    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 shadow-xl pointer-events-none">
-      {text}
-      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-100"></div>
-    </div>
-  </div>
-);
 
 export default function NetworkSettings() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, type: 'danger' });
-  const [toggles, setToggles] = useState({});
 
   const confirmAction = (title, message, onConfirm, type = 'danger') => {
     setModalConfig({ isOpen: true, title, message, onConfirm, type });
   };
   const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false });
+
+  const [toggles, setToggles] = useState({
+    speed_limit: false,
+    sqm: false,
+    udpPriority: false,
+    gamingMode: false,
+    openNat: false
+  });
 
   useEffect(() => {
     fetch('/admin/api/dashboard_data')
@@ -31,10 +28,10 @@ export default function NetworkSettings() {
       .then(json => {
         setData(json);
         setToggles({
-          speedLimit: json.speed_limit_enabled,
+          speed_limit: json.speed_limit_enabled,
           sqm: json.sqm_enabled,
-          gamingMode: json.gaming_mode_enabled,
           udpPriority: json.udp_priority_enabled,
+          gamingMode: json.gaming_mode_enabled,
           openNat: json.open_nat_enabled
         });
         setLoading(false);
@@ -45,6 +42,8 @@ export default function NetworkSettings() {
       });
   }, []);
 
+  const handleToggle = (key) => setToggles(prev => ({ ...prev, [key]: !prev[key] }));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -52,12 +51,9 @@ export default function NetworkSettings() {
     const formData = new FormData(e.target);
     const payload = Object.fromEntries(formData.entries());
     
-    payload.speed_limit_toggle = toggles.speedLimit ? 'on' : '';
-    payload.sqm_enabled = toggles.sqm ? 'on' : '';
-    payload.gaming_mode = toggles.gamingMode ? 'on' : '';
-    payload.udp_priority = toggles.udpPriority ? 'on' : '';
-    payload.open_nat = toggles.openNat ? 'on' : '';
-
+    payload.speed_limit_toggle = formData.get('speed_limit_toggle') ? 'on' : '';
+    payload.gaming_mode = formData.get('gaming_mode') ? 'on' : '';
+    payload.open_nat = formData.get('open_nat') ? 'on' : '';
     payload.free_time_toggle = formData.get('free_time_toggle') ? 'on' : '';
     payload.auto_pause = formData.get('auto_pause') ? 'on' : '';
     payload.custom_ttl = formData.get('custom_ttl') || (data.custom_ttl ?? 1);
@@ -80,10 +76,6 @@ export default function NetworkSettings() {
     setSaving(false);
   };
 
-  const handleToggle = (key) => {
-    setToggles(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
   if (loading) return (
     <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
       <Activity className="animate-spin w-8 h-8 mr-3" />
@@ -94,7 +86,7 @@ export default function NetworkSettings() {
   if (!data) return <div className="text-red-500">Error loading settings.</div>;
 
   return (
-    <div className="space-y-4 sm:space-y-6 relative">
+    <div className="space-y-6 relative">
       <ConfirmModal 
         isOpen={modalConfig.isOpen}
         title={modalConfig.title}
@@ -105,79 +97,75 @@ export default function NetworkSettings() {
       />
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        
-        {/* Speed Limit */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <div className="p-2 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400">
-                  <Gauge size={20} />
+
+        {/* Global Speed Limit */}
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
+          <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+               Global Speed Limit
+               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+                 <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
+                   Enforce global bandwidth cap
+                 </div>
                </div>
-               <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-                    Global Speed Limit
-                    <InfoTooltip text="Limits the maximum total internet bandwidth allowed for an individual user's device. Prevents a single user from hogging the connection." />
-                 </h3>
-                 <p className="text-xs text-gray-500 dark:text-gray-400">Enforce global bandwidth cap</p>
-               </div>
-             </div>
-             <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
-               <input type="checkbox" checked={toggles.speedLimit} onChange={() => handleToggle('speedLimit')} className="peer sr-only" />
-               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+             </h3>
+             <label className="relative flex items-center shrink-0 cursor-pointer">
+               <input type="checkbox" name="speed_limit_toggle" checked={toggles.speed_limit} onChange={() => handleToggle('speed_limit')} className="peer sr-only" />
+               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black dark:peer-checked:bg-blue-600"></div>
              </label>
           </div>
-          <div className={`p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 transition-opacity duration-200 ${!toggles.speedLimit ? 'opacity-50 pointer-events-none' : ''}`}>
-             <div className="space-y-2 max-w-sm">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Speed Limit (Mbps)</label>
+          
+          <div className={!toggles.speed_limit ? 'opacity-50 pointer-events-none transition-opacity duration-300' : 'transition-opacity duration-300'}>
+             <div className="max-w-sm space-y-1">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Speed Limit (Mbps)</label>
                 <input 
                   type="number" 
                   name="speed_limit_val" 
                   defaultValue={data.global_speed_limit} 
-                  className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 outline-none shadow-sm"
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                 />
              </div>
           </div>
         </div>
 
         {/* Smart Queue Management (SQM) */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <div className="p-2 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
-                  <Gauge size={20} />
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
+          <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+               Smart Queue Management (SQM)
+               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+                 <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
+                   Prevents bufferbloat by smoothly managing your overall WAN hardware traffic. Keeps your network ping low even when overall usage is high.
+                 </div>
                </div>
-               <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-                    Smart Queue Management (SQM)
-                    <InfoTooltip text="Prevents bufferbloat by smoothly managing your overall WAN hardware traffic. Keeps your network ping low even when overall usage is high." />
-                 </h3>
-                 <p className="text-xs text-gray-500 dark:text-gray-400">Prevent bufferbloat on WAN</p>
-               </div>
-             </div>
-             <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
-               <input type="checkbox" checked={toggles.sqm} onChange={() => handleToggle('sqm')} className="peer sr-only" />
-               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+             </h3>
+             <label className="relative flex items-center shrink-0 cursor-pointer">
+               <input type="checkbox" name="sqm_enabled" checked={toggles.sqm} onChange={() => handleToggle('sqm')} className="peer sr-only" />
+               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black dark:peer-checked:bg-blue-600"></div>
              </label>
           </div>
-          <div className={`p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 transition-opacity duration-200 ${!toggles.sqm ? 'opacity-50 pointer-events-none' : ''}`}>
+          
+          <div className={!toggles.sqm ? 'opacity-50 pointer-events-none transition-opacity duration-300' : 'transition-opacity duration-300'}>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div className="space-y-2">
-                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">ISP Download Speed (Mbps)</label>
+               <div className="space-y-1">
+                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400">ISP Download Speed (Mbps)</label>
                  <input 
                    type="number" 
                    name="sqm_download_mbps" 
                    defaultValue={data.sqm_download_mbps} 
-                   className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400 outline-none shadow-sm"
+                   className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                  />
                  <p className="text-[10px] text-gray-500 mt-1">Set to 95% of your true maximum ISP download speed.</p>
                </div>
-               <div className="space-y-2">
-                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">ISP Upload Speed (Mbps)</label>
+               <div className="space-y-1">
+                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400">ISP Upload Speed (Mbps)</label>
                  <input 
                    type="number" 
                    name="sqm_upload_mbps" 
                    defaultValue={data.sqm_upload_mbps} 
-                   className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400 outline-none shadow-sm"
+                   className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                  />
                  <p className="text-[10px] text-gray-500 mt-1">Set to 95% of your true maximum ISP upload speed.</p>
                </div>
@@ -185,103 +173,89 @@ export default function NetworkSettings() {
           </div>
         </div>
 
+        {/* UDP Priority Optimization */}
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+               UDP Priority Optimization
+               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+                 <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
+                   Automatically tags real-time UDP traffic (like Voice Calls and Games) with VIP priority labels. Highly recommended.
+                 </div>
+               </div>
+             </h3>
+             <label className="relative flex items-center shrink-0 cursor-pointer">
+               <input type="checkbox" name="udp_priority" checked={toggles.udpPriority} onChange={() => handleToggle('udpPriority')} className="peer sr-only" />
+               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black dark:peer-checked:bg-blue-600"></div>
+             </label>
+          </div>
+        </div>
+
         {/* Gaming Mode */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-5 sm:p-6 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <div className="p-2 rounded-xl bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400">
-                  <Activity size={20} />
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+               Gaming Mode
+               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+                 <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
+                   Creates priority lanes for each individual user's internet connection. Ensures that gaming traffic skips ahead of downloads inside their own speed limit.
+                 </div>
                </div>
-               <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-                    Gaming Mode
-                    <InfoTooltip text="Creates priority lanes for each individual user's internet connection. Ensures that gaming traffic skips ahead of downloads inside their own speed limit." />
-                 </h3>
-                 <p className="text-xs text-gray-500 dark:text-gray-400">Individual Anti-Bufferbloat optimization</p>
-               </div>
-             </div>
-             <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
-               <input type="checkbox" checked={toggles.gamingMode} onChange={() => handleToggle('gamingMode')} className="peer sr-only" />
-               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+             </h3>
+             <label className="relative flex items-center shrink-0 cursor-pointer">
+               <input type="checkbox" name="gaming_mode" checked={toggles.gamingMode} onChange={() => handleToggle('gamingMode')} className="peer sr-only" />
+               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black dark:peer-checked:bg-blue-600"></div>
              </label>
           </div>
         </div>
 
-        {/* UDP Priority */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-5 sm:p-6 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-                  <Activity size={20} />
+        {/* Open NAT */}
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+               Open NAT (Gaming)
+               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+                 <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
+                   Opens up UPnP routing to allow Console gaming (Playstation, Xbox) to connect more freely without Strict NAT type issues.
+                 </div>
                </div>
-               <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-                    UDP Priority Optimization
-                    <InfoTooltip text="Automatically tags real-time UDP traffic (like Voice Calls and Games) with VIP priority labels, while tagging Torrent traffic with lowest priority labels. Highly recommended." />
-                 </h3>
-                 <p className="text-xs text-gray-500 dark:text-gray-400">Tag Real-time UDP packets (Gaming/Voice)</p>
-               </div>
-             </div>
-             <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
-               <input type="checkbox" checked={toggles.udpPriority} onChange={() => handleToggle('udpPriority')} className="peer sr-only" />
-               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-             </label>
-          </div>
-        </div>
-
-        {/* Open NAT (Gaming) */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-5 sm:p-6 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <div className="p-2 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-                  <Activity size={20} />
-               </div>
-               <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-                    Open NAT (Gaming)
-                    <InfoTooltip text="Opens up UPnP routing to allow Console gaming (Playstation, Xbox) to connect more freely without Strict NAT type issues." />
-                 </h3>
-                 <p className="text-xs text-gray-500 dark:text-gray-400">Enable UPnP for consoles</p>
-               </div>
-             </div>
-             <label className="relative flex items-center shrink-0 ml-4 cursor-pointer">
-               <input type="checkbox" checked={toggles.openNat} onChange={() => handleToggle('openNat')} className="peer sr-only" />
-               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+             </h3>
+             <label className="relative flex items-center shrink-0 cursor-pointer">
+               <input type="checkbox" name="open_nat" checked={toggles.openNat} onChange={() => handleToggle('openNat')} className="peer sr-only" />
+               <div className="w-11 h-6 bg-gray-300 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black dark:peer-checked:bg-blue-600"></div>
              </label>
           </div>
         </div>
 
         {/* Tethering Override (TTL) */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <div className="p-2 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
-                  <Activity size={20} />
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm p-6 md:p-8">
+          <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
+               Tethering Override (TTL)
+               <div className="group relative flex items-center justify-center ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help">
+                 <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
+                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 text-center">
+                   Modifies the TTL (Time To Live) of packets leaving the router. Set to 1 to attempt blocking users from tethering/hotspotting their connection to other devices.
+                 </div>
                </div>
-               <div>
-                 <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-                    Tethering Override (TTL)
-                    <InfoTooltip text="Modifies the TTL (Time To Live) of packets leaving the router. Set to 1 to attempt blocking users from tethering/hotspotting their connection to other devices." />
-                 </h3>
-                 <p className="text-xs text-gray-500 dark:text-gray-400">Set to 1 to block tethering, 0 to disable</p>
-               </div>
-             </div>
+             </h3>
           </div>
-          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
-             <div className="space-y-2 max-w-sm">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">TTL Value</label>
-                <input 
-                  type="number" 
-                  name="custom_ttl" 
-                  defaultValue={data.custom_ttl ?? 1} 
-                  className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400 outline-none shadow-sm"
-                />
-             </div>
+          <div className="max-w-sm space-y-1">
+             <label className="text-xs font-bold text-gray-500 dark:text-gray-400">TTL Value</label>
+             <input 
+               type="number" 
+               name="custom_ttl" 
+               defaultValue={data.custom_ttl ?? 1} 
+               className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+             />
           </div>
         </div>
         
-        <div className="pt-6 pb-10 flex justify-end">
-          <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 w-full sm:w-auto justify-center shadow-lg">
+        <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-zinc-800">
+          <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50">
             <Save size={18} /> {saving ? 'Saving...' : 'Save Settings'}
           </button>
         </div>

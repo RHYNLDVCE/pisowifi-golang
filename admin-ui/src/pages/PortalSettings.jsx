@@ -180,43 +180,40 @@ export default function PortalSettings() {
       {/* --- MEDIA UPLOADS --- */}
 
       {/* Promotional Banners */}
-      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden w-full">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50">
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden w-full p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
           <div className="flex items-center gap-3">
-             <div className="p-2 rounded-xl bg-pink-50 text-pink-600 dark:bg-pink-500/10 dark:text-pink-400">
-                <Image size={20} />
-             </div>
+             <Image size={20} className="text-gray-900 dark:text-white" />
              <div>
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Promotional Banners</h3>
-               <p className="text-xs text-gray-500 dark:text-gray-400">Upload images for the captive portal slider</p>
              </div>
           </div>
           <button 
             onClick={saveBannerOrder}
             disabled={savingOrder || banners.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm shadow-sm"
           >
             <Save size={16} /> {savingOrder ? 'Saving...' : 'Save Order Layout'}
           </button>
         </div>
         
-        <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
+        <div>
           <form onSubmit={(e) => handleUpload('/admin/upload_banners', e)} className="flex flex-col sm:flex-row gap-4 mb-8">
             <input 
               type="file" 
               name="files" 
               multiple 
               accept="image/*" 
-              className="flex-1 px-4 py-2 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm shadow-sm" 
+              className="flex-1 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm shadow-sm" 
             />
-            <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-black text-black dark:border-white dark:text-white font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
+            <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-black text-black dark:border-white dark:text-white font-bold rounded hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
               <Upload size={18}/> Upload
             </button>
           </form>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {banners.map((file, idx) => (
-              <div key={file} className="group relative border border-gray-200 dark:border-zinc-800 rounded-xl overflow-hidden aspect-video bg-gray-100 dark:bg-zinc-900 flex flex-col shadow-sm">
+              <div key={file} className="group relative border border-gray-200 dark:border-zinc-800 rounded overflow-hidden aspect-video bg-gray-50 dark:bg-zinc-900 flex flex-col shadow-sm">
                 <div className="flex-1 relative overflow-hidden">
                   <img src={`/static/banners/set/${file}`} alt="Banner" className="w-full h-full object-cover" />
                 </div>
@@ -245,7 +242,7 @@ export default function PortalSettings() {
               </div>
             ))}
             {banners.length === 0 && (
-              <div className="col-span-full py-8 text-center text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900">
+              <div className="col-span-full py-8 text-center text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-zinc-800 rounded bg-white dark:bg-zinc-900">
                 No banners uploaded yet.
               </div>
             )}
@@ -254,46 +251,43 @@ export default function PortalSettings() {
       </div>
 
       {/* Custom Audio Uploads */}
-      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden pb-8 w-full">
-        <div className="flex items-center gap-3 p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50">
-           <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
-              <Volume2 size={20} />
-           </div>
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden w-full p-6 md:p-8">
+        <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+           <Volume2 size={20} className="text-gray-900 dark:text-white" />
            <div>
              <h3 className="text-base font-bold text-gray-900 dark:text-white">Custom Audio Assets</h3>
-             <p className="text-xs text-gray-500 dark:text-gray-400">Upload new `.mp3` or `.wav` sounds</p>
            </div>
         </div>
         
-        <div className="p-5 sm:p-6">
+        <div>
           <form onSubmit={(e) => handleUpload('/admin/upload_sound', e)} className="flex flex-col sm:flex-row gap-4 mb-8">
             <input 
               type="file" 
               name="file" 
               accept="audio/*" 
-              className="flex-1 px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm shadow-sm" 
+              className="flex-1 px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-sm shadow-sm" 
             />
-            <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-black text-black dark:border-white dark:text-white font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
+            <button type="submit" className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-black text-black dark:border-white dark:text-white font-bold rounded hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
               <Upload size={18}/> Upload
             </button>
           </form>
 
-          <div className="overflow-x-auto sm:border border-gray-200 dark:border-zinc-800 sm:rounded-xl -mx-5 sm:mx-0 border-y sm:border-t-0 shadow-sm">
+          <div className="overflow-x-auto border border-gray-200 dark:border-zinc-800 rounded shadow-sm">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 dark:bg-zinc-900/50">
-                  <th className="pl-5 sm:px-6 py-3 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Filename</th>
-                  <th className="pr-5 sm:px-6 py-3 sm:py-4 text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Action</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Filename</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right border-b border-gray-200 dark:border-zinc-800 whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
                 {data.sound_files && data.sound_files.map((file, idx) => (
                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
-                    <td className="pl-5 sm:px-6 py-3 sm:py-4 font-mono text-[10px] sm:text-sm whitespace-nowrap">{file}</td>
-                    <td className="pr-5 sm:px-6 py-3 sm:py-4 text-right whitespace-nowrap">
+                    <td className="px-6 py-3 font-mono text-sm whitespace-nowrap">{file}</td>
+                    <td className="px-6 py-3 text-right whitespace-nowrap">
                       <div className="flex justify-end gap-2">
                         <button 
-                          className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shadow-sm"
+                          className="inline-flex items-center px-4 py-2 text-xs font-bold rounded border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors shadow-sm"
                           onClick={(e) => {
                             e.preventDefault();
                             const audio = new Audio(`/static/sounds/${file}`);
@@ -307,7 +301,7 @@ export default function PortalSettings() {
                             e.preventDefault();
                             deleteSound(file);
                           }}
-                          className="inline-flex items-center justify-center p-1.5 sm:p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-500/20"
+                          className="inline-flex items-center justify-center p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-500/20"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -333,87 +327,78 @@ export default function PortalSettings() {
       <form onSubmit={handleSaveSettings} className="space-y-6">
         
         {/* Coin Slot Settings */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden w-full">
-          <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center gap-3">
-             <div className="p-2 rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
-                <Timer size={20} />
-             </div>
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm w-full p-6 md:p-8">
+          <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <Timer size={20} className="text-gray-900 dark:text-white" />
              <div>
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Coin Slot Configuration</h3>
-               <p className="text-xs text-gray-500 dark:text-gray-400">Manage hardware timeouts</p>
              </div>
           </div>
-          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
-             <div className="space-y-2 max-w-sm">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Slot Timeout (Seconds)</label>
+          <div>
+             <div className="space-y-1 max-w-sm">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Slot Timeout (Seconds)</label>
                 <input 
                   type="number" 
                   name="timeout" 
                   defaultValue={data.slot_timeout || 60} 
-                  className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none shadow-sm"
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                 />
-                <p className="text-xs text-gray-500 mt-1">Time before the physical coin slot accepts another coin.</p>
+                <p className="text-[10px] text-gray-500 mt-1">Time before the physical coin slot accepts another coin.</p>
              </div>
           </div>
         </div>
 
         {/* Portal Customization */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden w-full">
-          <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center gap-3">
-             <div className="p-2 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-                <MonitorSmartphone size={20} />
-             </div>
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm w-full p-6 md:p-8">
+          <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <MonitorSmartphone size={20} className="text-gray-900 dark:text-white" />
              <div>
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Interface Configuration</h3>
-               <p className="text-xs text-gray-500 dark:text-gray-400">Customize the captive portal banner</p>
              </div>
           </div>
-          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
+          <div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Portal Title</label>
-                <input type="text" name="portal_title" defaultValue={data.portal_title} placeholder="e.g. PISOWIFI" className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none shadow-sm" />
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Portal Title</label>
+                <input type="text" name="portal_title" defaultValue={data.portal_title} placeholder="e.g. PISOWIFI" className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
               </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Portal Subtitle</label>
-                <input type="text" name="portal_subtitle" defaultValue={data.portal_subtitle} placeholder="e.g. Premium internet connectivity" className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none shadow-sm" />
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Portal Subtitle</label>
+                <input type="text" name="portal_subtitle" defaultValue={data.portal_subtitle} placeholder="e.g. Premium internet connectivity" className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Banner Button Text</label>
-                <input type="text" name="banner_text" defaultValue={data.banner_text} placeholder="e.g. Open App" className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none shadow-sm" />
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Banner Button Text</label>
+                <input type="text" name="banner_text" defaultValue={data.banner_text} placeholder="e.g. Open App" className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
               </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Banner Button URL</label>
-                <input type="text" name="banner_link" defaultValue={data.banner_link} placeholder="http://..." className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none shadow-sm" />
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Banner Button URL</label>
+                <input type="text" name="banner_link" defaultValue={data.banner_link} placeholder="http://..." className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
               </div>
             </div>
           </div>
         </div>
         
         {/* Event Sounds (Selection) */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm overflow-hidden w-full">
-          <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center gap-3">
-             <div className="p-2 rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400">
-                <Volume2 size={20} />
-             </div>
+        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm w-full p-6 md:p-8">
+          <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+             <Volume2 size={20} className="text-gray-900 dark:text-white" />
              <div>
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Event Sounds Configuration</h3>
-               <p className="text-xs text-gray-500 dark:text-gray-400">Select sounds for coin insertion</p>
              </div>
           </div>
-          <div className="p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20">
+          <div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Insert Coin Sound (Looping)</label>
-                <select name="sound_insert" defaultValue={data.sound_insert_selected} className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none shadow-sm">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Insert Coin Sound (Looping)</label>
+                <select name="sound_insert" defaultValue={data.sound_insert_selected} className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:ring-2 focus:ring-black dark:focus:ring-white outline-none">
                   {data.sound_files && data.sound_files.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Coin Received Sound (Success)</label>
-                <select name="sound_coin" defaultValue={data.sound_coin_selected} className="w-full px-4 py-2.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-black dark:focus:ring-white outline-none shadow-sm">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Coin Received Sound (Success)</label>
+                <select name="sound_coin" defaultValue={data.sound_coin_selected} className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:ring-2 focus:ring-black dark:focus:ring-white outline-none">
                   {data.sound_files && data.sound_files.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
@@ -421,8 +406,8 @@ export default function PortalSettings() {
           </div>
         </div>
 
-        <div className="flex justify-end w-full">
-          <button type="submit" disabled={savingSettings} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 w-full sm:w-auto justify-center shadow-lg">
+        <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-zinc-800">
+          <button type="submit" disabled={savingSettings} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50">
             <Save size={18} /> {savingSettings ? 'Saving...' : 'Save General Settings'}
           </button>
         </div>

@@ -102,24 +102,21 @@ export default function Connections() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800/50 rounded-2xl shadow-sm flex flex-col overflow-hidden">
-        <div className="p-5 sm:p-6 border-b border-gray-100 dark:border-zinc-800/50 flex flex-wrap gap-4 justify-between items-center">
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm flex flex-col p-6 md:p-8">
+        <div className="flex flex-wrap gap-4 justify-between items-center mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 hidden sm:flex">
-               <Users size={20} />
+            <div className="hidden sm:flex">
+               <Users size={20} className="text-gray-900 dark:text-white" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center">
-                 Active Connections
-                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400 ml-3 tracking-widest uppercase">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></span>
-                    {active_users} Active
-                 </span>
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Managing live user sessions on the network</p>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">Active Connections</h3>
             </div>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900 text-gray-900 dark:text-white ml-2 shrink-0 whitespace-nowrap">
+               <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></span>
+               {active_users} Active
+            </span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto pb-2 sm:pb-0">
             <CustomSelect
               value={sortBy}
               onChange={(val) => setSortBy(val)}
@@ -137,25 +134,25 @@ export default function Connections() {
                 placeholder="Search MAC, IP, or Name..." 
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 w-full sm:w-64 transition-all shadow-sm" 
+                className="pl-9 pr-4 py-2 text-sm bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white w-full sm:w-64 transition-all" 
               />
             </div>
           </div>
         </div>
         
         {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto border border-gray-200 dark:border-zinc-800 rounded">
           <table className="w-full text-left border-collapse relative">
-            <thead className="sticky top-0 bg-white dark:bg-zinc-950 z-10 shadow-[0_1px_0_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.05)]">
+            <thead className="sticky top-0 bg-gray-50 dark:bg-zinc-900/50 z-10 border-b border-gray-200 dark:border-zinc-800">
               <tr>
-                <th className="pl-6 pr-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500 w-12">#</th>
-                <th className="px-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500">Device</th>
-                <th className="px-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500">IP / MAC</th>
-                <th className="px-4 py-2 text-xs font-medium text-gray-400 dark:text-gray-500">Status</th>
-                <th className="pl-4 pr-6 py-2 text-xs font-medium text-gray-400 dark:text-gray-500 text-right">Time Left</th>
+                <th className="pl-6 pr-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">#</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Device</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">IP / MAC</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="pl-4 pr-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Time Left</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50 dark:divide-zinc-900/50">
+            <tbody className="divide-y divide-gray-200 dark:divide-zinc-800">
               {displayMacs.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="py-12 text-center text-gray-500">
@@ -168,37 +165,37 @@ export default function Connections() {
                   const absoluteIdx = (safeCurrentPage - 1) * ITEMS_PER_PAGE + idx + 1;
                   return (
                     <tr key={mac} className={`transition-colors group cursor-pointer ${
-                      u.status === 'connected' ? 'bg-green-50/50 dark:bg-green-500/5 hover:bg-green-100/50 dark:hover:bg-green-500/10' :
-                      u.status === 'paused' ? 'bg-amber-50/50 dark:bg-amber-500/5 hover:bg-amber-100/50 dark:hover:bg-amber-500/10' :
+                      u.status === 'connected' ? 'bg-white dark:bg-zinc-950 hover:bg-gray-50 dark:hover:bg-zinc-900' :
+                      u.status === 'paused' ? 'bg-gray-50/50 dark:bg-zinc-900/50 hover:bg-gray-100/50 dark:hover:bg-zinc-800/50' :
                       'hover:bg-gray-50/50 dark:hover:bg-zinc-900/20'
                     }`} onClick={() => navigate(`/admin/user/${mac}`)}>
-                      <td className="pl-6 pr-4 py-2.5 text-sm font-medium text-gray-400">
+                      <td className="pl-6 pr-4 py-3 text-sm font-medium text-gray-500">
                         {absoluteIdx}
                       </td>
-                      <td className="px-4 py-2.5">
-                        <div className="font-semibold text-sm text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">{u.device_name || 'Unknown Device'}</div>
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-sm text-gray-900 dark:text-white transition-colors">{u.device_name || 'Unknown Device'}</div>
                       </td>
-                      <td className="px-4 py-2.5">
+                      <td className="px-4 py-3">
                         <div className="text-sm font-medium text-gray-700 dark:text-gray-300">{u.ip}</div>
                         <div className="text-xs text-gray-400 font-mono mt-0.5">{mac}</div>
                       </td>
-                      <td className="px-4 py-2.5">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                          u.status === 'connected' ? 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400' :
-                          u.status === 'paused' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' :
-                          'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                          u.status === 'connected' ? 'border-green-200 dark:border-green-900/50 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10' :
+                          u.status === 'paused' ? 'border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10' :
+                          'border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-500/10'
                         }`}>
                           {u.status}
                         </span>
                       </td>
-                      <td className="pl-4 pr-6 py-2.5 text-right">
+                      <td className="pl-4 pr-6 py-3 text-right">
                         <div className="flex flex-wrap items-center justify-end gap-2">
                            {u.points > 0 && (
-                             <span className="bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 px-2 py-1 rounded-md text-xs font-bold">
+                             <span className="border border-amber-200 dark:border-amber-900/50 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 px-2 py-1 rounded text-xs font-bold">
                                ★ {u.points}
                              </span>
                            )}
-                           <div className="font-semibold text-sm text-gray-900 dark:text-gray-100">{u.time > 0 ? u.time_formatted : '0s'}</div>
+                           <div className="font-semibold text-sm text-gray-900 dark:text-white">{u.time > 0 ? u.time_formatted : '0s'}</div>
                         </div>
                       </td>
                     </tr>
@@ -210,7 +207,7 @@ export default function Connections() {
         </div>
 
         {/* Mobile List View (Flat, Edge-to-Edge) */}
-        <div className="md:hidden flex flex-col -mx-4 mt-4 border-t border-gray-100 dark:border-zinc-800">
+        <div className="md:hidden flex flex-col -mx-6 sm:-mx-8 border-y border-gray-200 dark:border-zinc-800">
           {displayMacs.length === 0 ? (
             <div className="py-12 text-center text-gray-500">
                {searchQuery ? "No matching devices found." : "No active devices connected."}
@@ -220,23 +217,23 @@ export default function Connections() {
               const u = users[mac];
               const absoluteIdx = (safeCurrentPage - 1) * ITEMS_PER_PAGE + idx + 1;
               return (
-                <div key={mac} onClick={() => navigate(`/admin/user/${mac}`)} className={`flex flex-col py-3 px-6 border-b border-gray-100 dark:border-zinc-800/50 transition-colors cursor-pointer ${
-                  u.status === 'connected' ? 'bg-green-50/50 dark:bg-green-500/5 active:bg-green-100/50 dark:active:bg-green-500/10' :
-                  u.status === 'paused' ? 'bg-amber-50/50 dark:bg-amber-500/5 active:bg-amber-100/50 dark:active:bg-amber-500/10' :
+                <div key={mac} onClick={() => navigate(`/admin/user/${mac}`)} className={`flex flex-col py-3 px-6 border-b border-gray-200 dark:border-zinc-800 last:border-0 transition-colors cursor-pointer ${
+                  u.status === 'connected' ? 'bg-white dark:bg-zinc-950 active:bg-gray-50 dark:active:bg-zinc-900' :
+                  u.status === 'paused' ? 'bg-gray-50/50 dark:bg-zinc-900/50 active:bg-gray-100/50 dark:active:bg-zinc-800/50' :
                   'active:bg-gray-50 dark:active:bg-zinc-900'
                 }`}>
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
-                      <div className="text-gray-400 font-medium text-xs">{absoluteIdx}.</div>
+                      <div className="text-gray-500 font-medium text-xs">{absoluteIdx}.</div>
                       <div className="flex flex-col">
                         <div className="font-bold text-gray-900 dark:text-white text-[15px] leading-tight truncate max-w-[160px]">{u.device_name || 'Unknown Device'}</div>
                         <div className="text-[9px] text-gray-400 font-mono mt-0.5">{mac}</div>
                       </div>
                     </div>
-                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider shrink-0 ${
-                      u.status === 'connected' ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10' :
-                      u.status === 'paused' ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10' :
-                      'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10'
+                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-[9px] font-bold uppercase tracking-wider shrink-0 ${
+                      u.status === 'connected' ? 'border-green-200 dark:border-green-900/50 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10' :
+                      u.status === 'paused' ? 'border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10' :
+                      'border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-500/10'
                     }`}>
                       {u.status}
                     </span>
@@ -245,7 +242,7 @@ export default function Connections() {
                     <div className="text-[13px] font-medium text-gray-500 dark:text-gray-400">{u.ip}</div>
                     <div className="flex items-center gap-2">
                       {u.points > 0 && (
-                        <div className="text-[10px] text-amber-500 font-bold uppercase tracking-wider">★ {u.points}</div>
+                        <div className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">★ {u.points}</div>
                       )}
                       <div className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">{u.time > 0 ? u.time_formatted : '0s'}</div>
                     </div>
@@ -257,7 +254,7 @@ export default function Connections() {
         </div>
 
         {/* Pagination Controls */}
-        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-100 dark:border-zinc-800/50 p-5 sm:p-6 bg-gray-50/50 dark:bg-zinc-900/20 gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-6 mt-6 gap-4">
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Showing <span className="font-medium text-gray-900 dark:text-white">{totalItems > 0 ? (safeCurrentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="font-medium text-gray-900 dark:text-white">{Math.min(safeCurrentPage * ITEMS_PER_PAGE, totalItems)}</span> of <span className="font-medium text-gray-900 dark:text-white">{totalItems}</span> entries
           </div>
@@ -265,7 +262,7 @@ export default function Connections() {
             <button
               onClick={() => setCurrentPage(Math.max(1, safeCurrentPage - 1))}
               disabled={safeCurrentPage <= 1}
-              className="p-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded border border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white dark:bg-zinc-900"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -275,7 +272,7 @@ export default function Connections() {
             <button
               onClick={() => setCurrentPage(Math.min(safeTotalPages, safeCurrentPage + 1))}
               disabled={safeCurrentPage >= safeTotalPages}
-              className="p-1.5 rounded-lg border border-gray-200 dark:border-zinc-700 text-gray-500 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-1.5 rounded border border-gray-300 dark:border-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white dark:bg-zinc-900"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
