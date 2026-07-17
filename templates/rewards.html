@@ -279,8 +279,8 @@
 
     .modal-card {
         background: var(--surface);
-        width: 90%;
-        max-width: 360px;
+        width: 85%;
+        max-width: 320px;
         padding: 2rem 1.5rem;
         border-radius: 16px;
         text-align: center;
@@ -543,7 +543,7 @@
     </div>
 </div>
 
-<div id="toastContainer" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+<div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
 
 {% endblock %}
 
@@ -758,7 +758,7 @@
         t.style.fontSize = '0.9rem';
         t.style.background = isError ? 'var(--danger)' : 'var(--success)';
         t.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-        t.style.animation = 'toastSlideUp 0.3s ease';
+        t.style.animation = 'toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
         t.innerText = msg;
         container.appendChild(t);
         setTimeout(() => t.remove(), 3000);
@@ -859,18 +859,37 @@
     }
 
     function copyCode(code) {
-        navigator.clipboard.writeText(code).then(() => {
-            showVoucherToast("Code copied to clipboard!", false);
-        }).catch(() => {
-            showVoucherToast("Failed to copy code.", true);
-        });
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(code).then(() => {
+                showVoucherToast("Code copied to clipboard!", false);
+            }).catch(() => {
+                showVoucherToast("Failed to copy code.", true);
+            });
+        } else {
+            // Fallback for HTTP Captive Portals
+            let textArea = document.createElement("textarea");
+            textArea.value = code;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showVoucherToast("Code copied to clipboard!", false);
+            } catch (err) {
+                showVoucherToast("Failed to copy code.", true);
+            }
+            textArea.remove();
+        }
     }
 
 </script>
 <style>
-    @keyframes toastSlideUp {
-        from { transform: translateY(20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+    @keyframes toastSlideIn {
+        from { transform: translateX(20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
 </style>
 {% endblock %}
