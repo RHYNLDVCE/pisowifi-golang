@@ -105,7 +105,7 @@ export default function NetworkSettings() {
                <span>Global Speed Limit</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
+                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-[30%] sm:-translate-x-1/2 w-60 sm:w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60] text-left sm:text-center leading-relaxed">
                    Sets the maximum bandwidth allowed for EACH individual user. This does NOT limit the total speed of your ethernet port or USB LAN adapter.
                  </div>
                </div>
@@ -136,7 +136,7 @@ export default function NetworkSettings() {
                <span>Smart Queue Management (SQM)</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
+                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-[30%] sm:-translate-x-1/2 w-60 sm:w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60] text-left sm:text-center leading-relaxed">
                    Prevents bufferbloat by smoothly managing your overall WAN hardware traffic. Keeps your network ping low even when overall usage is high.
                  </div>
                </div>
@@ -180,7 +180,7 @@ export default function NetworkSettings() {
                <span>UDP Priority Optimization</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
+                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-[30%] sm:-translate-x-1/2 w-60 sm:w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60] text-left sm:text-center leading-relaxed">
                    Automatically tags real-time UDP traffic (like Voice Calls and Games) with VIP priority labels. Highly recommended.
                  </div>
                </div>
@@ -199,7 +199,7 @@ export default function NetworkSettings() {
                <span>Gaming Mode</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
+                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-[30%] sm:-translate-x-1/2 w-64 sm:w-80 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60] text-left sm:text-center leading-relaxed">
                    Enables CAKE SQM specifically for each individual user. It creates priority lanes inside their personal speed limit, ensuring their gaming traffic skips ahead of their own downloads.
                  </div>
                </div>
@@ -218,7 +218,7 @@ export default function NetworkSettings() {
                <span>Open NAT (Gaming)</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
+                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-[30%] sm:-translate-x-1/2 w-60 sm:w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60] text-left sm:text-center leading-relaxed">
                    Opens up UPnP routing to allow Console gaming (Playstation, Xbox) to connect more freely without Strict NAT type issues.
                  </div>
                </div>
@@ -237,7 +237,7 @@ export default function NetworkSettings() {
                <span>Tethering Override (TTL)</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-10 text-center">
+                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-[30%] sm:-translate-x-1/2 w-60 sm:w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60] text-left sm:text-center leading-relaxed">
                    Modifies the TTL (Time To Live) of packets leaving the router. Set to 1 to attempt blocking users from tethering/hotspotting their connection to other devices.
                  </div>
                </div>
