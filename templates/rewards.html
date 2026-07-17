@@ -444,9 +444,9 @@
             <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
                 Enter a voucher code from a friend to claim its value.
             </p>
-            <div style="display: flex; gap: 8px; margin-bottom: 2.5rem; background: var(--surface); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 12px;">
-                <input type="text" id="redeemCodeInput" placeholder="ENTER CODE" style="flex: 1; border: none; outline: none; background: transparent; font-family: monospace; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; padding-left: 0.5rem; color: var(--text-main);">
-                <button class="btn-confirm" onclick="redeemVoucherDirect()" id="btnSubmitRedeemDirect" style="padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 700;">Claim</button>
+            <div style="box-sizing: border-box; width: 100%; display: flex; gap: 8px; margin-bottom: 2.5rem; background: var(--surface); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 12px;">
+                <input type="text" id="redeemCodeInput" placeholder="ENTER CODE" style="flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-family: monospace; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; padding-left: 0.5rem; color: var(--text-main);">
+                <button class="btn-confirm" onclick="redeemVoucherDirect()" id="btnSubmitRedeemDirect" style="padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 700; flex-shrink: 0;">Claim</button>
             </div>
 
             <div class="section-title">
@@ -458,9 +458,9 @@
             </p>
 
             <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem;">From Time</h4>
-            <div style="display: flex; gap: 8px; margin-bottom: 2rem; background: var(--surface); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 12px;">
-                <input type="number" id="voucherTimeAmountDirect" placeholder="Minutes (e.g. 60)" style="flex: 1; border: none; outline: none; background: transparent; font-size: 1rem; padding-left: 0.5rem; color: var(--text-main);">
-                <button class="btn-confirm" onclick="generateVoucherDirect('time')" id="btnSubmitGenerateTimeDirect" style="padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 700;">Convert</button>
+            <div style="box-sizing: border-box; width: 100%; display: flex; gap: 8px; margin-bottom: 2rem; background: var(--surface); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 12px;">
+                <input type="number" id="voucherTimeAmountDirect" placeholder="Minutes (e.g. 60)" style="flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-size: 1rem; padding-left: 0.5rem; color: var(--text-main);">
+                <button class="btn-confirm" onclick="generateVoucherDirect('time')" id="btnSubmitGenerateTimeDirect" style="padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 700; flex-shrink: 0;">Convert</button>
             </div>
 
             {% if enabled and voucher_point_promos|length > 0 %}
