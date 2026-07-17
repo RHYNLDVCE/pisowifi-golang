@@ -13,13 +13,13 @@ import (
 	"pisowifi/internal/state"
 )
 
-// GenerateVoucherCode creates a random 8-character code like "8XY2-P9KL"
+// GenerateVoucherCode creates a random 8-character code like "8XY2P9KL"
 func GenerateVoucherCode() string {
 	b := make([]byte, 5)
 	rand.Read(b)
 	str := base32.StdEncoding.EncodeToString(b)
 	str = strings.ReplaceAll(str, "=", "")
-	return fmt.Sprintf("%s-%s", str[:4], str[4:])
+	return str[:8]
 }
 
 // GenerateVoucher creates a new voucher from the user's balance.
@@ -34,8 +34,9 @@ func GenerateVoucher(mac, vType string, value float64) (string, error) {
 	if vType == "time" && value < float64(cfg.VoucherMinTimeMinutes) {
 		return "", fmt.Errorf("amount below minimum limit (%d mins)", cfg.VoucherMinTimeMinutes)
 	}
-	if vType == "points" && value < cfg.VoucherMinPoints {
-		return "", fmt.Errorf("amount below minimum limit (%.2f pts)", cfg.VoucherMinPoints)
+	if vType == "points" && value != cfg.VoucherPromoPoints {
+		// Enforce fixed promo points
+		return "", fmt.Errorf("invalid promo amount")
 	}
 
 	// 2. Check user balance
@@ -52,6 +53,17 @@ func GenerateVoucher(mac, vType string, value float64) (string, error) {
 		}
 		state.Users.UpdateField(mac, func(u *state.UserRecord) {
 			u.Time -= secondsToDeduct
+			if u.Time < 0 {
+				u.Time = 0
+			}
+			if u.Status == "connected" {
+				u.ExpiresAt = float64(time.Now().UnixNano())/1e9 + float64(u.Time)
+			}
+			if u.Time == 0 && u.Status == "connected" {
+				u.Status = "expired"
+				u.ExpiresAt = 0
+				network.BlockUser(mac, u.IP)
+			}
 		})
 	} else if vType == "points" {
 		if user.Points < value {
@@ -60,6 +72,10 @@ func GenerateVoucher(mac, vType string, value float64) (string, error) {
 		state.Users.UpdateField(mac, func(u *state.UserRecord) {
 			u.Points -= value
 		})
+		
+		// A points voucher is actually just a time voucher now.
+		vType = "time"
+		value = float64(cfg.VoucherPromoTimeMinutes)
 	}
 
 	// Update DB to reflect the new balance
@@ -75,7 +91,14 @@ func GenerateVoucher(mac, vType string, value float64) (string, error) {
 	})
 
 	// 4. Create voucher
-	code := GenerateVoucherCode()
+	var code string
+	for {
+		code = GenerateVoucherCode()
+		if _, err := db.GetVoucher(code); err != nil {
+			break // code doesn't exist
+		}
+	}
+
 	v := &db.VoucherRecord{
 		Code:      code,
 		Type:      vType,
@@ -91,6 +114,14 @@ func GenerateVoucher(mac, vType string, value float64) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("database error")
 	}
+
+	state.Manager.Send(mac, map[string]any{
+		"type":           "sync",
+		"time_remaining": user.Time,
+		"status":         user.Status,
+		"balance":        user.Balance,
+		"points":         user.Points,
+	})
 
 	logger.SystemLog(fmt.Sprintf("[VOUCHER] Created: %s | Type: %s | Value: %.2f | By: %s", code, vType, value, mac))
 	return code, nil
@@ -120,6 +151,13 @@ func RedeemVoucher(mac, code string) error {
 		secondsToAdd := int(v.Value * 60)
 		state.Users.UpdateField(mac, func(u *state.UserRecord) {
 			u.Time += secondsToAdd
+			if u.Time > 0 && (u.Status == "expired" || u.Status == "new" || u.Status == "") {
+				u.Status = "connected"
+				u.ExpiresAt = float64(time.Now().UnixNano())/1e9 + float64(u.Time)
+				network.AllowUser(mac, u.IP)
+			} else if u.Status == "connected" {
+				u.ExpiresAt = float64(time.Now().UnixNano())/1e9 + float64(u.Time)
+			}
 		})
 	} else if v.Type == "points" {
 		state.Users.UpdateField(mac, func(u *state.UserRecord) {
@@ -144,6 +182,14 @@ func RedeemVoucher(mac, code string) error {
 	if err != nil {
 		return fmt.Errorf("database error")
 	}
+
+	state.Manager.Send(mac, map[string]any{
+		"type":           "sync",
+		"time_remaining": user.Time,
+		"status":         user.Status,
+		"balance":        user.Balance,
+		"points":         user.Points,
+	})
 
 	logger.SystemLog(fmt.Sprintf("[VOUCHER] Redeemed: %s | Type: %s | Value: %.2f | By: %s", code, v.Type, v.Value, mac))
 	return nil

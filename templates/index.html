@@ -600,11 +600,6 @@
         </button>
         {% endif %}
 
-        <button id="btnVouchers" class="btn btn-outline" style="margin-top: 5px; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2); border-color: #8b5cf6; color: #8b5cf6;"
-            onclick="openVoucherModal()">
-            🎟️ Vouchers
-        </button>
-
         {% if free_time_enabled and not free_claimed %}
         <button id="btnFree" class="btn" style="background: #8b5cf6; color: white; margin-top: 5px;"
             onclick="claimFreeTime()">
@@ -701,41 +696,6 @@
 
 <div id="imageViewerModal" class="viewer-overlay" onclick="closeImageViewer()">
     <img id="viewerImage" src="" style="max-width: 95%; max-height: 95%; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);" onclick="event.stopPropagation()">
-</div>
-
-<div id="voucherModal" class="modal-overlay">
-    <div class="modal-card">
-        <h3 style="margin: 0 0 20px;">🎟️ Vouchers</h3>
-        <div style="display:flex; justify-content:center; gap:10px; margin-bottom: 20px;">
-            <button id="tabGenerate" class="btn btn-main" style="flex:1;" onclick="switchVoucherTab('generate')">Create</button>
-            <button id="tabRedeem" class="btn btn-outline" style="flex:1;" onclick="switchVoucherTab('redeem')">Redeem</button>
-        </div>
-
-        <div id="voucherGenerateSection">
-            <p style="font-size:0.9rem; color:var(--text-sub); margin-bottom: 15px;">Convert your balance into a shareable voucher code.</p>
-            <select id="voucherType" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-main); font-size: 1rem;">
-                <option value="time">Time (Minutes)</option>
-                {% if points_enabled %}
-                <option value="points">Points</option>
-                {% endif %}
-            </select>
-            <input type="number" id="voucherAmount" placeholder="Amount to convert" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-main); font-size: 1rem;">
-            <button id="btnGenerateVoucher" class="btn btn-main" onclick="generateVoucher()">Generate Voucher</button>
-            <div id="generatedCodeContainer" style="display:none; margin-top: 15px; padding: 15px; background: var(--card-border); border-radius: 8px; position: relative;">
-                <div style="font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Your Voucher Code</div>
-                <div style="font-family: monospace; font-size: 1.4rem; font-weight: bold; color: var(--text-main); letter-spacing: 2px;" id="generatedCodeText"></div>
-                <button onclick="copyVoucherCode()" style="width: 100%; margin-top: 10px; padding: 8px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">📋 Copy to Clipboard</button>
-            </div>
-        </div>
-
-        <div id="voucherRedeemSection" style="display:none;">
-            <p style="font-size:0.9rem; color:var(--text-sub); margin-bottom: 15px;">Enter a voucher code to claim its balance.</p>
-            <input type="text" id="redeemCode" placeholder="Enter voucher code" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-main); font-family: monospace; font-size: 1.2rem; text-align: center; text-transform: uppercase;">
-            <button id="btnRedeemVoucher" class="btn btn-main" onclick="redeemVoucher()">Redeem Voucher</button>
-        </div>
-
-        <button class="btn btn-outline" style="margin-top:20px;" onclick="closeVoucherModal()">Close</button>
-    </div>
 </div>
 
 <div id="toastContainer" class="toast-container"></div>
@@ -1341,109 +1301,6 @@
         const htmlText = `<span style="display:inline-block;">${partsHtml.join("")}</span>`;
 
         return { plainText, htmlText, length: plainText.length };
-    }
-    // --- VOUCHERS ---
-    function openVoucherModal() {
-        document.getElementById("voucherModal").style.display = "flex";
-        switchVoucherTab('generate');
-        document.getElementById("generatedCodeContainer").style.display = "none";
-        document.getElementById("voucherAmount").value = "";
-        document.getElementById("redeemCode").value = "";
-    }
-
-    function closeVoucherModal() {
-        document.getElementById("voucherModal").style.display = "none";
-    }
-
-    function switchVoucherTab(tab) {
-        if (tab === 'generate') {
-            document.getElementById("voucherGenerateSection").style.display = "block";
-            document.getElementById("voucherRedeemSection").style.display = "none";
-            document.getElementById("tabGenerate").className = "btn btn-main";
-            document.getElementById("tabRedeem").className = "btn btn-outline";
-        } else {
-            document.getElementById("voucherGenerateSection").style.display = "none";
-            document.getElementById("voucherRedeemSection").style.display = "block";
-            document.getElementById("tabGenerate").className = "btn btn-outline";
-            document.getElementById("tabRedeem").className = "btn btn-main";
-        }
-    }
-
-    async function generateVoucher() {
-        const type = document.getElementById("voucherType").value;
-        const val = parseFloat(document.getElementById("voucherAmount").value);
-        if (!val || val <= 0) {
-            showToast("Please enter a valid amount.", "error");
-            return;
-        }
-
-        const btn = document.getElementById("btnGenerateVoucher");
-        btn.disabled = true;
-        btn.innerText = "Generating...";
-
-        try {
-            const res = await fetch("/generate_voucher", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ type: type, value: val })
-            });
-            const data = await res.json();
-            if (data.status === "success") {
-                document.getElementById("generatedCodeContainer").style.display = "block";
-                document.getElementById("generatedCodeText").innerText = data.code;
-                showToast("Voucher generated successfully!", "success");
-                fetchStatus(); // update UI balance
-            } else {
-                showToast(data.message || "Failed to generate voucher", "error");
-            }
-        } catch (e) {
-            showToast("Network error. Please try again.", "error");
-        }
-        
-        btn.disabled = false;
-        btn.innerText = "Generate Voucher";
-    }
-
-    async function redeemVoucher() {
-        const code = document.getElementById("redeemCode").value.trim();
-        if (!code) {
-            showToast("Please enter a voucher code.", "error");
-            return;
-        }
-
-        const btn = document.getElementById("btnRedeemVoucher");
-        btn.disabled = true;
-        btn.innerText = "Redeeming...";
-
-        try {
-            const res = await fetch("/redeem_voucher", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ code: code })
-            });
-            const data = await res.json();
-            if (data.status === "success") {
-                showToast("Voucher redeemed successfully!", "success");
-                closeVoucherModal();
-                fetchStatus(); // update UI balance
-            } else {
-                showToast(data.message || "Failed to redeem voucher", "error");
-            }
-        } catch (e) {
-            showToast("Network error. Please try again.", "error");
-        }
-        
-        btn.disabled = false;
-        btn.innerText = "Redeem Voucher";
-    }
-
-    function copyVoucherCode() {
-        const code = document.getElementById("generatedCodeText").innerText;
-        navigator.clipboard.writeText(code).then(() => {
-            showToast("Code copied to clipboard!", "success");
-        }).catch(() => {
-            showToast("Failed to copy code.", "error");
-        });
     }
 
     connectWebSocket();

@@ -3,7 +3,7 @@ import { Ticket, Search, Clock, Zap, Save, CheckCircle, XCircle } from 'lucide-r
 import toast from 'react-hot-toast';
 
 export default function Vouchers() {
-  const [data, setData] = useState({ vouchers: [], voucher_min_time_minutes: 5, voucher_min_points: 5 });
+  const [data, setData] = useState({ vouchers: [], voucher_min_time_minutes: 5, voucher_promo_points: 50, voucher_promo_time_minutes: 30 });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
@@ -34,7 +34,8 @@ export default function Vouchers() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           voucher_min_time_minutes: parseInt(data.voucher_min_time_minutes) || 0,
-          voucher_min_points: parseFloat(data.voucher_min_points) || 0
+          voucher_promo_points: parseFloat(data.voucher_promo_points) || 0,
+          voucher_promo_time_minutes: parseInt(data.voucher_promo_time_minutes) || 0
         })
       });
       if (res.ok) {
@@ -70,7 +71,7 @@ export default function Vouchers() {
           Set the minimum amount of time or points a user must convert to generate a shareable voucher code.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1"><Clock size={14} /> Minimum Time (Minutes)</label>
             <input 
@@ -80,24 +81,38 @@ export default function Vouchers() {
               min="1"
               className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white text-sm" 
             />
+            <div className="text-[10px] text-gray-400 mt-1">Minimum active time required to generate a time voucher.</div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1"><Zap size={14} /> Minimum Points</label>
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1"><Zap size={14} /> Promo Cost (Points)</label>
             <input 
               type="number" 
               step="0.01"
-              value={data.voucher_min_points} 
-              onChange={e => setData({...data, voucher_min_points: e.target.value})}
+              value={data.voucher_promo_points} 
+              onChange={e => setData({...data, voucher_promo_points: e.target.value})}
               min="1"
               className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white text-sm" 
             />
+            <div className="text-[10px] text-gray-400 mt-1">Points deducted to create a promo voucher.</div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1"><Clock size={14} /> Promo Value (Minutes)</label>
+            <input 
+              type="number" 
+              value={data.voucher_promo_time_minutes} 
+              onChange={e => setData({...data, voucher_promo_time_minutes: e.target.value})}
+              min="1"
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white text-sm" 
+            />
+            <div className="text-[10px] text-gray-400 mt-1">Minutes given when the promo voucher is redeemed.</div>
           </div>
         </div>
 
         <div className="flex justify-end">
           <button type="submit" disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50">
-            <Save size={18} /> {saving ? 'Saving...' : 'Save Limits'}
+            <Save size={18} /> {saving ? 'Saving...' : 'Save Settings'}
           </button>
         </div>
       </form>

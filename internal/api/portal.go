@@ -285,13 +285,18 @@ func rewardsPage(c *fiber.Ctx) error {
 		user = u
 	}
 
+	activeVouchers := db.GetActiveVouchersByUser(mac)
+
 	return c.Render("rewards", fiber.Map{
-		"mac":         mac,
-		"points":      user.Points,
-		"promos":      cfg.PointPromos,
-		"enabled":     cfg.PointsEnabled,
-		"banner_text": cfg.BannerText,
-		"banner_link": cfg.BannerLink,
+		"mac":             mac,
+		"points":          user.Points,
+		"promos":          cfg.PointPromos,
+		"enabled":         cfg.PointsEnabled,
+		"banner_text":     cfg.BannerText,
+		"banner_link":     cfg.BannerLink,
+		"active_vouchers": activeVouchers,
+		"voucher_promo_points": cfg.VoucherPromoPoints,
+		"voucher_promo_time": cfg.VoucherPromoTimeMinutes,
 	})
 }
 
