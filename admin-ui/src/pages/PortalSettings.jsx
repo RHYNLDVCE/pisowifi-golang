@@ -11,6 +11,13 @@ export default function PortalSettings() {
   const [savingOrder, setSavingOrder] = useState(false);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, type: 'danger' });
 
+  // Preview States
+  const [previewTitle, setPreviewTitle] = useState('');
+  const [previewSubtitle, setPreviewSubtitle] = useState('');
+  const [previewColor, setPreviewColor] = useState('#fde68a');
+  const [previewSize, setPreviewSize] = useState(27);
+  const [previewSubtitleSize, setPreviewSubtitleSize] = useState(15);
+
   const confirmAction = (title, message, onConfirm, type = 'danger') => {
     setModalConfig({ isOpen: true, title, message, onConfirm, type });
   };
@@ -22,6 +29,14 @@ export default function PortalSettings() {
       .then(json => {
         setData(json);
         setBanners(json.banner_files || []);
+        
+        // Initialize Previews
+        setPreviewTitle(json.portal_title || 'PISOWIFI');
+        setPreviewSubtitle(json.portal_subtitle || 'Premium internet connectivity');
+        setPreviewColor(json.portal_title_color || '#fde68a');
+        setPreviewSize(json.portal_title_size || 27);
+        setPreviewSubtitleSize(json.portal_subtitle_size || 15);
+        
         setLoading(false);
       })
       .catch(err => {
@@ -356,17 +371,53 @@ export default function PortalSettings() {
                <h3 className="text-base font-bold text-gray-900 dark:text-white">Interface Configuration</h3>
              </div>
           </div>
+
+          <div className="mb-8 p-6 bg-gray-900 rounded-lg overflow-hidden relative shadow-inner flex flex-col justify-center items-center min-h-[160px]">
+             {banners.length > 0 && (
+               <div className="absolute inset-0 opacity-20 bg-cover bg-center" style={{ backgroundImage: `url('/static/banners/set/${banners[0]}')` }}></div>
+             )}
+             <div className="relative z-10 text-center flex flex-col items-center gap-1">
+                <h2 style={{ margin: 0, fontWeight: 800, fontSize: `${previewSize}px`, letterSpacing: '-0.5px', color: previewColor, filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8))' }}>{previewTitle || 'PISOWIFI'}</h2>
+                <p style={{ margin: 0, opacity: 0.9, fontSize: `${previewSubtitleSize}px`, fontWeight: 500, textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)', color: 'white' }}>{previewSubtitle || 'Premium internet connectivity'}</p>
+             </div>
+          </div>
+
           <div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Portal Title</label>
-                <input type="text" name="portal_title" defaultValue={data.portal_title} placeholder="e.g. PISOWIFI" className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
+                <input type="text" name="portal_title" value={previewTitle} onChange={e => setPreviewTitle(e.target.value)} placeholder="e.g. PISOWIFI" className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Portal Subtitle</label>
-                <input type="text" name="portal_subtitle" defaultValue={data.portal_subtitle} placeholder="e.g. Premium internet connectivity" className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
+                <input type="text" name="portal_subtitle" value={previewSubtitle} onChange={e => setPreviewSubtitle(e.target.value)} placeholder="e.g. Premium internet connectivity" className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white" />
               </div>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Title Color</label>
+                <div className="flex items-center gap-2">
+                  <input type="color" name="portal_title_color" value={previewColor} onChange={e => setPreviewColor(e.target.value)} className="w-12 h-10 p-1 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded cursor-pointer" />
+                  <span className="text-sm font-mono text-gray-600 dark:text-gray-300 uppercase">{previewColor}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Title Size</label>
+                  <span className="text-xs text-gray-400 font-mono">{previewSize}px</span>
+                </div>
+                <input type="range" name="portal_title_size" min="16" max="48" value={previewSize} onChange={e => setPreviewSize(Number(e.target.value))} className="w-full accent-black dark:accent-white" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Subtitle Size</label>
+                  <span className="text-xs text-gray-400 font-mono">{previewSubtitleSize}px</span>
+                </div>
+                <input type="range" name="portal_subtitle_size" min="12" max="24" value={previewSubtitleSize} onChange={e => setPreviewSubtitleSize(Number(e.target.value))} className="w-full accent-black dark:accent-white" />
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Banner Button Text</label>

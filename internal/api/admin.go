@@ -153,7 +153,10 @@ func getDashboardData(c *fiber.Ctx) error {
 	data["banner_text"] = cfg.BannerText
 	data["banner_link"] = cfg.BannerLink
 	data["portal_title"] = cfg.PortalTitle
+	data["portal_title_color"] = cfg.PortalTitleColor
+	data["portal_title_size"] = cfg.PortalTitleSize
 	data["portal_subtitle"] = cfg.PortalSubtitle
+	data["portal_subtitle_size"] = cfg.PortalSubtitleSize
 	data["open_nat_enabled"] = cfg.OpenNATEnabled
 	data["custom_ttl"] = cfg.CustomTTL
 	data["banner_files"] = bannerFiles
@@ -335,7 +338,10 @@ func updateSettings(c *fiber.Ctx) error {
 		BannerText       string
 		BannerLink       string
 		PortalTitle      string
+		PortalTitleColor string
+		PortalTitleSize  string
 		PortalSubtitle   string
+		PortalSubtitleSize string
 		FreeTimeToggle   string
 		FreeTimeDuration string
 		SoundInsert      string
@@ -357,7 +363,10 @@ func updateSettings(c *fiber.Ctx) error {
 		BannerText:       getString("banner_text"),
 		BannerLink:       getString("banner_link"),
 		PortalTitle:      getString("portal_title"),
+		PortalTitleColor: getString("portal_title_color"),
+		PortalTitleSize:  getString("portal_title_size"),
 		PortalSubtitle:   getString("portal_subtitle"),
+		PortalSubtitleSize: getString("portal_subtitle_size"),
 		FreeTimeToggle:   getString("free_time_toggle"),
 		FreeTimeDuration: getString("free_time_duration"),
 		SoundInsert:      getString("sound_insert"),
@@ -397,7 +406,12 @@ func updateSettings(c *fiber.Ctx) error {
 		cfg.BannerText = body.BannerText
 		cfg.BannerLink = body.BannerLink
 		cfg.PortalTitle = body.PortalTitle
+		if body.PortalTitleColor != "" {
+			cfg.PortalTitleColor = body.PortalTitleColor
+		}
+		cfg.PortalTitleSize = parseInt(body.PortalTitleSize, 27)
 		cfg.PortalSubtitle = body.PortalSubtitle
+		cfg.PortalSubtitleSize = parseInt(body.PortalSubtitleSize, 15)
 		cfg.FreeTimeEnabled = newFreeEnabled
 		cfg.FreeTimeDuration = parseInt(body.FreeTimeDuration, 5)
 		cfg.SoundInsert = body.SoundInsert
