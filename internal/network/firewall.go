@@ -266,6 +266,7 @@ table ip pisowifi {
 	
 	// SQM
 	runTcStr(fmt.Sprintf("tc qdisc del dev %s root", wan)) // Clear any existing WAN SQM
+	runTcStr(fmt.Sprintf("tc qdisc del dev %s ingress", wan)) // Clear ingress before deleting ifb0 to prevent kernel panic
 	runTcStr("ip link del ifb0") // Clear any existing IFB
 	
 	if cfg.SQMEnabled {
