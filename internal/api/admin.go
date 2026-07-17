@@ -137,7 +137,7 @@ func getDashboardData(c *fiber.Ctx) error {
 	cfg := config.Get()
 	bannerFiles := infrastructure.GetBanners(cfg.BannerOrder)
 	soundFiles := infrastructure.GetSounds()
-	logResult := infrastructure.GetSystemLogs(200, 0, "")
+	logResult := infrastructure.GetSystemLogs(200, 0, "", "")
 
 	data := services.GetPaginatedUsers(search, page, sortBy, itemsPerPage)
 
@@ -201,7 +201,8 @@ func getLogsJSON(c *fiber.Ctx) error {
 	limit := c.QueryInt("limit", 100)
 	offset := c.QueryInt("offset", 0)
 	logType := c.Query("log_type", "")
-	return c.JSON(infrastructure.GetSystemLogs(limit, offset, logType))
+	query := c.Query("q", "")
+	return c.JSON(infrastructure.GetSystemLogs(limit, offset, logType, query))
 }
 
 func wsLogs(c *websocket.Conn) {

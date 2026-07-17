@@ -27,15 +27,21 @@ export default function Logs() {
   const logsEndRef = useRef(null);
 
   useEffect(() => {
-    fetch('/admin/api/logs?limit=100')
+    const url = new URL(window.location.origin + '/admin/api/logs');
+    url.searchParams.set('limit', '100');
+    if (searchTerm) url.searchParams.set('q', searchTerm);
+    if (activeFilter !== 'All') url.searchParams.set('log_type', activeFilter);
+
+    fetch(url.toString())
       .then(res => res.json())
       .then(data => {
         if (data.logs) {
-          // If data.logs comes newest-first, we just use it, or if oldest-first we reverse it.
-          // Since it used to reverse() to get oldest-first, it means natively it is newest-first.
           setLogs(data.logs);
         }
       });
+  }, [searchTerm, activeFilter]);
+
+  useEffect(() => {
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/admin/ws/logs`;

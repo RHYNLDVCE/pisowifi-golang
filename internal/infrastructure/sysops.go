@@ -128,7 +128,7 @@ var typeMap = map[string][]string{
 	"SECURITY": {"SECURITY_ALERT", "CRITICAL"},
 }
 
-func GetSystemLogs(limit, offset int, logType string) LogResult {
+func GetSystemLogs(limit, offset int, logType, query string) LogResult {
 	f, err := os.Open("system.log")
 	if err != nil {
 		return LogResult{Logs: []LogEntry{}, Limit: limit}
@@ -137,8 +137,20 @@ func GetSystemLogs(limit, offset int, logType string) LogResult {
 
 	var parsed []LogEntry
 	scanner := bufio.NewScanner(f)
+	
+	lowerQuery := ""
+	if query != "" {
+		lowerQuery = strings.ToLower(query)
+	}
+
 	for scanner.Scan() {
 		line := scanner.Text()
+		
+		// If query is provided, skip lines that don't match
+		if lowerQuery != "" && !strings.Contains(strings.ToLower(line), lowerQuery) {
+			continue
+		}
+
 		if m := logPattern.FindStringSubmatch(line); m != nil {
 			parsed = append(parsed, LogEntry{Timestamp: m[1], Type: m[2], Message: m[3]})
 		} else if strings.HasPrefix(line, "[") {
