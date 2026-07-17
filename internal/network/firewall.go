@@ -300,9 +300,13 @@ func RemoveSpeedLimit(ip string) {
 		return
 	}
 	lan := config.LANInterface
-	runTcStr(fmt.Sprintf("tc class del dev %s parent 1:ffff classid 1:%x", lan, uid))
+	// Delete filters first
 	runTcStr(fmt.Sprintf("tc filter del dev %s protocol ip parent 1:0 prio %d", lan, uid))
 	runTcStr(fmt.Sprintf("tc filter del dev %s protocol ip parent ffff: prio %d", lan, uid))
+	// Delete the leaf qdisc
+	runTcStr(fmt.Sprintf("tc qdisc del dev %s parent 1:%x", lan, uid))
+	// Finally delete the class
+	runTcStr(fmt.Sprintf("tc class del dev %s parent 1:ffff classid 1:%x", lan, uid))
 }
 
 func ensureTCRoot(lan string) {
@@ -341,12 +345,12 @@ func ApplySpeedLimit(ip string) {
 	speedStr := fmt.Sprintf("%dmbit", speed)
 	uploadKbps := speed * 1024
 
-	runTcStr(fmt.Sprintf("tc class add dev %s parent 1:ffff classid 1:%x htb rate %s ceil %s burst 15k cburst 15k", lan, uid, speedStr, speedStr))
+	runTcStr(fmt.Sprintf("tc class replace dev %s parent 1:ffff classid 1:%x htb rate %s ceil %s burst 15k cburst 15k", lan, uid, speedStr, speedStr))
 
 	if cfg.GamingModeEnabled {
-		runTcStr(fmt.Sprintf("tc qdisc add dev %s parent 1:%x handle %x: cake bandwidth %s diffserv4", lan, uid, uid, speedStr))
+		runTcStr(fmt.Sprintf("tc qdisc replace dev %s parent 1:%x handle %x: cake bandwidth %s diffserv4", lan, uid, uid, speedStr))
 	} else {
-		runTcStr(fmt.Sprintf("tc qdisc add dev %s parent 1:%x handle %x: cake bandwidth %s", lan, uid, uid, speedStr))
+		runTcStr(fmt.Sprintf("tc qdisc replace dev %s parent 1:%x handle %x: cake bandwidth %s", lan, uid, uid, speedStr))
 	}
 	runTcStr(fmt.Sprintf("tc filter add dev %s protocol ip parent 1:0 prio %d u32 match ip dst %s flowid 1:%x", lan, uid, ip, uid))
 	runTcStr(fmt.Sprintf("tc filter add dev %s parent ffff: protocol ip prio %d u32 match ip src %s police rate %dkbit burst 12k drop flowid :1", lan, uid, ip, uploadKbps))
