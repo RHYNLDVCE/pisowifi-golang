@@ -151,17 +151,23 @@ func WaitForPulse(onDetected func()) int {
 
 	events := make([]syscall.EpollEvent, 1)
 
-	waitForEdge := func(timeoutMs int) bool {
-		// Read to clear interrupt flag
-		buf := make([]byte, 2)
-		syscall.Seek(fd, 0, 0)
-		syscall.Read(fd, buf)
+	// Initial read to clear any pending interrupt
+	buf := make([]byte, 2)
+	syscall.Seek(fd, 0, 0)
+	syscall.Read(fd, buf)
 
+	waitForEdge := func(timeoutMs int) bool {
 		n, err := syscall.EpollWait(epfd, events, timeoutMs)
 		if err != nil && err != syscall.EINTR {
 			return false
 		}
-		return n > 0
+		if n > 0 {
+			// Acknowledge the interrupt so it can trigger again
+			syscall.Seek(fd, 0, 0)
+			syscall.Read(fd, buf)
+			return true
+		}
+		return false
 	}
 
 	// PHASE 1 — Wait for first pulse (HIGH → LOW edge)
