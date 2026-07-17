@@ -102,7 +102,7 @@ export default function SessionSettings() {
                <span>Automatic Pause (Idle Timeout)</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-[30%] sm:-translate-x-1/2 w-60 sm:w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60] text-left sm:text-center leading-relaxed">
+                 <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 sm:absolute sm:top-auto sm:bottom-full sm:mb-2 w-[85vw] sm:w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[100] text-center leading-relaxed">
                    Automatically pauses a user's time if they disconnect from the network or remain idle for the set duration.
                  </div>
                </div>
@@ -133,7 +133,7 @@ export default function SessionSettings() {
                <span>Free Time Access</span>
                <div tabIndex={0} className="group relative flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:text-gray-600 dark:focus:text-gray-300 cursor-help outline-none">
                  <div className="w-4 h-4 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">i</div>
-                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-[30%] sm:-translate-x-1/2 w-60 sm:w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60] text-left sm:text-center leading-relaxed">
+                 <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 sm:absolute sm:top-auto sm:bottom-full sm:mb-2 w-[85vw] sm:w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[100] text-center leading-relaxed">
                    Allows users to claim limited free internet access. Great for promotions or short-term use.
                  </div>
                </div>
