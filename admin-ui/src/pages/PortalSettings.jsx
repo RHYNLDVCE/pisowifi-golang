@@ -325,6 +325,36 @@ export default function PortalSettings() {
         </div>
       </div>
 
+      {/* Event Sounds (Selection) */}
+      <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden w-full p-6 md:p-8 mt-6">
+        <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
+           <Volume2 size={20} className="text-gray-900 dark:text-white" />
+           <div>
+             <h3 className="text-base font-bold text-gray-900 dark:text-white">Event Sounds Configuration</h3>
+           </div>
+        </div>
+        <form id="sounds-config-form" onSubmit={handleSaveSettings} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Insert Coin Sound (Looping)</label>
+            <select name="sound_insert" defaultValue={data.sound_insert_selected} className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:ring-2 focus:ring-black dark:focus:ring-white outline-none">
+              {data.sound_files && data.sound_files.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Coin Received Sound (Success)</label>
+            <select name="sound_coin" defaultValue={data.sound_coin_selected} className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:ring-2 focus:ring-black dark:focus:ring-white outline-none">
+              {data.sound_files && data.sound_files.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div className="col-span-1 md:col-span-2 flex justify-end mt-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
+             <button type="submit" disabled={savingSettings} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50">
+               <Save size={18} /> {savingSettings ? 'Saving...' : 'Save Sounds Config'}
+             </button>
+          </div>
+        </form>
+      </div>
+
+
       <hr className="my-10 border-gray-200 dark:border-zinc-800" />
 
       <form onSubmit={handleSaveSettings} className="space-y-6">
@@ -419,31 +449,6 @@ export default function PortalSettings() {
           </div>
         </div>
         
-        {/* Event Sounds (Selection) */}
-        <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm w-full p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-6 pb-2 border-b border-gray-200 dark:border-zinc-800">
-             <Volume2 size={20} className="text-gray-900 dark:text-white" />
-             <div>
-               <h3 className="text-base font-bold text-gray-900 dark:text-white">Event Sounds Configuration</h3>
-             </div>
-          </div>
-          <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Insert Coin Sound (Looping)</label>
-                <select name="sound_insert" defaultValue={data.sound_insert_selected} className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:ring-2 focus:ring-black dark:focus:ring-white outline-none">
-                  {data.sound_files && data.sound_files.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400">Coin Received Sound (Success)</label>
-                <select name="sound_coin" defaultValue={data.sound_coin_selected} className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded focus:ring-2 focus:ring-black dark:focus:ring-white outline-none">
-                  {data.sound_files && data.sound_files.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-zinc-800">
           <button type="submit" disabled={savingSettings} className="flex items-center gap-2 px-6 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50">
