@@ -453,49 +453,43 @@
 
     .toast-container {
         position: fixed;
-        top: 24px;
-        right: 24px;
-        z-index: 2000;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         pointer-events: none;
     }
 
     .toast {
-        background: rgba(15, 23, 42, 0.95);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        color: #ffffff;
-        padding: 14px 28px;
-        border-radius: 14px;
-        font-size: 0.95rem;
+        background: var(--text-main);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.9rem;
         font-weight: 600;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         display: flex;
         align-items: center;
-        justify-content: center;
-        text-align: left;
-        animation: toastSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 10px;
+        animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         min-width: 250px;
         justify-content: flex-start;
-        letter-spacing: 0.3px;
+        text-align: left;
     }
 
     .toast.error {
-        background: rgba(220, 38, 38, 0.95);
-        border-color: rgba(239, 68, 68, 0.4);
+        background: var(--danger);
     }
 
     .toast.success {
-        background: rgba(16, 185, 129, 0.95);
-        border-color: rgba(52, 211, 153, 0.4);
+        background: var(--success);
     }
 
     @keyframes toastSlideIn {
-        from { transform: translateX(40px) scale(0.9); opacity: 0; }
-        to { transform: translateX(0) scale(1); opacity: 1; }
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
 
     /* --- THEME TOGGLE BUTTON --- */
@@ -905,12 +899,7 @@
         toast.className = `toast ${type}`;
         toast.innerHTML = message;
         container.appendChild(toast);
-        setTimeout(() => {
-            toast.style.transition = 'all 0.3s ease';
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(20px)';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        setTimeout(() => toast.remove(), 3000);
     }
 
     function handleModalAction() {
