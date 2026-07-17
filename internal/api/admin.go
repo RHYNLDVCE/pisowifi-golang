@@ -375,7 +375,7 @@ func updateNetworkSettings(c *fiber.Ctx) error {
 		}
 	})
 	config.Save()
-	network.RefreshAllLimits()
+	network.ReloadFirewall()
 	logger.AuditLog("CONFIG_UPDATE", clientIP, infrastructure.GetMACFromIP(clientIP), "Updated network settings")
 	return c.JSON(fiber.Map{"status": "success"})
 }

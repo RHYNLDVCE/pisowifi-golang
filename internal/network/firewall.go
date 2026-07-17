@@ -463,3 +463,18 @@ func resolveIPFromARP(mac string) string {
 	}
 	return ""
 }
+
+// ReloadFirewall completely rebuilds the firewall and restores all active user sessions.
+// This allows applying network settings without rebooting the system.
+func ReloadFirewall() {
+	logger.SystemLog("[FIREWALL] Reloading firewall rules to apply new network settings...")
+	InitFirewall()
+	
+	// Restore all connected users to the firewall and re-apply their speed limits
+	state.Users.Range(func(mac string, u *state.UserRecord) {
+		if u.Status == "connected" && u.IP != "" {
+			AllowUser(mac, u.IP)
+		}
+	})
+	logger.SystemLog("[FIREWALL] Firewall reload complete. Active sessions restored.")
+}
