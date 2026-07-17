@@ -453,44 +453,48 @@
 
     .toast-container {
         position: fixed;
-        bottom: 30px;
+        top: 24px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 2000;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
         pointer-events: none;
     }
 
     .toast {
-        background: var(--text-main);
-        color: var(--card-bg);
-        padding: 14px 24px;
-        border-radius: 50px;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        color: #ffffff;
+        padding: 14px 28px;
+        border-radius: 14px;
         font-size: 0.95rem;
         font-weight: 600;
-        box-shadow: var(--shadow-lg);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         display: flex;
         align-items: center;
-        gap: 10px;
-        animation: toastSlideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        min-width: 280px;
         justify-content: center;
+        text-align: center;
+        animation: toastSlideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        min-width: 250px;
+        letter-spacing: 0.3px;
     }
 
     .toast.error {
-        background: var(--danger);
-        color: white;
+        background: rgba(220, 38, 38, 0.95);
+        border-color: rgba(239, 68, 68, 0.4);
     }
 
     .toast.success {
-        background: var(--success);
-        color: white;
+        background: rgba(16, 185, 129, 0.95);
+        border-color: rgba(52, 211, 153, 0.4);
     }
 
-    @keyframes toastSlideUp {
-        from { transform: translateY(40px) scale(0.9); opacity: 0; }
+    @keyframes toastSlideDown {
+        from { transform: translateY(-40px) scale(0.9); opacity: 0; }
         to { transform: translateY(0) scale(1); opacity: 1; }
     }
 
@@ -596,9 +600,9 @@
         <button id="btnFree" class="btn" style="background: #8b5cf6; color: white; margin-top: 5px;"
             onclick="claimFreeTime()">
             {% if free_duration >= 60 %}
-            🎁 Claim Free {{ free_time_formatted }} Hours
+            Claim Free {{ free_time_formatted }} Hours
             {% else %}
-            🎁 Claim Free {{ free_duration }} Mins
+            Claim Free {{ free_duration }} Mins
             {% endif %}
         </button>
         {% endif %}
@@ -636,7 +640,6 @@
 
 <div id="coinModal" class="modal-overlay">
     <div class="modal-card">
-        <div class="coin-circle pulse-animation">🪙</div>
         <h3 style="margin: 0 0 5px;">Insert Coins Now</h3>
         <p style="margin: 0; color: var(--text-sub); font-size: 0.9rem;">Slot closes in <b id="slotSeconds"
                 style="color:var(--primary);">--</b>s</p>
@@ -678,9 +681,6 @@
 
 <div id="confirmModal" class="modal-overlay">
     <div class="modal-card">
-        <div class="coin-circle"
-            style="background:#e0e7ff; color:#4f46e5; border-color:white; box-shadow:0 10px 15px -3px rgba(79, 70, 229, 0.2);">
-            🎁</div>
         <h3 style="margin: 0 0 10px;">Claim Free Time?</h3>
         <p style="margin-bottom: 25px; color: var(--text-sub); font-size: 0.9rem;">
             You are about to activate your free trial. <br>Do you want to proceed?
@@ -694,9 +694,6 @@
 
 <div id="successModal" class="modal-overlay">
     <div class="modal-card">
-        <div class="coin-circle"
-            style="background:#d1fae5; color:#059669; border-color:white; box-shadow:0 10px 15px -3px rgba(5, 150, 105, 0.2);">
-            🎉</div>
         <h3 style="margin: 0 0 10px;">Congratulations!</h3>
         <p style="margin-bottom: 25px; color: var(--text-sub);">
             You have successfully claimed your free time.
@@ -906,8 +903,7 @@
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        const icon = type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
-        toast.innerHTML = `<span>${icon}</span> ${message}`;
+        toast.innerHTML = message;
         container.appendChild(toast);
         setTimeout(() => {
             toast.style.transition = 'all 0.3s ease';
