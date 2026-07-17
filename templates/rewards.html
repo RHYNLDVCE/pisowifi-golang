@@ -45,18 +45,25 @@
     .header-card {
         background-color: var(--primary);
         color: #ffffff; 
-        padding: 2.5rem 1.5rem; 
+        padding: 3.5rem 1.5rem 1.5rem; 
         position: relative;
     }
 
-    .brand-title {
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+    .btn-floating-back {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.25rem;
         color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        text-decoration: none;
+        font-size: 0.875rem;
         font-weight: 600;
-        margin-bottom: 2rem;
-        text-align: center;
+        transition: color 0.2s ease;
+    }
+    .btn-floating-back:hover {
+        color: #ffffff;
     }
     
     .stats-container {
@@ -193,32 +200,6 @@
         cursor: not-allowed; 
     }
     
-    .btn-back-wrapper { 
-        margin-top: 2.5rem; 
-        text-align: center; 
-    }
-
-    .btn-back {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        background: transparent; 
-        border: 1px solid var(--border-color); 
-        border-radius: 8px;
-        color: var(--text-muted); 
-        text-decoration: none; 
-        font-weight: 500; 
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
-    }
-    
-    .btn-back:hover { 
-        background: var(--surface);
-        color: var(--text-main);
-    }
-
     /* EMPTY STATE */
     .empty-state {
         text-align: center;
@@ -370,7 +351,10 @@
 {% block content %}
 <div class="main-wrapper">
     <div class="header-card">
-        <div class="brand-title">REYES Starlink</div>
+        <a href="/" class="btn-floating-back">
+            <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+            Back
+        </a>
         
         <div class="stats-container">
             <div class="stat-box">
@@ -391,7 +375,7 @@
     </div>
 
     <div class="content-area">
-        {% if not enabled %}
+        {% if not enabled and not voucher_enabled %}
             <div class="empty-state">
                 <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
                     <i data-lucide="power-off" style="width: 32px; height: 32px; color: #94a3b8;"></i>
@@ -400,6 +384,8 @@
                 <p style="margin:0; font-size: 0.875rem;">The rewards system is currently unavailable.</p>
             </div>
         {% else %}
+            
+            {% if enabled %}
             <div class="section-title">
                 <i data-lucide="list" style="width: 20px; height: 20px; color: var(--text-muted);"></i>
                 Reward Catalog
@@ -435,20 +421,62 @@
                 </button>
             </div>
             {% endfor %}
+            {% endif %}
             
+            {% if voucher_enabled %}
             <div class="section-title" style="margin-top: 3rem;">
                 <i data-lucide="ticket" style="width: 20px; height: 20px; color: var(--text-muted);"></i>
-                Voucher Center
+                Redeem Voucher
             </div>
-            <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-                Convert your balance into a shareable voucher, or redeem a code from a friend!
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Enter a voucher code from a friend to claim its value.
             </p>
-            <div style="display: flex; gap: 10px; margin-bottom: 2rem;">
-                <button class="btn-modal btn-confirm" onclick="openVoucherModal('generate')" style="flex:1;">Create Voucher</button>
-                <button class="btn-modal btn-cancel" onclick="openVoucherModal('redeem')" style="flex:1;">Redeem Code</button>
+            <div style="display: flex; gap: 8px; margin-bottom: 2.5rem; background: var(--surface); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 12px;">
+                <input type="text" id="redeemCodeInput" placeholder="ENTER CODE" style="flex: 1; border: none; outline: none; background: transparent; font-family: monospace; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; padding-left: 0.5rem; color: var(--text-main);">
+                <button class="btn-confirm" onclick="redeemVoucherDirect()" id="btnSubmitRedeemDirect" style="padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 700;">Claim</button>
             </div>
 
             <div class="section-title">
+                <i data-lucide="gift" style="width: 20px; height: 20px; color: var(--text-muted);"></i>
+                Create Voucher
+            </div>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                Convert your time or points into a shareable voucher code.
+            </p>
+
+            <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem;">From Time</h4>
+            <div style="display: flex; gap: 8px; margin-bottom: 2rem; background: var(--surface); border: 1px solid var(--border-color); padding: 0.5rem; border-radius: 12px;">
+                <input type="number" id="voucherTimeAmountDirect" placeholder="Minutes (e.g. 60)" style="flex: 1; border: none; outline: none; background: transparent; font-size: 1rem; padding-left: 0.5rem; color: var(--text-main);">
+                <button class="btn-confirm" onclick="generateVoucherDirect('time')" id="btnSubmitGenerateTimeDirect" style="padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 700;">Convert</button>
+            </div>
+
+            {% if enabled and voucher_point_promos|length > 0 %}
+            <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem;">From Points (Promos)</h4>
+            {% for p in voucher_point_promos %}
+            <div class="promo-card">
+                <div class="promo-info">
+                    <div class="promo-name">{{ p.Minutes }} Mins Voucher</div>
+                    <div class="promo-cost" style="color: #6366f1;">
+                        <i data-lucide="zap" style="width: 14px; height: 14px;"></i>
+                        {{ p.Cost|floatformat:2 }} Points
+                    </div>
+                </div>
+                <button class="btn-redeem" 
+                    id="btnGeneratePoints_{{ p.ID }}"
+                    onclick="generateVoucherDirect('points', {{ p.ID }})"
+                    {% if points < p.Cost %}disabled{% endif %}
+                    style="background-color: var(--primary);">
+                    {% if points < p.Cost %}
+                        Locked
+                    {% else %}
+                        Generate
+                    {% endif %}
+                </button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="section-title" style="margin-top: 3rem;">
                 <i data-lucide="inbox" style="width: 20px; height: 20px; color: var(--text-muted);"></i>
                 My Unused Vouchers
             </div>
@@ -475,15 +503,10 @@
                 </div>
                 {% endfor %}
             {% endif %}
+            {% endif %}
 
         {% endif %}
 
-        <div class="btn-back-wrapper">
-            <a href="/" class="btn-back">
-                <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
-                Return to Dashboard
-            </a>
-        </div>
     </div>
 </div>
 
@@ -493,54 +516,12 @@
     </div>
 </div>
 
-<!-- VOUCHER MODAL -->
+<!-- MINIMAL RESULT MODAL -->
 <div id="voucherModal" class="modal-overlay">
-    <div class="modal-card" style="max-width: 400px;">
-        <h3 class="modal-title" style="margin-bottom: 1.5rem;" id="voucherModalTitle">Voucher Center</h3>
-        
-        <div id="voucherGenerateSection" style="display:none; text-align: left;">
-            <p class="modal-text" style="margin-bottom: 1rem;">Choose balance to convert into a voucher.</p>
-            
-            <!-- Generate Form -->
-            <div style="margin-bottom: 1rem;">
-                <label style="display:block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;">Convert From</label>
-                <select id="voucherType" onchange="toggleVoucherInput()" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--surface); color: var(--text-main); font-family: inherit; margin-bottom: 1rem;">
-                    <option value="time">My Time (Minutes)</option>
-                    {% if enabled %}
-                    <option value="points">My Points (Promo)</option>
-                    {% endif %}
-                </select>
-
-                <div id="voucherTimeInputGroup">
-                    <label style="display:block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;">Minutes to Convert</label>
-                    <input type="number" id="voucherTimeAmount" placeholder="e.g. 60" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--surface); color: var(--text-main); font-family: inherit;">
-                </div>
-
-                <div id="voucherPointsInputGroup" style="display: none;">
-                    <label style="display:block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;">Select Promo</label>
-                    <select id="voucherPointsPromoSelect" style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--surface); color: var(--text-main); font-family: inherit;">
-                        {% for p in voucher_point_promos %}
-                            <option value="{{ p.ID }}">Convert {{ p.Cost|floatformat:0 }} Pts ➔ {{ p.Minutes }} Mins</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <button id="btnSubmitGenerate" class="btn-modal btn-confirm btn-full" onclick="generateVoucher()" style="margin-bottom: 0.5rem;">Generate</button>
-            <button class="btn-modal btn-cancel btn-full" onclick="closeVoucherModal()">Cancel</button>
-        </div>
-
-        <div id="voucherRedeemSection" style="display:none; text-align: left;">
-            <p class="modal-text" style="margin-bottom: 1rem;">Enter a voucher code from a friend to claim its value.</p>
-            <input type="text" id="redeemCode" placeholder="Enter code (e.g. 8XY2P9KL)" style="width: 100%; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--surface); color: var(--text-main); font-family: monospace; font-size: 1.25rem; text-align: center; text-transform: uppercase; margin-bottom: 1.5rem; letter-spacing: 2px;">
-            <button id="btnSubmitRedeem" class="btn-modal btn-confirm btn-full" onclick="redeemVoucher()" style="margin-bottom: 0.5rem;">Redeem Code</button>
-            <button class="btn-modal btn-cancel btn-full" onclick="closeVoucherModal()">Cancel</button>
-        </div>
-        
-        <div id="voucherResultSection" style="display:none;">
+    <div class="modal-card" style="max-width: 320px; text-align: center; padding: 2rem;">
+        <div id="voucherResultSection">
             <!-- Result content injected dynamically -->
         </div>
-
     </div>
 </div>
 
@@ -763,38 +744,9 @@
     // --- VOUCHER LOGIC ---
     const vModal = document.getElementById('voucherModal');
     
-    function openVoucherModal(mode) {
-        document.getElementById('voucherGenerateSection').style.display = 'none';
-        document.getElementById('voucherRedeemSection').style.display = 'none';
-        document.getElementById('voucherResultSection').style.display = 'none';
-        
-        if (mode === 'generate') {
-            document.getElementById('voucherModalTitle').innerText = 'Create Voucher';
-            document.getElementById('voucherGenerateSection').style.display = 'block';
-            document.getElementById('voucherTimeAmount').value = '';
-            toggleVoucherInput();
-        } else {
-            document.getElementById('voucherModalTitle').innerText = 'Redeem Voucher';
-            document.getElementById('voucherRedeemSection').style.display = 'block';
-            document.getElementById('redeemCode').value = '';
-        }
-        
-        vModal.classList.add('active');
-    }
-
     function closeVoucherModal() {
         vModal.classList.remove('active');
-    }
-
-    function toggleVoucherInput() {
-        const type = document.getElementById('voucherType').value;
-        if (type === 'time') {
-            document.getElementById('voucherTimeInputGroup').style.display = 'block';
-            document.getElementById('voucherPointsInputGroup').style.display = 'none';
-        } else {
-            document.getElementById('voucherTimeInputGroup').style.display = 'none';
-            document.getElementById('voucherPointsInputGroup').style.display = 'block';
-        }
+        setTimeout(() => window.location.reload(), 200);
     }
 
     function showVoucherToast(msg, isError) {
@@ -813,23 +765,27 @@
         setTimeout(() => t.remove(), 3000);
     }
 
-    async function generateVoucher() {
-        const type = document.getElementById("voucherType").value;
+    async function generateVoucherDirect(type, promoId = null) {
         let val = 0;
-        
+        let btn = null;
+        let originalText = "";
+
         if (type === 'time') {
-            val = parseFloat(document.getElementById("voucherTimeAmount").value);
+            val = parseFloat(document.getElementById("voucherTimeAmountDirect").value);
+            btn = document.getElementById("btnSubmitGenerateTimeDirect");
+            originalText = "Convert";
             if (!val || val <= 0) {
                 showVoucherToast("Please enter a valid amount of minutes.", true);
                 return;
             }
         } else {
-            val = parseFloat(document.getElementById("voucherPointsPromoSelect").value);
+            val = parseFloat(promoId);
+            btn = document.getElementById("btnGeneratePoints_" + promoId);
+            originalText = "Generate";
         }
 
-        const btn = document.getElementById("btnSubmitGenerate");
         btn.disabled = true;
-        btn.innerText = "Processing...";
+        btn.innerText = "...";
 
         try {
             const res = await fetch("/generate_voucher", {
@@ -839,44 +795,45 @@
             });
             const data = await res.json();
             if (data.status === "success") {
-                document.getElementById("voucherGenerateSection").style.display = "none";
+                showVoucherToast("Voucher Generated Successfully!", false);
                 const resSec = document.getElementById("voucherResultSection");
-                resSec.style.display = "block";
                 resSec.innerHTML = `
-                    <div class="modal-icon-wrapper">
+                    <div style="display:flex; justify-content:center; margin-bottom:1rem;">
                         <i data-lucide="check-circle-2" style="width: 48px; height: 48px; color: var(--success);"></i>
                     </div>
-                    <h3 class="modal-title">Voucher Created!</h3>
+                    <h3 class="modal-title" style="margin-bottom:0.5rem; font-size:1.25rem;">Success!</h3>
+                    <p style="color:var(--text-muted); font-size:0.875rem;">Your code is ready to share.</p>
                     <div style="background: var(--bg-body); padding: 1rem; border-radius: 8px; border: 1px dashed var(--border-color); margin: 1.5rem 0;">
-                        <div style="font-family: monospace; font-size: 1.5rem; font-weight: bold; letter-spacing: 2px;">${data.code}</div>
+                        <span style="font-family: monospace; font-size: 1.75rem; font-weight: bold; letter-spacing: 3px; color:var(--text-main);">${data.code}</span>
                     </div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn-modal btn-confirm" onclick="copyCode('${data.code}')" style="flex:1;">Copy Code</button>
-                        <button class="btn-modal btn-cancel" onclick="window.location.reload()" style="flex:1;">Done</button>
-                    </div>
+                    <button class="btn-modal btn-confirm btn-full" onclick="copyCode('${data.code}')" style="margin-bottom: 0.5rem; border-radius:8px; padding:0.75rem;">Copy Code</button>
+                    <button class="btn-modal btn-cancel btn-full" onclick="closeVoucherModal()" style="border-radius:8px; padding:0.75rem; background:transparent;">Done</button>
                 `;
                 lucide.createIcons();
+                vModal.classList.add('active');
             } else {
-                showVoucherToast(data.message || "Failed to generate voucher", true);
+                showVoucherToast(data.message, true);
+                btn.disabled = false;
+                btn.innerText = originalText;
             }
-        } catch (e) {
+        } catch (err) {
             showVoucherToast("Network error. Please try again.", true);
+            btn.disabled = false;
+            btn.innerText = originalText;
         }
-        
-        btn.disabled = false;
-        btn.innerText = "Generate";
     }
 
-    async function redeemVoucher() {
-        const code = document.getElementById("redeemCode").value.trim();
+    async function redeemVoucherDirect() {
+        const inputField = document.getElementById("redeemCodeInput");
+        const code = inputField.value.trim().toUpperCase();
         if (!code) {
-            showVoucherToast("Please enter a voucher code.", true);
+            showVoucherToast("Please enter a code.", true);
             return;
         }
 
-        const btn = document.getElementById("btnSubmitRedeem");
+        const btn = document.getElementById("btnSubmitRedeemDirect");
         btn.disabled = true;
-        btn.innerText = "Verifying...";
+        btn.innerText = "...";
 
         try {
             const res = await fetch("/redeem_voucher", {
@@ -886,27 +843,20 @@
             });
             const data = await res.json();
             if (data.status === "success") {
-                document.getElementById("voucherRedeemSection").style.display = "none";
-                const resSec = document.getElementById("voucherResultSection");
-                resSec.style.display = "block";
-                resSec.innerHTML = `
-                    <div class="modal-icon-wrapper">
-                        <i data-lucide="party-popper" style="width: 48px; height: 48px; color: var(--warning);"></i>
-                    </div>
-                    <h3 class="modal-title">Success!</h3>
-                    <p class="modal-text">Voucher redeemed successfully. Your time has been updated.</p>
-                    <button class="btn-modal btn-confirm btn-full" onclick="window.location.reload()">Awesome</button>
-                `;
-                lucide.createIcons();
+                showVoucherToast("Successfully claimed voucher!", false);
+                inputField.value = '';
+                // Reload after a short delay so toast is visible
+                setTimeout(() => window.location.reload(), 1500);
             } else {
-                showVoucherToast(data.message || "Failed to redeem voucher", true);
+                showVoucherToast(data.message, true);
+                btn.disabled = false;
+                btn.innerText = "Claim";
             }
-        } catch (e) {
+        } catch (err) {
             showVoucherToast("Network error. Please try again.", true);
+            btn.disabled = false;
+            btn.innerText = "Claim";
         }
-        
-        btn.disabled = false;
-        btn.innerText = "Redeem Code";
     }
 
     function copyCode(code) {

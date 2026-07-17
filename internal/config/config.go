@@ -91,6 +91,7 @@ type AppConfig struct {
 	PulseValue             int                `json:"pulse_value"`
 	RestartSchedule        RestartSchedule    `json:"restart_schedule"`
 	PointsEnabled          bool               `json:"points_enabled"`
+	VoucherEnabled         bool               `json:"voucher_enabled"`
 	OpenNATEnabled         bool               `json:"open_nat_enabled"`
 	CustomTTL              int                `json:"custom_ttl"`
 	CoinPointMap           map[string]float64 `json:"coin_point_map"`
@@ -131,6 +132,7 @@ var defaultConfig = AppConfig{
 	PulseValue:              1,
 	RestartSchedule:         RestartSchedule{Enabled: false, Time: "03:00"},
 	PointsEnabled:           false,
+	VoucherEnabled:          false,
 	OpenNATEnabled:          false,
 	CustomTTL:               1,
 	CoinPointMap:            map[string]float64{"1": 0.5, "5": 1, "10": 3, "20": 5},

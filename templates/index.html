@@ -592,23 +592,34 @@
             View Rates
         </button>
 
-        {% if points_enabled %}
-        <button id="btnRewards" class="btn"
-            style="background: #0b61f5; color: white; margin-top: 5px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);"
-            onclick="window.location.href='/rewards'">
-            Loyalty Points
-        </button>
-        {% endif %}
-
         {% if free_time_enabled and not free_claimed %}
         <button id="btnFree" class="btn" style="background: #8b5cf6; color: white; margin-top: 5px;"
             onclick="claimFreeTime()">
             {% if free_duration >= 60 %}
-
             🎁 Claim Free {{ free_time_formatted }} Hours
             {% else %}
             🎁 Claim Free {{ free_duration }} Mins
             {% endif %}
+        </button>
+        {% endif %}
+
+        {% if points_enabled and voucher_enabled %}
+        <button id="btnRewards" class="btn"
+            style="background: #0b61f5; color: white; margin-top: 5px; box-shadow: 0 4px 15px rgba(11, 97, 245, 0.3);"
+            onclick="window.location.href='/rewards'">
+            Points & Voucher
+        </button>
+        {% elif points_enabled %}
+        <button id="btnRewards" class="btn"
+            style="background: #0b61f5; color: white; margin-top: 5px; box-shadow: 0 4px 15px rgba(11, 97, 245, 0.3);"
+            onclick="window.location.href='/rewards'">
+            Loyalty Points
+        </button>
+        {% elif voucher_enabled %}
+        <button id="btnRewards" class="btn"
+            style="background: #0b61f5; color: white; margin-top: 5px; box-shadow: 0 4px 15px rgba(11, 97, 245, 0.3);"
+            onclick="window.location.href='/rewards'">
+            Voucher
         </button>
         {% endif %}
 

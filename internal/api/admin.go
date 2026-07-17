@@ -671,6 +671,7 @@ func getVouchers(c *fiber.Ctx) error {
 	cfg := config.Get()
 	return c.JSON(fiber.Map{
 		"vouchers": vouchers,
+		"voucher_enabled": cfg.VoucherEnabled,
 		"voucher_min_time_minutes": cfg.VoucherMinTimeMinutes,
 		"voucher_point_promos": cfg.VoucherPointPromos,
 	})
@@ -678,6 +679,7 @@ func getVouchers(c *fiber.Ctx) error {
 
 func updateVoucherSettings(c *fiber.Ctx) error {
 	var body struct {
+		Enabled   bool    `json:"voucher_enabled"`
 		MinTime   int     `json:"voucher_min_time_minutes"`
 		PointPromos []config.PromoItem `json:"voucher_point_promos"`
 	}
@@ -686,6 +688,7 @@ func updateVoucherSettings(c *fiber.Ctx) error {
 	}
 
 	config.Update(func(cfg *config.AppConfig) {
+		cfg.VoucherEnabled = body.Enabled
 		cfg.VoucherMinTimeMinutes = body.MinTime
 		cfg.VoucherPointPromos = body.PointPromos
 	})
