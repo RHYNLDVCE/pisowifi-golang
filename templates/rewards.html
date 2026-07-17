@@ -752,11 +752,11 @@
     function showVoucherToast(msg, isError) {
         const container = document.getElementById('toastContainer');
         const t = document.createElement('div');
-        t.style.padding = '12px 24px';
-        t.style.borderRadius = '8px';
+        t.style.padding = '8px 16px';
+        t.style.borderRadius = '6px';
         t.style.color = 'white';
         t.style.fontWeight = '600';
-        t.style.fontSize = '0.9rem';
+        t.style.fontSize = '0.75rem';
         t.style.background = isError ? 'var(--danger)' : 'var(--success)';
         t.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
         t.style.animation = 'toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
