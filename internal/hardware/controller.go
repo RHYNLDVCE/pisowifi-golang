@@ -10,6 +10,7 @@ import (
 
 	"pisowifi/internal/config"
 	"pisowifi/internal/logger"
+	"pisowifi/internal/state"
 )
 
 // ---------------------------------------------------------------------------
@@ -99,18 +100,26 @@ func ReadPin() int {
 func WaitForPulse(onDetected func()) int {
 	pin := config.CoinGPIONum
 
-	// Safety: if pin is stuck LOW, wait for it to clear (max 2 s)
+	var initialPulseDetected bool
+
+	// Safety: if pin is stuck LOW at the start, measure how long it takes to clear
 	if ReadPin() == 0 {
-		logger.SystemLog("[HW] Warning: Signal stuck LOW. Waiting for clear...")
+		startLow := time.Now()
 		deadline := time.Now().Add(2 * time.Second)
 		for ReadPin() == 0 {
 			if time.Now().After(deadline) {
 				logger.SystemLog("[HW] Error: Signal permanently stuck LOW. Resetting...")
 				return 0
 			}
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(5 * time.Millisecond)
 		}
-		logger.SystemLog("[HW] Signal cleared. Ready.")
+		
+		if time.Since(startLow) < 300*time.Millisecond {
+			// It was a fast pulse, we just caught it mid-LOW!
+			initialPulseDetected = true
+		} else {
+			logger.SystemLog("[HW] Warning: Signal was stuck LOW for too long, ignored.")
+		}
 	}
 
 	valuePath := gpioPath(pin, "value")
@@ -156,13 +165,15 @@ func WaitForPulse(onDetected func()) int {
 	}
 
 	// PHASE 1 — Wait for first pulse (HIGH → LOW edge)
-	for {
-		if ReadPin() == 0 {
-			break
-		}
-		// Block for up to 1s to allow shutting-down checks in background.go
-		if !waitForEdge(1000) {
-			return 0
+	if !initialPulseDetected {
+		for {
+			if ReadPin() == 0 {
+				break
+			}
+			if state.IsShuttingDown.Load() {
+				return 0
+			}
+			waitForEdge(1000)
 		}
 	}
 
