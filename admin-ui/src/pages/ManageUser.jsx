@@ -214,7 +214,7 @@ export default function ManageUser() {
           </div>
 
           {/* Vouchers Created Section */}
-          <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden flex flex-col h-full mt-6">
+          <div className="bg-white dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden mt-6">
             <div className="p-6 border-b border-gray-100 dark:border-zinc-800">
               <h3 className="flex items-center gap-2 text-base font-bold text-gray-800 dark:text-gray-100">
                 <Ticket size={20} className="text-purple-500" /> Vouchers Created
@@ -261,9 +261,9 @@ export default function ManageUser() {
                <ShieldBan size={100} />
             </div>
             <h3 className="text-base font-bold text-red-600 dark:text-red-500 mb-4 pb-2 border-b border-red-100 dark:border-red-900/20 relative z-10">Security Actions</h3>
-            <div className="space-y-3 relative z-10">
+            <div className="flex flex-col md:flex-row gap-3 relative z-10">
               {user.Status === 'blocked' ? (
-                <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-sm" onClick={() => {
+                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-black text-white dark:bg-white dark:text-black font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-sm" onClick={() => {
                   confirmAction(
                     'Unblock User',
                     'Are you sure you want to unblock this user and restore their internet access?',
@@ -274,7 +274,7 @@ export default function ManageUser() {
                   <Check size={18}/> Unblock Device
                 </button>
               ) : (
-                <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-black dark:bg-zinc-900 dark:text-white border border-gray-300 dark:border-zinc-700 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors shadow-sm" onClick={() => {
+                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-black dark:bg-zinc-900 dark:text-white border border-gray-300 dark:border-zinc-700 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors shadow-sm" onClick={() => {
                   confirmAction(
                     'Block User',
                     'Are you sure you want to block this user? Their internet access will be suspended immediately.',
@@ -285,7 +285,7 @@ export default function ManageUser() {
                 </button>
               )}
               
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-500 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors shadow-sm" onClick={() => {
+              <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-500 font-bold rounded-xl hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors shadow-sm" onClick={() => {
                 confirmAction(
                   'Erase User',
                   'Are you sure you want to completely erase this user from the database? This action cannot be undone.',
