@@ -154,7 +154,9 @@ func GetPaginatedUsers(search string, page int, sortBy string, itemsPerPage int)
 		lower := strings.ToLower(search)
 		var filtered []enriched
 		for _, u := range users {
-			if strings.Contains(strings.ToLower(u.MAC), lower) {
+			if strings.Contains(strings.ToLower(u.MAC), lower) ||
+				strings.Contains(strings.ToLower(u.Data.IP), lower) ||
+				strings.Contains(strings.ToLower(u.Name), lower) {
 				filtered = append(filtered, u)
 			}
 		}
