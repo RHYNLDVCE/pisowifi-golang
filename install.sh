@@ -42,11 +42,6 @@ echo "[3/4] Installing Build Tools (Go)..."
 # you may need to install Go via the official golang.org tarball.
 apt-get install -y golang
 
-echo "[4/5] Initializing Go Modules..."
-if [ ! -f "go.mod" ]; then
-    go mod init pisowifi
-fi
-go mod tidy
 
 echo "[5/5] Installing Systemd Service..."
 if [ -f "pisowifi.service" ]; then
