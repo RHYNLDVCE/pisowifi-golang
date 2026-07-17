@@ -296,8 +296,7 @@ func rewardsPage(c *fiber.Ctx) error {
 		"banner_text":     cfg.BannerText,
 		"banner_link":     cfg.BannerLink,
 		"active_vouchers": activeVouchers,
-		"voucher_promo_points": cfg.VoucherPromoPoints,
-		"voucher_promo_time": cfg.VoucherPromoTimeMinutes,
+		"voucher_point_promos": cfg.VoucherPointPromos,
 	})
 }
 

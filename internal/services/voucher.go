@@ -35,9 +35,21 @@ func GenerateVoucher(mac, vType string, value float64) (string, error) {
 	if vType == "time" && value < float64(cfg.VoucherMinTimeMinutes) {
 		return "", fmt.Errorf("amount below minimum limit (%d mins)", cfg.VoucherMinTimeMinutes)
 	}
-	if vType == "points" && value != cfg.VoucherPromoPoints {
-		// Enforce fixed promo points
-		return "", fmt.Errorf("invalid promo amount")
+
+	var selectedPromo *config.PromoItem
+	if vType == "points" {
+		promoID := int64(value)
+		for _, p := range cfg.VoucherPointPromos {
+			if p.ID == promoID {
+				// Make a copy so we can take its address or just assign
+				sp := p
+				selectedPromo = &sp
+				break
+			}
+		}
+		if selectedPromo == nil {
+			return "", fmt.Errorf("invalid promo selection")
+		}
 	}
 
 	// 2. Check user balance
@@ -67,16 +79,16 @@ func GenerateVoucher(mac, vType string, value float64) (string, error) {
 			}
 		})
 	} else if vType == "points" {
-		if user.Points < value {
+		if user.Points < selectedPromo.Cost {
 			return "", fmt.Errorf("insufficient points balance")
 		}
 		state.Users.UpdateField(mac, func(u *state.UserRecord) {
-			u.Points -= value
+			u.Points -= selectedPromo.Cost
 		})
 		
 		// A points voucher is actually just a time voucher now.
 		vType = "time"
-		value = float64(cfg.VoucherPromoTimeMinutes)
+		value = float64(selectedPromo.Minutes)
 	}
 
 	// Update DB to reflect the new balance

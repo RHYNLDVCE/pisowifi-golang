@@ -3,7 +3,7 @@ import { Ticket, Search, Clock, Zap, Save, CheckCircle, XCircle } from 'lucide-r
 import toast from 'react-hot-toast';
 
 export default function Vouchers() {
-  const [data, setData] = useState({ vouchers: [], voucher_min_time_minutes: 5, voucher_promo_points: 50, voucher_promo_time_minutes: 30 });
+  const [data, setData] = useState({ vouchers: [], voucher_min_time_minutes: 5, voucher_point_promos: [] });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
@@ -12,6 +12,7 @@ export default function Vouchers() {
     try {
       const res = await fetch('/admin/api/vouchers');
       const json = await res.json();
+      if (!json.voucher_point_promos) json.voucher_point_promos = [];
       setData(json);
       setLoading(false);
     } catch (err) {
@@ -19,6 +20,25 @@ export default function Vouchers() {
       toast.error('Failed to fetch vouchers');
       setLoading(false);
     }
+  };
+
+  const updatePromo = (index, field, value) => {
+    const newData = { ...data };
+    newData.voucher_point_promos[index][field] = field === 'name' ? value : Number(value);
+    setData(newData);
+  };
+
+  const addPromo = () => {
+    const newData = { ...data };
+    if (!newData.voucher_point_promos) newData.voucher_point_promos = [];
+    newData.voucher_point_promos.push({ id: Date.now(), name: "Convert Points", cost: 50, minutes: 30 });
+    setData(newData);
+  };
+
+  const removePromo = (index) => {
+    const newData = { ...data };
+    newData.voucher_point_promos.splice(index, 1);
+    setData(newData);
   };
 
   useEffect(() => {
@@ -34,8 +54,7 @@ export default function Vouchers() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           voucher_min_time_minutes: parseInt(data.voucher_min_time_minutes) || 0,
-          voucher_promo_points: parseFloat(data.voucher_promo_points) || 0,
-          voucher_promo_time_minutes: parseInt(data.voucher_promo_time_minutes) || 0
+          voucher_point_promos: data.voucher_point_promos || []
         })
       });
       if (res.ok) {
@@ -68,11 +87,11 @@ export default function Vouchers() {
           <Ticket size={20} /> Voucher Limits Settings
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-          Set the minimum amount of time or points a user must convert to generate a shareable voucher code.
+          Set the minimum amount of time a user must convert, and configure the point-to-voucher promotions.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="space-y-1">
+        <div className="mb-8">
+          <div className="space-y-1 w-full md:w-1/2">
             <label className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1"><Clock size={14} /> Minimum Time (Minutes)</label>
             <input 
               type="number" 
@@ -83,31 +102,41 @@ export default function Vouchers() {
             />
             <div className="text-[10px] text-gray-400 mt-1">Minimum active time required to generate a time voucher.</div>
           </div>
+        </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1"><Zap size={14} /> Promo Cost (Points)</label>
-            <input 
-              type="number" 
-              step="0.01"
-              value={data.voucher_promo_points} 
-              onChange={e => setData({...data, voucher_promo_points: e.target.value})}
-              min="1"
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white text-sm" 
-            />
-            <div className="text-[10px] text-gray-400 mt-1">Points deducted to create a promo voucher.</div>
-          </div>
+        <div className="flex items-center justify-between mb-4">
+           <h4 className="text-sm font-bold uppercase tracking-widest text-gray-500">Points to Voucher Promos</h4>
+           <button type="button" onClick={addPromo} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border border-gray-300 dark:border-zinc-700 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+             <Ticket size={14} /> Add Promo
+           </button>
+        </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1"><Clock size={14} /> Promo Value (Minutes)</label>
-            <input 
-              type="number" 
-              value={data.voucher_promo_time_minutes} 
-              onChange={e => setData({...data, voucher_promo_time_minutes: e.target.value})}
-              min="1"
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none focus:ring-2 focus:ring-black dark:focus:ring-white text-sm" 
-            />
-            <div className="text-[10px] text-gray-400 mt-1">Minutes given when the promo voucher is redeemed.</div>
-          </div>
+        <div className="space-y-3 mb-8">
+          {(!data.voucher_point_promos || data.voucher_point_promos.length === 0) ? (
+             <div className="p-8 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-md text-center text-gray-500 dark:text-gray-400">
+               No voucher point promos configured.
+             </div>
+          ) : (
+             data.voucher_point_promos.map((promo, idx) => (
+               <div key={promo.id || idx} className="flex flex-col sm:flex-row gap-3 bg-gray-50 dark:bg-zinc-900/50 p-3 rounded-md border border-gray-200 dark:border-zinc-800 items-end">
+                 <div className="flex-1 w-full">
+                   <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Promo Name</label>
+                   <input type="text" value={promo.name} onChange={(e) => updatePromo(idx, 'name', e.target.value)} className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none text-sm" />
+                 </div>
+                 <div className="w-full sm:w-28">
+                   <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Points Cost</label>
+                   <input type="number" value={promo.cost} onChange={(e) => updatePromo(idx, 'cost', e.target.value)} className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none text-sm" />
+                 </div>
+                 <div className="w-full sm:w-28">
+                   <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Time (Mins)</label>
+                   <input type="number" value={promo.minutes} onChange={(e) => updatePromo(idx, 'minutes', e.target.value)} className="w-full px-3 py-1.5 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded outline-none text-sm" />
+                 </div>
+                 <button type="button" onClick={() => removePromo(idx)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors" title="Delete Promo">
+                   <XCircle size={18} />
+                 </button>
+               </div>
+             ))
+          )}
         </div>
 
         <div className="flex justify-end">

@@ -110,8 +110,7 @@ type AppConfig struct {
 	SoundCoin              string             `json:"sound_coin"`
 	CustomDeviceNames      map[string]string  `json:"custom_device_names,omitempty"`
 	VoucherMinTimeMinutes  int                `json:"voucher_min_time_minutes"`
-	VoucherPromoPoints     float64            `json:"voucher_promo_points"`
-	VoucherPromoTimeMinutes int               `json:"voucher_promo_time_minutes"`
+	VoucherPointPromos     []PromoItem        `json:"voucher_point_promos"`
 }
 
 // Defaults mirror state.py defaults
@@ -151,8 +150,7 @@ var defaultConfig = AppConfig{
 	SoundCoin:               "coin-recieved.mp3",
 	CustomDeviceNames:       map[string]string{},
 	VoucherMinTimeMinutes:   5,
-	VoucherPromoPoints:      50,
-	VoucherPromoTimeMinutes: 30,
+	VoucherPointPromos:      []PromoItem{{ID: 1, Name: "Convert 50 Points", Cost: 50, Minutes: 30}},
 }
 
 const configFile = "config.json"

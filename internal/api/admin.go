@@ -672,16 +672,14 @@ func getVouchers(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"vouchers": vouchers,
 		"voucher_min_time_minutes": cfg.VoucherMinTimeMinutes,
-		"voucher_promo_points": cfg.VoucherPromoPoints,
-		"voucher_promo_time_minutes": cfg.VoucherPromoTimeMinutes,
+		"voucher_point_promos": cfg.VoucherPointPromos,
 	})
 }
 
 func updateVoucherSettings(c *fiber.Ctx) error {
 	var body struct {
 		MinTime   int     `json:"voucher_min_time_minutes"`
-		PromoPoints float64 `json:"voucher_promo_points"`
-		PromoTime int `json:"voucher_promo_time_minutes"`
+		PointPromos []config.PromoItem `json:"voucher_point_promos"`
 	}
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": "Invalid body"})
@@ -689,8 +687,7 @@ func updateVoucherSettings(c *fiber.Ctx) error {
 
 	config.Update(func(cfg *config.AppConfig) {
 		cfg.VoucherMinTimeMinutes = body.MinTime
-		cfg.VoucherPromoPoints = body.PromoPoints
-		cfg.VoucherPromoTimeMinutes = body.PromoTime
+		cfg.VoucherPointPromos = body.PointPromos
 	})
 	config.Save()
 
