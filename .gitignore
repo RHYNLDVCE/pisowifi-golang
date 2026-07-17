@@ -22,3 +22,4 @@ __pycache__/
 *.tmp
 config.json.tmp
 config.json.corrupt
+.vscode/
