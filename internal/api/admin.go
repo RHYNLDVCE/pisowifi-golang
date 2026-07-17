@@ -212,13 +212,9 @@ func wsLogs(c *websocket.Conn) {
 	}
 	defer f.Close()
 
-	// Seek to end minus last 200 lines
-	lines, _ := tailLines(f, 200)
-	for _, line := range lines {
-		if m := parseLogLine(line); m != nil {
-			c.WriteJSON(m)
-		}
-	}
+	// Seek to end of file to only tail NEW logs
+	f.Seek(0, 2)
+
 	// Tail continuously
 	for {
 		if state.IsShuttingDown.Load() {

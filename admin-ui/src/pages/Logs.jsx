@@ -4,6 +4,9 @@ import { useSearchParams } from 'react-router-dom';
 
 export default function Logs() {
   const [logs, setLogs] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const limit = 100;
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get('q') || '';
   const activeFilter = searchParams.get('filter') || 'All';
@@ -14,6 +17,7 @@ export default function Logs() {
       else prev.delete('q');
       return prev;
     }, { replace: true });
+    setOffset(0);
   };
 
   const setActiveFilter = (val) => {
@@ -22,13 +26,15 @@ export default function Logs() {
       else prev.delete('filter');
       return prev;
     }, { replace: true });
+    setOffset(0);
   };
 
   const logsEndRef = useRef(null);
 
   useEffect(() => {
     const url = new URL(window.location.origin + '/admin/api/logs');
-    url.searchParams.set('limit', '100');
+    url.searchParams.set('limit', limit);
+    url.searchParams.set('offset', offset);
     if (searchTerm) url.searchParams.set('q', searchTerm);
     if (activeFilter !== 'All') url.searchParams.set('log_type', activeFilter);
 
@@ -36,10 +42,20 @@ export default function Logs() {
       .then(res => res.json())
       .then(data => {
         if (data.logs) {
-          setLogs(data.logs);
+          if (offset === 0) {
+            setLogs(data.logs);
+          } else {
+            setLogs(prev => {
+              // Create a set of existing timestamps/messages to avoid duplicates if new logs came in
+              const existing = new Set(prev.map(l => l.timestamp + l.message));
+              const newLogs = data.logs.filter(l => !existing.has(l.timestamp + l.message));
+              return [...prev, ...newLogs];
+            });
+          }
+          setTotal(data.total);
         }
       });
-  }, [searchTerm, activeFilter]);
+  }, [searchTerm, activeFilter, offset]);
 
   useEffect(() => {
 
@@ -105,7 +121,9 @@ export default function Logs() {
   });
 
   const getCategoryCount = (cat) => {
-    if (cat === 'All') return searchFilteredLogs.length;
+    // We cannot accurately count total historical categories without fetching all, 
+    // so we show the counts of what we have loaded locally for now.
+    if (cat === 'All') return total || searchFilteredLogs.length;
     return searchFilteredLogs.filter(l => getLogCategory(l.type) === cat).length;
   };
 
@@ -191,15 +209,27 @@ export default function Logs() {
           {filteredLogs.length === 0 ? (
             <div className="text-gray-400 dark:text-gray-500 italic">No logs found matching filters.</div>
           ) : (
-            filteredLogs.map((log, i) => (
-              <div key={i} className={`flex flex-col sm:flex-row sm:gap-4 px-2 py-1.5 rounded-md mb-1.5 transition-colors ${i % 2 === 0 ? 'bg-gray-200/40 dark:bg-zinc-900/60' : 'bg-transparent'} hover:bg-gray-200 dark:hover:bg-zinc-800`}>
-                <div className="flex gap-2 sm:gap-4 pt-0.5">
-                  <span className="text-gray-400 dark:text-gray-500 shrink-0 sm:w-40">[{log.timestamp}]</span>
-                  <span className={`shrink-0 sm:w-24 ${getLogColorClass(log.type)}`}>[{log.type}]</span>
+            <>
+              {filteredLogs.map((log, i) => (
+                <div key={i} className={`flex flex-col sm:flex-row sm:gap-4 px-2 py-1.5 rounded-md mb-1.5 transition-colors ${i % 2 === 0 ? 'bg-gray-200/40 dark:bg-zinc-900/60' : 'bg-transparent'} hover:bg-gray-200 dark:hover:bg-zinc-800`}>
+                  <div className="flex gap-2 sm:gap-4 pt-0.5">
+                    <span className="text-gray-400 dark:text-gray-500 shrink-0 sm:w-40">[{log.timestamp}]</span>
+                    <span className={`shrink-0 sm:w-24 ${getLogColorClass(log.type)}`}>[{log.type}]</span>
+                  </div>
+                  <span className="text-gray-800 dark:text-gray-200 break-words mt-0.5 sm:mt-0 whitespace-pre-wrap">{log.message}</span>
                 </div>
-                <span className="text-gray-800 dark:text-gray-200 break-words mt-0.5 sm:mt-0 whitespace-pre-wrap">{log.message}</span>
-              </div>
-            ))
+              ))}
+              {total > logs.length && (
+                <div className="flex justify-center mt-6 mb-4">
+                  <button 
+                    onClick={() => setOffset(prev => prev + limit)}
+                    className="px-6 py-2 bg-gray-200 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 font-bold text-xs rounded-full hover:bg-gray-300 dark:hover:bg-zinc-700 transition-colors shadow-sm"
+                  >
+                    Load More Logs ({logs.length} of {total})
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
