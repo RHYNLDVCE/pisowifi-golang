@@ -52,6 +52,8 @@ export default function NetworkSettings() {
     const payload = Object.fromEntries(formData.entries());
     
     payload.speed_limit_toggle = formData.get('speed_limit_toggle') ? 'on' : '';
+    payload.sqm_enabled = formData.get('sqm_enabled') ? 'on' : '';
+    payload.udp_priority = formData.get('udp_priority') ? 'on' : '';
     payload.gaming_mode = formData.get('gaming_mode') ? 'on' : '';
     payload.open_nat = formData.get('open_nat') ? 'on' : '';
     payload.custom_ttl = formData.get('custom_ttl') || (data.custom_ttl ?? 1);
