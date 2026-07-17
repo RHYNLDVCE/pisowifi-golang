@@ -88,7 +88,7 @@ export default function Devices() {
                 {devices.map((dev, idx) => (
                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors">
                     <td className="pl-4 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                      {dev.IsRouter ? (
+                      {dev.is_router ? (
                         <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[9px] sm:text-xs font-bold uppercase tracking-wide bg-gray-100 text-black dark:bg-zinc-800 dark:text-white border border-gray-200 dark:border-zinc-700">
                           <Server size={12} className="sm:w-3.5 sm:h-3.5" /> Gateway
                         </span>
@@ -98,13 +98,13 @@ export default function Devices() {
                         </span>
                       )}
                     </td>
-                    <td className="px-3 sm:px-6 py-2 sm:py-4 font-bold text-[11px] sm:text-sm whitespace-nowrap">{dev.Name || dev.Vendor || 'Unknown Device'}</td>
-                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">{dev.MAC}</td>
-                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-[11px] sm:text-sm font-medium whitespace-nowrap">{dev.IP}</td>
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 font-bold text-[11px] sm:text-sm whitespace-nowrap">{dev.vendor || 'Unknown Device'}</td>
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">{dev.mac}</td>
+                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-[11px] sm:text-sm font-medium whitespace-nowrap">{dev.ip}</td>
                     <td className="pr-4 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap">
                       <button 
                         className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                        onClick={() => handleRename(dev.MAC, dev.Name)}
+                        onClick={() => handleRename(dev.mac, dev.vendor)}
                       >
                         Rename
                       </button>

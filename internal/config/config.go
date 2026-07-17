@@ -25,8 +25,8 @@ const (
 	// Physical pin 3 on the 40-pin header = GPIO 12 on most Orange Pi boards.
 	// Physical pin 5 on the 40-pin header = GPIO 11 on most Orange Pi boards.
 	// Run `gpio readall` on your board to confirm the correct numbers.
-	CoinGPIONum  = 12 // coin signal input pin
-	RelayGPIONum = 11 // relay / slot power output pin
+	CoinGPIONum  = 12 // coin signal input pin for orange pi 3 lts 122
+	RelayGPIONum = 11 // relay / slot power output pin for orange pi 3 lts 121
 
 	PulseValue = 1 // coins credited per physical pulse
 )
