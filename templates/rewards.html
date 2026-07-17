@@ -279,8 +279,8 @@
 
     .modal-card {
         background: var(--surface);
-        width: 85%;
-        max-width: 320px;
+        width: 90%;
+        max-width: 360px;
         padding: 2rem 1.5rem;
         border-radius: 16px;
         text-align: center;
@@ -522,7 +522,17 @@
     </div>
 </div>
 
+<div id="rewardModal" class="modal-overlay">
+    <div class="modal-card">
+        <div id="modalContent"></div>
+    </div>
+</div>
 
+<div id="rewardModal" class="modal-overlay">
+    <div class="modal-card">
+        <div id="modalContent"></div>
+    </div>
+</div>
 
 <!-- MINIMAL RESULT MODAL -->
 <div id="voucherModal" class="modal-overlay">
@@ -533,7 +543,7 @@
     </div>
 </div>
 
-<div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
+<div id="toastContainer" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
 
 {% endblock %}
 
@@ -645,22 +655,48 @@
         return { plainText, htmlText, length: plainText.length };
     }
 
-    // --- REDEMPTION LOGIC ---
+    // --- MODAL & REDEMPTION LOGIC ---
+    const modal = document.getElementById('rewardModal');
+    const modalContent = document.getElementById('modalContent');
     let currentPromoId = null;
 
-    async function openConfirmModal(btn) {
+    // Show confirmation dialog
+    function openConfirmModal(btn) {
         const id = btn.getAttribute('data-id');
         const name = btn.getAttribute('data-name');
         const cost = btn.getAttribute('data-cost');
-        
-        if (!confirm(`Confirm deduction of ${cost} points in exchange for "${name}"?`)) {
-            return;
-        }
-
         currentPromoId = parseInt(id);
-        const originalText = btn.innerText;
-        btn.disabled = true;
-        btn.innerText = "...";
+
+        modalContent.innerHTML = `
+            <div class="modal-icon-wrapper">
+                <i data-lucide="help-circle" style="width: 48px; height: 48px; color: var(--accent);"></i>
+            </div>
+            <h3 class="modal-title">Confirm Redemption</h3>
+            <p class="modal-text">
+                Confirm deduction of <b>${cost} points</b> in exchange for <b>"${name}"</b>.
+            </p>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-modal btn-confirm" onclick="processRedemption()">Confirm</button>
+            </div>
+        `;
+        
+        lucide.createIcons();
+        modal.classList.add('active');
+    }
+
+    // Process redemption request
+    async function processRedemption() {
+        console.info('[Rewards] Initializing redemption process for promo ID:', currentPromoId);
+
+        modalContent.innerHTML = `
+            <div class="modal-icon-wrapper">
+                <i data-lucide="loader-2" class="lucide-spin" style="width: 48px; height: 48px; color: var(--text-muted);"></i>
+            </div>
+            <h3 class="modal-title">Processing</h3>
+            <p class="modal-text">Please wait while the transaction is finalized.</p>
+        `;
+        lucide.createIcons();
 
         try {
             let res = await fetch('/redeem_points', {
@@ -670,6 +706,8 @@
             });
             let data = await res.json();
             
+            closeModal();
+
             if(data.status === "success") {
                 console.info('[Rewards] Redemption successful.');
                 showVoucherToast(data.message, false);
@@ -677,16 +715,30 @@
             } else {
                 console.warn('[Rewards] Redemption rejected by server:', data.message);
                 showVoucherToast(data.message, true);
-                btn.disabled = false;
-                btn.innerText = originalText;
             }
         } catch(e) {
             console.error('[Rewards] Network exception during redemption:', e);
+            closeModal();
             showVoucherToast("Network connection failed. Please check connectivity.", true);
-            btn.disabled = false;
-            btn.innerText = originalText;
         }
     }
+
+
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+
+    function finishRedemption() {
+        closeModal();
+        // The reload will now automatically trigger the syncTimeWithServer() function on boot
+        setTimeout(() => window.location.reload(), 200);
+    }
+
+    // Close modal on outside click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
 
     // --- VOUCHER LOGIC ---
     const vModal = document.getElementById('voucherModal');
@@ -706,7 +758,7 @@
         t.style.fontSize = '0.9rem';
         t.style.background = isError ? 'var(--danger)' : 'var(--success)';
         t.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-        t.style.animation = 'toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        t.style.animation = 'toastSlideUp 0.3s ease';
         t.innerText = msg;
         container.appendChild(t);
         setTimeout(() => t.remove(), 3000);
@@ -807,37 +859,18 @@
     }
 
     function copyCode(code) {
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(code).then(() => {
-                showVoucherToast("Code copied to clipboard!", false);
-            }).catch(() => {
-                showVoucherToast("Failed to copy code.", true);
-            });
-        } else {
-            // Fallback for HTTP Captive Portals
-            let textArea = document.createElement("textarea");
-            textArea.value = code;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-999999px";
-            textArea.style.top = "-999999px";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                showVoucherToast("Code copied to clipboard!", false);
-            } catch (err) {
-                showVoucherToast("Failed to copy code.", true);
-            }
-            textArea.remove();
-        }
+        navigator.clipboard.writeText(code).then(() => {
+            showVoucherToast("Code copied to clipboard!", false);
+        }).catch(() => {
+            showVoucherToast("Failed to copy code.", true);
+        });
     }
 
 </script>
 <style>
-    @keyframes toastSlideIn {
-        from { transform: translateX(20px); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+    @keyframes toastSlideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
 </style>
 {% endblock %}
