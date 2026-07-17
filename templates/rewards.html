@@ -184,7 +184,8 @@
         font-size: 0.875rem; 
         cursor: pointer;
         transition: all 0.2s ease;
-        min-width: 90px;
+        min-width: 110px;
+        text-align: center;
         font-family: inherit;
     }
     
@@ -336,20 +337,19 @@
     .btn-cancel:hover { background: #e2e8f0; }
     
     .btn-confirm { 
-        background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
-        color: white; 
-        border: none;
+        background: var(--surface); 
+        color: var(--accent); 
+        border: 1px solid var(--accent); 
         cursor: pointer;
-        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        transition: all 0.2s ease;
+        font-family: inherit;
     }
     .btn-confirm:hover { 
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+        background: var(--accent); 
+        color: #ffffff;
     }
     .btn-confirm:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+        transform: translateY(1px);
     }
 
     .btn-full { width: 100%; }
@@ -475,8 +475,7 @@
                 <button class="btn-redeem" 
                     id="btnGeneratePoints_{{ p.ID }}"
                     onclick="generateVoucherDirect('points', {{ p.ID }})"
-                    {% if points < p.Cost %}disabled{% endif %}
-                    style="background-color: var(--primary);">
+                    {% if points < p.Cost %}disabled{% endif %}>
                     {% if points < p.Cost %}
                         Locked
                     {% else %}
