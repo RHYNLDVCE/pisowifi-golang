@@ -85,6 +85,14 @@ func WaitForPulse(onDetected func()) int {
 		if state.IsShuttingDown.Load() {
 			return 0
 		}
+
+		// HYPER-OPTIMIZATION: If the slot is mathematically disabled (no active user),
+		// do not bother polling the hardware pin at all. Just sleep deeply.
+		if state.GetSlotUser() == "" {
+			time.Sleep(100 * time.Millisecond)
+			continue
+		}
+
 		pinState := readPinFast()
 		if pinState == 0 && lastState == 1 {
 			logger.SystemLog("[HW] First pulse detected (HIGH->LOW)!")
