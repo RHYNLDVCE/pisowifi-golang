@@ -121,16 +121,13 @@ func WaitForPulse(onDetected func()) int {
 		time.Sleep(1 * time.Millisecond)
 	}
 	lastState = 1
-	logger.SystemLog(fmt.Sprintf("[HW] Pulse 1 finished. Duration: %v", time.Since(timeout)))
 
 	// Keep listening until silence
 	for time.Since(lastPulseTime) < 600*time.Millisecond {
 		pinState := readPinFast()
 		if pinState == 0 && lastState == 1 {
 			totalPulses++
-			pulseGap := time.Since(lastPulseTime)
 			lastPulseTime = time.Now()
-			logger.SystemLog(fmt.Sprintf("[HW] Pulse %d started! Gap: %v", totalPulses, pulseGap))
 
 			timeout := time.Now()
 			for readPinFast() == 0 {
@@ -141,7 +138,6 @@ func WaitForPulse(onDetected func()) int {
 				time.Sleep(1 * time.Millisecond)
 			}
 			pinState = 1
-			logger.SystemLog(fmt.Sprintf("[HW] Pulse %d finished. Duration: %v", totalPulses, time.Since(timeout)))
 		}
 		lastState = pinState
 		time.Sleep(1 * time.Millisecond)
