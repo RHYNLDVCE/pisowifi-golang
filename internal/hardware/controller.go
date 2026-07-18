@@ -37,7 +37,7 @@ func Setup() {
 		config.CoinChip,
 		config.CoinLine,
 		gpiocdev.AsInput,
-		gpiocdev.WithPullUp(),
+		gpiocdev.WithPullUp,
 		gpiocdev.WithFallingEdge,
 		gpiocdev.WithEventHandler(func(evt gpiocdev.LineEvent) {
 			// A true hardware interrupt just fired from the Linux Kernel!
