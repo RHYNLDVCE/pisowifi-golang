@@ -1,93 +1,64 @@
 package hardware
 
+/*
+#cgo LDFLAGS: -lwiringPi
+#include <wiringPi.h>
+*/
+import "C"
 import (
 	"fmt"
 	"time"
 
-	"github.com/warthog618/go-gpiocdev"
 	"pisowifi/internal/config"
 	"pisowifi/internal/logger"
 	"pisowifi/internal/state"
 )
 
-// ---------------------------------------------------------------------------
-// Public API using modern libgpiod (warthog618/go-gpiocdev)
-// ---------------------------------------------------------------------------
-
 var (
-	coinLine         *gpiocdev.Line
-	relayLine        *gpiocdev.Line
-	coinInterruptChan chan struct{}
+	coinPin  C.int
+	relayPin C.int
 )
 
-// Setup initialises the coin input pin and the relay output pin.
+// Setup initialises the coin input pin and the relay output pin using WiringOP (CGO).
 func Setup() {
-	var err error
-
-	// Setup Relay Pin (Output + Default OFF)
-	relayLine, err = gpiocdev.RequestLine(config.RelayChip, config.RelayLine, gpiocdev.AsOutput(0))
-	if err != nil {
-		logger.SystemLog(fmt.Sprintf("[HW] Fatal: Failed to request relay line: %v", err))
+	if C.wiringPiSetupPhys() == -1 {
+		logger.SystemLog("[HW] Fatal: Failed to setup wiringPi")
+		return
 	}
 
-	coinInterruptChan = make(chan struct{}, 1)
+	coinPin = C.int(config.CoinPinPhys)
+	relayPin = C.int(config.RelayPinPhys)
 
-	// Setup Coin Pin (Input + Pull Up + Hardware Interrupts)
-	coinLine, err = gpiocdev.RequestLine(
-		config.CoinChip,
-		config.CoinLine,
-		gpiocdev.AsInput,
-		gpiocdev.WithPullUp,
-		gpiocdev.WithFallingEdge,
-		gpiocdev.WithEventHandler(func(evt gpiocdev.LineEvent) {
-			// A true hardware interrupt just fired from the Linux Kernel!
-			// Non-blocking send to wake up the Go program
-			select {
-			case coinInterruptChan <- struct{}{}:
-			default:
-			}
-		}),
-	)
+	// Set Relay as Output, default to OFF (0)
+	C.pinMode(relayPin, C.OUTPUT)
+	C.digitalWrite(relayPin, 0)
 
-	if err != nil {
-		logger.SystemLog(fmt.Sprintf("[HW] Fatal: Failed to request coin line: %v", err))
-	}
+	// Set Coin as Input, with Pull-Up
+	C.pinMode(coinPin, C.INPUT)
+	C.pullUpDnControl(coinPin, C.PUD_UP)
 
-	logger.SystemLog(fmt.Sprintf("[HW] Hardware ready (Coin: %s/%d, Relay: %s/%d)", config.CoinChip, config.CoinLine, config.RelayChip, config.RelayLine))
+	logger.SystemLog(fmt.Sprintf("[HW] Hardware ready (Coin: %d, Relay: %d) via WiringOP", config.CoinPinPhys, config.RelayPinPhys))
 }
 
 // TurnSlotOn powers the coin slot relay HIGH.
 func TurnSlotOn() {
-	if relayLine != nil {
-		_ = relayLine.SetValue(1)
-	}
+	C.digitalWrite(relayPin, 1)
 }
 
 // TurnSlotOff powers the relay LOW and clears the current slot user.
 func TurnSlotOff() {
-	if relayLine != nil {
-		_ = relayLine.SetValue(0)
-	}
+	C.digitalWrite(relayPin, 0)
 }
 
 // ReadPin returns the current coin signal pin value (0 = coin pulse detected, 1 = idle).
 func ReadPin() int {
-	if coinLine != nil {
-		v, _ := coinLine.Value()
-		return v
-	}
-	return 1
+	return int(C.digitalRead(coinPin))
 }
 
 // WaitForPulse blocks until one or more pulses are detected and counted.
 func WaitForPulse(onDetected func()) int {
-	readPinFast := func() int {
-		if coinLine != nil {
-			v, _ := coinLine.Value()
-			return v
-		}
-		return 1
-	}
+	readPinFast := func() int { return int(C.digitalRead(coinPin)) }
+	lastState := 1
 
 	// SAFETY: If pin is stuck LOW (0), wait for it to clear.
 	if readPinFast() == 0 {
@@ -103,12 +74,6 @@ func WaitForPulse(onDetected func()) int {
 		logger.SystemLog("   [OK] Signal Cleared. Ready.")
 	}
 
-	// Drain any stale interrupts before we begin waiting
-	select {
-	case <-coinInterruptChan:
-	default:
-	}
-
 	// PHASE 1: Wait for coin
 	for {
 		if state.IsShuttingDown.Load() {
@@ -120,11 +85,9 @@ func WaitForPulse(onDetected func()) int {
 			continue
 		}
 
-		// TRUE HARDWARE INTERRUPT (0.00% CPU):
-		// We use a select statement to block until the kernel wakes us up.
-		select {
-		case <-coinInterruptChan:
-			// The Kernel interrupt handler just woke us up!
+		pinState := readPinFast()
+		if pinState == 0 && lastState == 1 {
+			// Coin dropped!
 			if onDetected != nil {
 				func() {
 					defer func() {
@@ -135,21 +98,16 @@ func WaitForPulse(onDetected func()) int {
 					onDetected()
 				}()
 			}
-			goto Phase2
-		case <-time.After(100 * time.Millisecond):
-			// Timeout 100ms just to loop around and check IsShuttingDown and GetSlotUser again
-			continue
+			break
 		}
+		lastState = pinState
+		time.Sleep(10 * time.Millisecond)
 	}
 
-Phase2:
 	// PHASE 2: Count pulses
-	// Now that the kernel woke us up, we fall back to a 1ms high-speed software 
-	// polling loop for exactly 600ms. This prevents "Interrupt Storms" caused 
-	// by dirty electrical bouncing, ensuring we perfectly debounce the signal.
 	totalPulses := 1
 	lastPulseTime := time.Now()
-	lastState := 0
+	lastState = 0
 
 	// Wait for the pulse to finish (go back HIGH) with Timeout
 	timeout := time.Now()
