@@ -111,6 +111,15 @@ func InitDB() {
 	seedAdmin()
 }
 
+// CloseDB gracefully closes the database connection.
+// In WAL mode, this forces SQLite to flush all pending data from the -wal file
+// directly into the main .db file, keeping backups clean and safe.
+func CloseDB() {
+	if db != nil {
+		db.Close()
+	}
+}
+
 func mustExec(query string) {
 	if _, err := db.Exec(query); err != nil {
 		panic(fmt.Sprintf("[DB] Fatal: %v — query: %s", err, query))

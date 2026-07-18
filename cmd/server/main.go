@@ -144,6 +144,9 @@ func main() {
 
 		// Graceful HTTP shutdown
 		app.Shutdown()
+
+		// Safely close DB (triggers WAL checkpoint)
+		db.CloseDB()
 	}()
 
 	// 13. Start HTTP server (blocks until shutdown)

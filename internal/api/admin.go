@@ -544,11 +544,21 @@ func restoreBackup(c *fiber.Ctx) error {
 				hasConfig = true
 			}
 		} else if f.Name == "pisowifi.db" {
+			// CRITICAL FIX: Close the active database to detach the WAL file 
+			// BEFORE overwriting the main database file.
+			db.CloseDB()
+
 			rc, err := f.Open()
 			if err == nil {
 				data, _ := io.ReadAll(rc)
 				os.WriteFile("pisowifi.db", data, 0644)
 				rc.Close()
+
+				// Delete the WAL and SHM files to ensure SQLite doesn't try 
+				// to merge old active data into the newly restored backup!
+				os.Remove("pisowifi.db-wal")
+				os.Remove("pisowifi.db-shm")
+
 				hasDB = true
 			}
 		}
