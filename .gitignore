@@ -23,3 +23,11 @@ __pycache__/
 config.json.tmp
 config.json.corrupt
 .vscode/
+
+# Production runtime files
+pisowifi-server
+*.db-wal
+*.db-shm
+
+# Local configuration
+config.json
