@@ -25,12 +25,9 @@ const (
 	CoinGPIONum  = 122 // coin signal input pin for orange pi 3 lts 122
 	RelayGPIONum = 121 // relay / slot power output pin for orange pi 3 lts 121
 
-	// Modern Character Device (cdev) configuration for libgpiod
-	// Orange Pi 3 LTS: Main GPIOs are mostly on gpiochip1.
-	CoinChip  = "gpiochip1"
-	CoinLine  = 122 // coin signal input pin
-	RelayChip = "gpiochip1"
-	RelayLine = 121 // relay / slot power output pin
+	// WiringOP Physical Pin numbers on the 40-pin header
+	CoinPinPhys  = 3
+	RelayPinPhys = 5
 
 	PulseValue = 1 // coins credited per physical pulse
 )
