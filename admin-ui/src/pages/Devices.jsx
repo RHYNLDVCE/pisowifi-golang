@@ -69,6 +69,25 @@ export default function Devices() {
     }
   };
 
+  const removeDevice = async (mac) => {
+    if (!window.confirm('Are you sure you want to remove this device?')) return;
+    try {
+      const res = await fetch('/admin/remove_device', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mac })
+      });
+      if (res.ok) {
+        toast.success('Device removed');
+        fetchDevices();
+      } else {
+        toast.error('Failed to remove device');
+      }
+    } catch (err) {
+      toast.error('Failed to remove device');
+    }
+  };
+
   const submitRename = async (e) => {
     e.preventDefault();
     if (!deviceToRename) return;
@@ -143,12 +162,22 @@ export default function Devices() {
                       </a>
                     </td>
                     <td className="pr-4 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap">
-                      <button 
-                        className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                        onClick={() => openRenameModal(dev.mac, dev.vendor)}
-                      >
-                        Rename
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        <button 
+                          className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                          onClick={() => openRenameModal(dev.mac, dev.vendor)}
+                        >
+                          Rename
+                        </button>
+                        {!dev.in_arp && (
+                          <button 
+                            className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors"
+                            onClick={() => removeDevice(dev.mac)}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

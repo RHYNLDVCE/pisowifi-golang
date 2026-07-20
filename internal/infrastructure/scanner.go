@@ -21,6 +21,7 @@ type Device struct {
 	Vendor   string `json:"vendor"`
 	IsCustom bool   `json:"is_custom"`
 	IsOnline bool   `json:"is_online"`
+	InARP    bool   `json:"in_arp"`
 }
 
 var leaseFiles = []string{
@@ -145,6 +146,7 @@ func ScanInfrastructure(activeMacs map[string]bool, customNames map[string]strin
 			MAC:      mac,
 			Vendor:   name,
 			IsCustom: customNames[mac] != "",
+			InARP:    true,
 		})
 	}
 
@@ -160,6 +162,7 @@ func ScanInfrastructure(activeMacs map[string]bool, customNames map[string]strin
 				MAC:      customMac,
 				Vendor:   customName,
 				IsCustom: true,
+				InARP:    false,
 			})
 		}
 	}
