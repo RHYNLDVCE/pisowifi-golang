@@ -37,7 +37,12 @@ func GetDashboardStats() DashboardStats {
 	now := time.Now()
 
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	startOfWeek := startOfDay.AddDate(0, 0, -int(now.Weekday()))
+	
+	// Calculate offset for Monday as the start of the week
+	// time.Weekday(): Sunday=0, Monday=1, ..., Saturday=6
+	// We want an offset where Monday=0, Tuesday=1, ..., Sunday=6
+	offset := (int(now.Weekday()) + 6) % 7
+	startOfWeek := startOfDay.AddDate(0, 0, -offset)
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 	startOfLastMonth := startOfMonth.AddDate(0, -1, 0)
 	startOfYear := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
