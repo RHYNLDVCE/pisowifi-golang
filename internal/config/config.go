@@ -111,6 +111,7 @@ type AppConfig struct {
 	SoundInsert            string             `json:"sound_insert"`
 	SoundCoin              string             `json:"sound_coin"`
 	CustomDeviceNames      map[string]string  `json:"custom_device_names,omitempty"`
+	CustomDeviceIPs        map[string]string  `json:"custom_device_ips,omitempty"`
 	VoucherMinTimeMinutes  int                `json:"voucher_min_time_minutes"`
 	VoucherPointPromos     []PromoItem        `json:"voucher_point_promos"`
 }
@@ -152,6 +153,7 @@ var defaultConfig = AppConfig{
 	SoundInsert:             "insert_coin_sound.mp3",
 	SoundCoin:               "coin-recieved.mp3",
 	CustomDeviceNames:       map[string]string{},
+	CustomDeviceIPs:         map[string]string{},
 	VoucherMinTimeMinutes:   5,
 	VoucherPointPromos:      []PromoItem{{ID: 1, Name: "Convert 50 Points", Cost: 50, Minutes: 30}},
 }
@@ -199,6 +201,9 @@ func Load() {
 	}
 	if current.CustomDeviceNames == nil {
 		current.CustomDeviceNames = map[string]string{}
+	}
+	if current.CustomDeviceIPs == nil {
+		current.CustomDeviceIPs = map[string]string{}
 	}
 	fmt.Println("[Config] Loaded from config.json.")
 }

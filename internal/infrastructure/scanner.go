@@ -95,7 +95,7 @@ func IsReachable(ip string) bool {
 }
 
 // ScanInfrastructure reads /proc/net/arp and pings all non-user devices in parallel.
-func ScanInfrastructure(activeMacs map[string]bool, customNames map[string]string) []Device {
+func ScanInfrastructure(activeMacs map[string]bool, customNames map[string]string, customIPs map[string]string) []Device {
 	leases := GetDhcpLeases()
 	lan := config.LANInterface
 
@@ -156,7 +156,7 @@ func ScanInfrastructure(activeMacs map[string]bool, customNames map[string]strin
 	for customMac, customName := range customNames {
 		if !seenMacs[customMac] {
 			candidates = append(candidates, Device{
-				IP:       "",
+				IP:       customIPs[customMac],
 				MAC:      customMac,
 				Vendor:   customName,
 				IsCustom: true,

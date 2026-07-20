@@ -231,7 +231,7 @@ func GetPaginatedUsers(search string, page int, sortBy string, itemsPerPage int)
 			activeMacs[mac] = true
 		}
 	})
-	devices := infrastructure.ScanInfrastructure(activeMacs, customNames)
+	devices := infrastructure.ScanInfrastructure(activeMacs, customNames, cfg.CustomDeviceIPs)
 
 	activeCount := 0
 	state.Users.Range(func(_ string, u *state.UserRecord) {

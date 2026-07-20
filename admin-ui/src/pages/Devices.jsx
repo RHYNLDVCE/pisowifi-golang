@@ -40,6 +40,7 @@ export default function Devices() {
   const [addDeviceModalOpen, setAddDeviceModalOpen] = useState(false);
   const [addDeviceMac, setAddDeviceMac] = useState('');
   const [addDeviceName, setAddDeviceName] = useState('');
+  const [addDeviceIp, setAddDeviceIp] = useState('');
 
   const submitAddDevice = async (e) => {
     e.preventDefault();
@@ -51,7 +52,7 @@ export default function Devices() {
       const res = await fetch('/admin/add_device', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mac: addDeviceMac, name: addDeviceName })
+        body: JSON.stringify({ mac: addDeviceMac, name: addDeviceName, ip: addDeviceIp })
       });
       if (res.ok) {
         toast.success('Device added');
@@ -59,6 +60,7 @@ export default function Devices() {
         setAddDeviceModalOpen(false);
         setAddDeviceMac('');
         setAddDeviceName('');
+        setAddDeviceIp('');
       } else {
         toast.error('Failed to add device');
       }
@@ -215,7 +217,7 @@ export default function Devices() {
                   required
                 />
               </div>
-              <div className="mb-6">
+              <div className="mb-4">
                 <label className="block text-sm font-semibold mb-2">Device Name</label>
                 <input
                   type="text"
@@ -225,6 +227,16 @@ export default function Devices() {
                   placeholder="e.g. Lobby Access Point"
                 />
               </div>
+              <div className="mb-6">
+                <label className="block text-sm font-semibold mb-2">IP Address <span className="text-gray-400 font-normal">(Optional)</span></label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+                  value={addDeviceIp}
+                  onChange={(e) => setAddDeviceIp(e.target.value)}
+                  placeholder="e.g. 192.168.1.50"
+                />
+              </div>
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
@@ -232,6 +244,7 @@ export default function Devices() {
                     setAddDeviceModalOpen(false);
                     setAddDeviceMac('');
                     setAddDeviceName('');
+                    setAddDeviceIp('');
                   }}
                   className="px-4 py-2 font-bold rounded-lg border border-gray-300 dark:border-zinc-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                 >

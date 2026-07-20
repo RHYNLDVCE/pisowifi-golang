@@ -251,7 +251,7 @@ func getInfrastructureDevices(c *fiber.Ctx) error {
 			activeMacs[mac] = true 
 		}
 	})
-	devices := infrastructure.ScanInfrastructure(activeMacs, cfg.CustomDeviceNames)
+	devices := infrastructure.ScanInfrastructure(activeMacs, cfg.CustomDeviceNames, cfg.CustomDeviceIPs)
 	return c.JSON(fiber.Map{"devices": devices})
 }
 
@@ -858,12 +858,18 @@ func addDevice(c *fiber.Ctx) error {
 		if cfg.CustomDeviceNames == nil {
 			cfg.CustomDeviceNames = map[string]string{}
 		}
+		if cfg.CustomDeviceIPs == nil {
+			cfg.CustomDeviceIPs = map[string]string{}
+		}
 		cfg.CustomDeviceNames[body.MAC] = strings.TrimSpace(body.Name)
+		if strings.TrimSpace(body.IP) != "" {
+			cfg.CustomDeviceIPs[body.MAC] = strings.TrimSpace(body.IP)
+		}
 	})
 	config.Save()
 	clientIP := c.IP()
 	logger.AuditLog("DEVICE_ADDED", clientIP, infrastructure.GetMACFromIP(clientIP),
-		fmt.Sprintf("Manually added device %s as '%s'", body.MAC, strings.TrimSpace(body.Name)))
+		fmt.Sprintf("Manually added device %s as '%s' with IP '%s'", body.MAC, strings.TrimSpace(body.Name), strings.TrimSpace(body.IP)))
 	return c.JSON(fiber.Map{"status": "success"})
 }
 
