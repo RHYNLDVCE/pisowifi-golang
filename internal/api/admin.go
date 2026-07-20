@@ -62,6 +62,7 @@ func RegisterAdminRoutes(app *fiber.App) {
 	admin.Post("/unblock", adminUnblock)
 	admin.Post("/delete_user", adminDeleteUser)
 	admin.Post("/rename_device", renameDevice)
+	admin.Post("/add_device", addDevice)
 	admin.Get("/api/vouchers", getVouchers)
 	admin.Post("/update_voucher_settings", updateVoucherSettings)
 
@@ -837,6 +838,32 @@ func renameDevice(c *fiber.Ctx) error {
 	config.Save()
 	logger.AuditLog("DEVICE_RENAMED", clientIP, infrastructure.GetMACFromIP(clientIP),
 		fmt.Sprintf("Renamed device %s to '%s'", body.MAC, strings.TrimSpace(body.Name)))
+	return c.JSON(fiber.Map{"status": "success"})
+}
+
+func addDevice(c *fiber.Ctx) error {
+	var body struct {
+		MAC  string `json:"mac"`
+		Name string `json:"name"`
+		IP   string `json:"ip"`
+	}
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "Invalid body"})
+	}
+	body.MAC = strings.ToLower(strings.TrimSpace(body.MAC))
+	if body.MAC == "" {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "MAC address is required"})
+	}
+	config.Update(func(cfg *config.AppConfig) {
+		if cfg.CustomDeviceNames == nil {
+			cfg.CustomDeviceNames = map[string]string{}
+		}
+		cfg.CustomDeviceNames[body.MAC] = strings.TrimSpace(body.Name)
+	})
+	config.Save()
+	clientIP := c.IP()
+	logger.AuditLog("DEVICE_ADDED", clientIP, infrastructure.GetMACFromIP(clientIP),
+		fmt.Sprintf("Manually added device %s as '%s'", body.MAC, strings.TrimSpace(body.Name)))
 	return c.JSON(fiber.Map{"status": "success"})
 }
 

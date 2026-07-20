@@ -148,6 +148,22 @@ func ScanInfrastructure(activeMacs map[string]bool, customNames map[string]strin
 		})
 	}
 
+	// Append any custom devices that were not in the ARP table
+	seenMacs := make(map[string]bool)
+	for _, dev := range candidates {
+		seenMacs[dev.MAC] = true
+	}
+	for customMac, customName := range customNames {
+		if !seenMacs[customMac] {
+			candidates = append(candidates, Device{
+				IP:       "",
+				MAC:      customMac,
+				Vendor:   customName,
+				IsCustom: true,
+			})
+		}
+	}
+
 	if len(candidates) == 0 {
 		return nil
 	}
